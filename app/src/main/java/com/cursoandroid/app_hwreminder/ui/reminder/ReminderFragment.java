@@ -1,10 +1,12 @@
 package com.cursoandroid.app_hwreminder.ui.reminder;
 
 import android.app.DatePickerDialog;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -13,14 +15,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+import android.widget.Toolbar;
 
-import com.cursoandroid.app_hwreminder.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.model.Tarefa;
 
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -34,8 +40,11 @@ public class ReminderFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-    private EditText edittext;
-    final Calendar myCalendar = Calendar.getInstance();
+    private EditText editDate, editTitulo, editDescricao;
+    private Spinner spinner;
+    private Button buttonSalvar;
+    private final Calendar myCalendar = Calendar.getInstance();
+    private Tarefa tarefa;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -82,13 +91,28 @@ public class ReminderFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_reminder, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        editTitulo = view.findViewById(R.id.editTitulo);
+        editDescricao = view.findViewById(R.id.editDescricao);
+        buttonSalvar = view.findViewById(R.id.buttonSalvar);
+        spinner = view.findViewById(R.id.disciplines_spinner);
+        editDate = view.findViewById(R.id.deadlineDate);
+
+        //onClick para salvar tarefa
+        buttonSalvar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                salvarTarefa(v);
+            }
+        });
+
         //date picker
 
-        edittext = (EditText) view.findViewById(R.id.deadlineDate);
+        editDate = (EditText) view.findViewById(R.id.deadlineDate);
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -100,7 +124,7 @@ public class ReminderFragment extends Fragment {
             }
         };
 
-        edittext.setOnClickListener(new View.OnClickListener() {
+        editDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new DatePickerDialog(getContext(), date, myCalendar
@@ -122,10 +146,45 @@ public class ReminderFragment extends Fragment {
     }
 
     private void updateLabel() {
-        String myFormat = "dd/MM/yy"; //In which you need put here
+        String myFormat = "dd/MM/yy"; //Date format
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        edittext.setText(sdf.format(myCalendar.getTime()));
+        editDate.setText(sdf.format(myCalendar.getTime()));
+    }
+
+    public void salvarTarefa(View view){
+        if(validarCampos()){
+            tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
+            Toast.makeText(getContext(), "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public boolean validarCampos(){
+        if(!editTitulo.getText().toString().equals("") && editTitulo.getText() != null){
+            if(!editDescricao.getText().toString().equals("") && editDescricao.getText() != null){
+                if(!spinner.getSelectedItem().toString().equals("Selecione uma disciplina") && spinner.getSelectedItem() != null) {
+                    if(!editDate.getText().toString().equals("") && editDate.getText() != null){
+                        return true;
+                    }
+                    else{
+                        Toast.makeText(getContext(), "Escolha uma data", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                }
+                else{
+                    Toast.makeText(getContext(), "Escolha uma disciplina", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+            else{
+                Toast.makeText(getContext(), "Preencha o campo Descrição", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        else{
+            Toast.makeText(getContext(), "Preencha o campo Título", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
 }
