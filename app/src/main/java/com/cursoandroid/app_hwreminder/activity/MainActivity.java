@@ -1,4 +1,4 @@
-package com.cursoandroid.app_hwreminder;
+package com.cursoandroid.app_hwreminder.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,14 @@ import android.view.Menu;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.ui.gallery.GalleryFragment;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragmentMonthly;
 import com.google.android.material.navigation.NavigationView;
+import com.ogaclejapan.smarttablayout.SmartTabLayout;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.navigation.NavController;
@@ -17,6 +24,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        //Fab menu
     }
 
     @Override

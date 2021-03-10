@@ -47,4 +47,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
+    implementation 'com.ogaclejapan.smarttablayout:utils-v4:2.0.0@aar'
+
 }

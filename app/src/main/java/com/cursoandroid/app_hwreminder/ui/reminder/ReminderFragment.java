@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.ui.reminder;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -9,24 +10,21 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
+import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -155,7 +153,10 @@ public class ReminderFragment extends Fragment {
     public void salvarTarefa(View view){
         if(validarCampos()){
             tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
+            tarefa.salvar();
             Toast.makeText(getContext(), "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
+            getActivity().finish();
+            startActivity(new Intent(getContext(), MainActivity.class));
         }
     }
 
