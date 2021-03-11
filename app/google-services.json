@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "349697797901",
+    "project_id": "app-hwreminder",
+    "storage_bucket": "app-hwreminder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349697797901:android:bdcc0159d1665ced4e0a44",
+        "android_client_info": {
+          "package_name": "com.cursoandroid.app_hwreminder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "349697797901-hmhus9bohuq9upl42i1skvrjafmmig9l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cursoandroid.app_hwreminder",
+            "certificate_hash": "8a78b7f6a1d0a7dd1d3b578437d5f56d4bac6e05"
+          }
+        },
+        {
+          "client_id": "349697797901-agtsoi5124ovn70k40jithed7pj8t7gk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJEMI4hwN8UPnwq_vEunJUNFPefFRyU9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "349697797901-agtsoi5124ovn70k40jithed7pj8t7gk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
