@@ -3,6 +3,7 @@ package com.cursoandroid.app_hwreminder.model;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 
 public class Tarefa {
 
@@ -50,6 +51,7 @@ public class Tarefa {
         this.descricao = descricao;
     }
 
+    @Exclude
     public String getKey() {
         return key;
     }

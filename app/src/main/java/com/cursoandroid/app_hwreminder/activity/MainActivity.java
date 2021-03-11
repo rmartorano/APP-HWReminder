@@ -2,6 +2,7 @@ package com.cursoandroid.app_hwreminder.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 import android.widget.ImageView;
@@ -67,4 +68,8 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    //Method below was required because I was losing instance of fragment so now when clicking 'Lista de tarefas', it creates a new one again
+    public void startHomeHolder(MenuItem item) {
+        startActivity(new Intent(this, MainActivity.class));
+    }
 }

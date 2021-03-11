@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.home.HomeFragmentHolder">
 
     <com.ogaclejapan.smarttablayout.SmartTabLayout
         android:id="@+id/viewPagerTab"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#F44336"
+        android:background="#40C4FF"
 
         app:stl_distributeEvenly="true"
         app:stl_defaultTabBackground="?attr/selectableItemBackground"
@@ -19,11 +20,11 @@
         app:stl_defaultTabTextSize="14sp"
 
         app:stl_indicatorGravity="bottom"
-        app:stl_indicatorColor="#40C4FF"
+        app:stl_indicatorColor="@color/black"
         app:stl_indicatorThickness="4dp"
         app:stl_indicatorCornerRadius="2dp"
 
-        app:stl_dividerColor="#D32F2F"
+        app:stl_dividerColor="@color/black"
         app:stl_dividerThickness="1dp"
 
         app:stl_overlineColor="#4D000000"
