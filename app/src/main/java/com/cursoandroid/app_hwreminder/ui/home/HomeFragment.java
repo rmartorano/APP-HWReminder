@@ -6,15 +6,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,9 +26,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ public class HomeFragment extends Fragment {
     private AdapterAluno adapterAluno;
     private List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
-    private TextView textViewTituloLista;
+    private TextView textViewTituloLista, textDiaSemana;
 
     public HomeFragment() {
     }
@@ -65,42 +62,92 @@ public class HomeFragment extends Fragment {
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
 
-        //Muda o titulo de mês em mês
+        //Change title from month to month
         Calendar cal = Calendar.getInstance();
         textViewTituloLista.setText("Dever de casa - "+new SimpleDateFormat("MMMM").format(cal.getTime()));
 
-        //Configurar adapter
+        //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
         adapterAluno = new AdapterAluno(alunos, getContext());
 
-        //Configurar RecyclerView
+        //Config RecyclerView tarefas
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerViewHome.setLayoutManager(layoutManager);
         recyclerViewHome.setHasFixedSize(true);
         recyclerViewHome.setAdapter(adapterTarefa);
         recyclerViewHome.addItemDecoration(new DividerItemDecoration(recyclerViewHome.getContext(), DividerItemDecoration.VERTICAL));
 
+        //Config RecyclerView alunos
         RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(getContext());
         recyclerViewAluno.setLayoutManager(layoutManagerAluno);
         recyclerViewAluno.setHasFixedSize(true);
         recyclerViewAluno.setAdapter(adapterAluno);
-        recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewHome.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
 
-        //Listar tarefas na tela inicial
+        //List 'tarefas' in the home screen
         FirebaseDatabase.getInstance().getReference().child("tarefa")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yy");
+                        Date date = null;
+                        String diaSemana = new String();
                         for(DataSnapshot dados: snapshot.getChildren()){
                             Tarefa tarefa = dados.getValue(Tarefa.class);
                             long diasEntre = ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(tarefa.getDataEntrega(), dtf));
                             if(diasEntre <= 7){
-                                Log.i("Teste", "Hoje: 10/03"+" Data no database: "+tarefa.getDataEntrega()+" Data diff: "+ diasEntre);
+
+                                //get weekDay string
+                                try {
+                                    date = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
+                                    diaSemana = new SimpleDateFormat("EE").format(date);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.i("Teste", "Dia: "+ diaSemana);
+
+                                switch (diaSemana){
+                                    case "seg":
+                                        textDiaSemana = view.findViewById(R.id.textViewS);
+                                        break;
+                                    case "ter":
+                                        textDiaSemana = view.findViewById(R.id.textViewT);
+                                        break;
+                                    case "qua":
+                                        textDiaSemana = view.findViewById(R.id.textViewQ);
+                                        break;
+                                    case "qui":
+                                        textDiaSemana = view.findViewById(R.id.textViewQui);
+                                        break;
+                                    case "sex":
+                                        textDiaSemana = view.findViewById(R.id.textViewSex);
+                                        break;
+                                }
+                                //textDiaSemana.setText(tarefa.getDescricao().toString());
+                                //Log.i("Teste", textDiaSemana.getText().toString());
+                                Log.i("Teste", "Hoje: 11/03"+" Data no database: "+tarefa.getDataEntrega()+" Data diff: "+ diasEntre);
                                 tarefas.add(tarefa);
                                 adapterTarefa.notifyDataSetChanged();
                             }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+        //List 'alunos' in the home screen
+        FirebaseDatabase.getInstance().getReference().child("aluno")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot dados: snapshot.getChildren()){
+                            Aluno aluno = dados.getValue(Aluno.class);
+                            alunos.add(aluno);
+                            adapterAluno.notifyDataSetChanged();
                         }
                     }
 

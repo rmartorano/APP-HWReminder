@@ -32,8 +32,6 @@ public class AdapterTarefa extends RecyclerView.Adapter<AdapterTarefa.MyViewHold
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Tarefa tarefa = tarefas.get(position);
-
-        holder.titulo.setText(tarefa.getTitulo());
         holder.descricao.setText(tarefa.getDescricao());
 
     }
@@ -46,13 +44,11 @@ public class AdapterTarefa extends RecyclerView.Adapter<AdapterTarefa.MyViewHold
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView titulo, descricao;
+        TextView descricao;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-
-            titulo = itemView.findViewById(R.id.textAdapterTitulo);
-            descricao = itemView.findViewById(R.id.textAdapterDescricao);
+            descricao = itemView.findViewById(R.id.textViewQui);
         }
 
     }
