@@ -8,6 +8,9 @@ public class Aluno {
 
     private String nome, key;
 
+    public Aluno() {
+    }
+
     public Aluno(String nome) {
         this.nome = nome;
     }
