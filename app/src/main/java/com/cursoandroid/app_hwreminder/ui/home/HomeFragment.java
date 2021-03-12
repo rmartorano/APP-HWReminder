@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,11 +16,13 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.model.Aluno;
@@ -69,6 +72,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        FragmentManager fragmentManager = getParentFragmentManager();
+
         textDiaSemana = view.findViewById(R.id.textViewDiaSemana);
         textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
 
@@ -89,7 +94,7 @@ public class HomeFragment extends Fragment {
         long sextaMili = timeMili+Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
         Calendar sexta = Calendar.getInstance();
         sexta.setTimeInMillis(sextaMili);
-        textViewSemanaHome.setText("  Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH))));
+        textViewSemanaHome.setText("Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH))));
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
@@ -108,6 +113,13 @@ public class HomeFragment extends Fragment {
         recyclerViewAluno.setHasFixedSize(true);
         recyclerViewAluno.setAdapter(adapterAluno);
         recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
+
+        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                startActivity(new Intent(getContext(), MainActivity.class));
+            }
+        });
 
         //List 'tarefas' in the home screen
         FirebaseDatabase.getInstance().getReference().child("tarefa")

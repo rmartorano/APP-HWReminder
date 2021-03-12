@@ -87,7 +87,7 @@ public class HomeFragmentHolder extends Fragment {
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
                 getActivity().getSupportFragmentManager(),
                 FragmentPagerItems.with(getContext())
-                        .add("7 dias", HomeFragment.class)
+                        .add("Semanal", HomeFragment.class)
                         .add("Mensal", HomeFragmentMonthly.class)
                         .create()
         );

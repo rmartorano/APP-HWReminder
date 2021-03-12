@@ -12,7 +12,7 @@
     <ImageView
         android:id="@+id/imageView7"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="437dp"
         android:src="@drawable/students" />
 
     <TextView
@@ -20,6 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="5dp"
         android:clickable="true"
         android:drawableRight="@drawable/ic_baseline_add_green_24"
         android:gravity="center"
@@ -30,6 +31,16 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAlunoPendente"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="219dp"
+        android:layout_margin="8dp">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/buttonSalvarAddAlunos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Salvar" />
 
 </LinearLayout>

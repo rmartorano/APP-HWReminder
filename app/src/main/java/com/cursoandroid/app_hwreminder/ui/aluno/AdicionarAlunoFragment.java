@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.ui.aluno;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAddAlunoPendente;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.model.Aluno;
@@ -83,6 +85,17 @@ public class AdicionarAlunoFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_adicionar_aluno, container, false);
 
+        Button salvarBtn = view.findViewById(R.id.buttonSalvarAddAlunos);
+
+        salvarBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                salvarAlunos();
+                getActivity().finish();
+                startActivity(new Intent(getContext(), MainActivity.class));
+            }
+        });
+
         //Config recyclerView
         AdapterAddAlunoPendente adapterAluno = new AdapterAddAlunoPendente(listAlunos, getContext());
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAlunoPendente);
@@ -110,7 +123,7 @@ public class AdicionarAlunoFragment extends Fragment {
 
         //Config title and message
         dialog.setTitle("Adicionar aluno");
-        dialog.setMessage("Mensagem da Dialog");
+        dialog.setMessage("Insira o nome do aluno");
         final EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         dialog.setView(input);
@@ -119,7 +132,7 @@ public class AdicionarAlunoFragment extends Fragment {
         dialog.setCancelable(false);
 
         //Config icon
-        dialog.setIcon(android.R.drawable.ic_btn_speak_now);
+        dialog.setIcon(R.drawable.ic_baseline_person_add_24);
 
         //Config actions for yes or no
         dialog.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
@@ -157,4 +170,12 @@ public class AdicionarAlunoFragment extends Fragment {
         dialog.show();
 
     }
+
+    public void salvarAlunos(){
+        for(AlunoAddPendente alunoAdd : listAlunos){
+            Aluno aluno = new Aluno(alunoAdd.getNome());
+            aluno.salvar();
+        }
+    }
+
 }
