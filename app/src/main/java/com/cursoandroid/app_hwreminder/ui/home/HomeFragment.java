@@ -1,5 +1,6 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,10 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -36,6 +40,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -45,7 +50,10 @@ public class HomeFragment extends Fragment {
     private AdapterAluno adapterAluno;
     private List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
-    private TextView textViewTituloLista, textDiaSemana, textViewSegunda, textViewTerca, textViewQuarta, textViewQuinta, textViewSexta;
+
+    private TextView textViewTituloLista, textDiaSemana, textViewSegunda,
+            textViewTerca, textViewQuarta, textViewQuinta, textViewSexta,
+            textViewSemanaHome;
 
     public HomeFragment() {
     }
@@ -62,15 +70,26 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         textDiaSemana = view.findViewById(R.id.textViewDiaSemana);
+        textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
 
         //recyclerViewHome = view.findViewById(R.id.recyclerViewHome);
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
 
-        //Change title from month to month and day every day
+        //Change title from month to month, day every day and set currently week interval from monday to friday
+        DecimalFormat mFormat= new DecimalFormat("00");
+        Date date = new Date();
         Calendar c = Calendar.getInstance();
         textViewTituloLista.setText("Dever de casa - "+new SimpleDateFormat("MMMM").format(c.getTime()));
         textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(c.getTime())));
+        final int week = c.get(Calendar.WEEK_OF_MONTH); // week of the month
+        c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
+        c.setTimeInMillis(c.getTimeInMillis()+Long.parseLong("86400000")); // set first day of week to monday not sunday
+        long timeMili = c.getTimeInMillis();
+        long sextaMili = timeMili+Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
+        Calendar sexta = Calendar.getInstance();
+        sexta.setTimeInMillis(sextaMili);
+        textViewSemanaHome.setText("  Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH))));
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
@@ -101,17 +120,20 @@ public class HomeFragment extends Fragment {
                         String diaSemana = new String();
                         for(DataSnapshot dados: snapshot.getChildren()){
                             Tarefa tarefa = dados.getValue(Tarefa.class);
-                            long diasEntre = ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(tarefa.getDataEntrega(), dtf));
-                            if(diasEntre <= 7){
+                            try {
+                                c.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            };
+                            if(c.get(Calendar.WEEK_OF_MONTH) == week){ // only shows currently week tarefas
 
-                                //get weekDay string
+                                //get weekDay string from tarefa
                                 try {
                                     date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
                                     diaSemana = new SimpleDateFormat("EE").format(date);
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
-                                Log.i("Teste", "Dia: "+ diaSemana);
 
                                 switch (diaSemana){
                                     case "seg":
@@ -137,9 +159,6 @@ public class HomeFragment extends Fragment {
                                     default:
                                         throw new IllegalStateException("Unexpected value: " + diaSemana);
                                 }
-                                //textDiaSemana.setText(tarefa.getDescricao().toString());
-                                //Log.i("Teste", textDiaSemana.getText().toString());
-                                Log.i("Teste", "Hoje: 11/03"+" Data no database: "+tarefa.getDataEntrega()+" Data diff: "+ diasEntre);
                                 tarefas.add(tarefa);
                                 adapterTarefa.notifyDataSetChanged();
                             }
@@ -171,4 +190,5 @@ public class HomeFragment extends Fragment {
                 });
 
     }
+
 }

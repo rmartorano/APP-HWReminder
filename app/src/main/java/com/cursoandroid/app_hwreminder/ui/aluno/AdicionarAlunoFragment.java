@@ -1,14 +1,32 @@
 package com.cursoandroid.app_hwreminder.ui.aluno;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.adapter.AdapterAddAlunoPendente;
+import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
+import com.cursoandroid.app_hwreminder.model.Aluno;
+import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +34,8 @@ import com.cursoandroid.app_hwreminder.R;
  * create an instance of this fragment.
  */
 public class AdicionarAlunoFragment extends Fragment {
+
+    List<AlunoAddPendente> listAlunos = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -61,6 +81,80 @@ public class AdicionarAlunoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_adicionar_aluno, container, false);
+        View view = inflater.inflate(R.layout.fragment_adicionar_aluno, container, false);
+
+        //Config recyclerView
+        AdapterAddAlunoPendente adapterAluno = new AdapterAddAlunoPendente(listAlunos, getContext());
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAlunoPendente);
+        RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManagerAluno);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapterAluno);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+
+        TextView textViewAddAluno = view.findViewById(R.id.textViewAddAluno);
+        textViewAddAluno.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirDialog(v);
+            }
+        });
+
+        return view;
+    }
+
+    public void abrirDialog(View view){
+
+        //Instance alertDialog
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+
+        //Config title and message
+        dialog.setTitle("Adicionar aluno");
+        dialog.setMessage("Mensagem da Dialog");
+        final EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        dialog.setView(input);
+
+        //Config cancel (can't be closed unless choosing an option)
+        dialog.setCancelable(false);
+
+        //Config icon
+        dialog.setIcon(android.R.drawable.ic_btn_speak_now);
+
+        //Config actions for yes or no
+        dialog.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(input.getText().toString().equals("")){
+                    Toast.makeText(
+                            getContext().getApplicationContext(),
+                            "Cancelado",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+                else {
+                    Toast.makeText(
+                            getContext().getApplicationContext(),
+                            input.getText().toString()+" adicionado com sucesso!",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    AlunoAddPendente aluno = new AlunoAddPendente();
+                    aluno.setNome(input.getText().toString());
+                    listAlunos.add(aluno);
+                }
+            }
+        });
+
+        dialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        //Criar e exibir AlertDialog
+        dialog.create();
+        dialog.show();
+
     }
 }
