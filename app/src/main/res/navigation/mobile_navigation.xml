@@ -12,20 +12,15 @@
         tools:layout="@layout/fragment_home_holder" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.cursoandroid.app_hwreminder.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.cursoandroid.app_hwreminder.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
-
-    <fragment
         android:id="@+id/nav_reminder"
-        android:name="com.cursoandroid.app_hwreminder.ui.reminder.ReminderFragment"
-        android:label="Reminder"
+        android:name="com.cursoandroid.app_hwreminder.ui.tarefa.ReminderFragment"
+        android:label="Adicionar tarefa"
         tools:layout="@layout/fragment_reminder" />
+
+    <fragment
+        android:id="@+id/nav_aluno"
+        android:name="com.cursoandroid.app_hwreminder.ui.aluno.AdicionarAlunoFragment"
+        android:label="Adicionar aluno"
+        tools:layout="@layout/fragment_adicionar_aluno" />
+
 </navigation>

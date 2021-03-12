@@ -24,14 +24,14 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/textViewDiaSemana"
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/textlines_spaced_bottom_right"
             android:gravity="center"
             android:paddingTop="8dp"
-            android:text="Alunos"
+            android:text="Segunda"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -63,22 +63,15 @@
             <TextView
                 android:id="@+id/textView10"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="142dp"
                 android:layout_gravity="center"
                 android:background="@drawable/textlines_spaced_bottom"
                 android:gravity="center"
                 android:paddingTop="8dp"
-                android:text="Tarefas"
+                android:text="Clique nos alunos que\nnão fizeram\na lição"
                 android:textColor="@color/red"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewAluno"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:foregroundGravity="center" />
 
         </LinearLayout>
 
@@ -102,7 +95,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Segunda"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textView2"
@@ -113,7 +106,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Terça"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textView3"
@@ -124,7 +117,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Quarta"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textView4"
@@ -135,10 +128,10 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Quinta"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/textView5"
+                    android:id="@+id/textView30"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -146,19 +139,83 @@
                     android:gravity="center"
                     android:padding="2dp"
                     android:text="Sexta"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
+
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewHome"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:foregroundGravity="center">
+                android:layout_height="100dp"
+                android:background="@drawable/textlines_no_spaced_bottom"
+                android:orientation="horizontal">
 
-            </androidx.recyclerview.widget.RecyclerView>
+                <TextView
+                    android:id="@+id/textViewSegunda"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/textlines_right_and_bottom_divisor"
+                    android:gravity="center"
+                    android:padding="1dp"
+                    android:text="Sem tarefa"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textViewTerca"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/textlines_right_and_bottom_divisor"
+                    android:gravity="center"
+                    android:padding="1dp"
+                    android:text="Sem tarefa"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textViewQuarta"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/textlines_right_and_bottom_divisor"
+                    android:gravity="center"
+                    android:padding="1dp"
+                    android:text="Sem tarefa"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textViewQuinta"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/textlines_right_and_bottom_divisor"
+                    android:gravity="center"
+                    android:padding="1dp"
+                    android:text="Sem tarefa"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textViewSexta"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/textlines_no_spaced_bottom"
+                    android:gravity="center"
+                    android:padding="1dp"
+                    android:text="Sem tarefa"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAluno"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:foregroundGravity="center" />
 
 </LinearLayout>

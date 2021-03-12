@@ -9,17 +9,16 @@
             android:icon="@drawable/ic_baseline_format_list_bulleted_24"
             android:title="@string/menu_home"
             android:onClick="startHomeHolder"/>
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_slideshow" />
+
         <item
             android:id="@+id/nav_reminder"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Reminder" />
+            android:icon="@drawable/ic_add"
+            android:title="Adicionar tarefa" />
+
+        <item
+            android:id="@+id/nav_aluno"
+            android:icon="@drawable/ic_baseline_person_add_24"
+            android:title="Adicionar aluno" />
+
     </group>
 </menu>

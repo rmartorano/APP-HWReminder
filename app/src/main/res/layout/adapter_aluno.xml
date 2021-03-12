@@ -1,17 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:orientation="vertical">
+    android:gravity="center">
 
     <TextView
         android:id="@+id/textAdapterAlunoNome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_width="130dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:background="@drawable/textlines_right_and_bottom_divisor"
+        android:gravity="center"
         android:text="Nome do aluno"
         android:textColor="@android:color/black"
         android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/textlines_right_and_bottom_divisor"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/textlines_right_and_bottom_divisor"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/checkBox3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/textlines_right_and_bottom_divisor"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/checkBox4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/textlines_right_and_bottom_divisor"
+        android:checked="true" />
+
+    <CheckBox
+        android:id="@+id/checkBox5"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/textlines_no_spaced_bottom"
+        android:checked="true"
+        android:duplicateParentState="false" />
 
 </LinearLayout>

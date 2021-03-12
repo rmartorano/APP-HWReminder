@@ -1,4 +1,4 @@
-package com.cursoandroid.app_hwreminder.ui.reminder;
+package com.cursoandroid.app_hwreminder.ui.tarefa;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -133,7 +133,6 @@ public class ReminderFragment extends Fragment {
         });
 
         //Spinner
-
         Spinner spinner = view.findViewById(R.id.disciplines_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),

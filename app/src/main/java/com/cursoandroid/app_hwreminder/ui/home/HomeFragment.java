@@ -26,6 +26,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -43,7 +45,7 @@ public class HomeFragment extends Fragment {
     private AdapterAluno adapterAluno;
     private List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
-    private TextView textViewTituloLista, textDiaSemana;
+    private TextView textViewTituloLista, textDiaSemana, textViewSegunda, textViewTerca, textViewQuarta, textViewQuinta, textViewSexta;
 
     public HomeFragment() {
     }
@@ -58,24 +60,28 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerViewHome = view.findViewById(R.id.recyclerViewHome);
+
+        textDiaSemana = view.findViewById(R.id.textViewDiaSemana);
+
+        //recyclerViewHome = view.findViewById(R.id.recyclerViewHome);
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
 
-        //Change title from month to month
-        Calendar cal = Calendar.getInstance();
-        textViewTituloLista.setText("Dever de casa - "+new SimpleDateFormat("MMMM").format(cal.getTime()));
+        //Change title from month to month and day every day
+        Calendar c = Calendar.getInstance();
+        textViewTituloLista.setText("Dever de casa - "+new SimpleDateFormat("MMMM").format(c.getTime()));
+        textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(c.getTime())));
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
         adapterAluno = new AdapterAluno(alunos, getContext());
 
         //Config RecyclerView tarefas
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        recyclerViewHome.setLayoutManager(layoutManager);
-        recyclerViewHome.setHasFixedSize(true);
-        recyclerViewHome.setAdapter(adapterTarefa);
-        recyclerViewHome.addItemDecoration(new DividerItemDecoration(recyclerViewHome.getContext(), DividerItemDecoration.VERTICAL));
+        //RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        //recyclerViewHome.setLayoutManager(layoutManager);
+        //recyclerViewHome.setHasFixedSize(true);
+        //recyclerViewHome.setAdapter(adapterTarefa);
+        //recyclerViewHome.addItemDecoration(new DividerItemDecoration(recyclerViewHome.getContext(), DividerItemDecoration.VERTICAL));
 
         //Config RecyclerView alunos
         RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(getContext());
@@ -100,7 +106,7 @@ public class HomeFragment extends Fragment {
 
                                 //get weekDay string
                                 try {
-                                    date = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
+                                    date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
                                     diaSemana = new SimpleDateFormat("EE").format(date);
                                 } catch (ParseException e) {
                                     e.printStackTrace();
@@ -109,20 +115,27 @@ public class HomeFragment extends Fragment {
 
                                 switch (diaSemana){
                                     case "seg":
-                                        textDiaSemana = view.findViewById(R.id.textViewS);
+                                        textViewSegunda = view.findViewById(R.id.textViewSegunda);
+                                        textViewSegunda.setText(tarefa.getDescricao());
                                         break;
                                     case "ter":
-                                        textDiaSemana = view.findViewById(R.id.textViewT);
+                                        textViewTerca = view.findViewById(R.id.textViewTerca);
+                                        textViewTerca.setText(tarefa.getDescricao());
                                         break;
                                     case "qua":
-                                        textDiaSemana = view.findViewById(R.id.textViewQ);
+                                        textViewQuarta = view.findViewById(R.id.textViewQuarta);
+                                        textViewQuarta.setText(tarefa.getDescricao());
                                         break;
                                     case "qui":
-                                        textDiaSemana = view.findViewById(R.id.textViewQui);
+                                        textViewQuinta = view.findViewById(R.id.textViewQuinta);
+                                        textViewQuinta.setText(tarefa.getDescricao());
                                         break;
                                     case "sex":
-                                        textDiaSemana = view.findViewById(R.id.textViewSex);
+                                        textViewSexta = view.findViewById(R.id.textViewSexta);
+                                        textViewSexta.setText(tarefa.getDescricao());
                                         break;
+                                    default:
+                                        throw new IllegalStateException("Unexpected value: " + diaSemana);
                                 }
                                 //textDiaSemana.setText(tarefa.getDescricao().toString());
                                 //Log.i("Teste", textDiaSemana.getText().toString());
