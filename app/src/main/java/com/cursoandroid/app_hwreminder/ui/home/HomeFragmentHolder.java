@@ -1,5 +1,6 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -7,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
@@ -15,9 +18,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.activity.MainActivity;
+import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
+import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.

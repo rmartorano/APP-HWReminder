@@ -1,5 +1,7 @@
 package com.cursoandroid.app_hwreminder.model;
 
+import android.util.Log;
+
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -51,11 +53,11 @@ public class Tarefa {
         this.descricao = descricao;
     }
 
-    @Exclude
     public String getKey() {
         return key;
     }
 
+    @Exclude
     public void setKey(String key) {
         this.key = key;
     }
@@ -67,6 +69,13 @@ public class Tarefa {
         firebase.child("tarefa")
                 .child(key)
                 .setValue(this);
+
+    }
+
+    public void deletarTarefa(){
+
+        DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
+        firebase.child("tarefa").child(this.key).removeValue();
 
     }
 

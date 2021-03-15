@@ -50,7 +50,7 @@ public class AdapterAddAlunoPendente extends RecyclerView.Adapter<AdapterAddAlun
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_UP){
-                    if(event.getRawX() >= (holder.nome.getRight() - holder.nome.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())){
+                    if(event.getRawX() >= (holder.nome.getRight() - holder.nome.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())){ // opens dialog when clicking the drawable on the right
                         abrirDialog(v, aluno);
                         return true;
                     }

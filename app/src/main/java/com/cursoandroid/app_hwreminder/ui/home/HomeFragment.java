@@ -4,10 +4,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,9 +56,8 @@ public class HomeFragment extends Fragment {
     private List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
 
-    private TextView textViewTituloLista, textDiaSemana, textViewSegunda,
-            textViewTerca, textViewQuarta, textViewQuinta, textViewSexta,
-            textViewSemanaHome;
+    private TextView textViewTituloLista, textDiaSemana,
+            textViewSemanaHome, textViewDescricao;
 
     public HomeFragment() {
     }
@@ -100,13 +101,6 @@ public class HomeFragment extends Fragment {
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
         adapterAluno = new AdapterAluno(alunos, getContext());
 
-        //Config RecyclerView tarefas
-        //RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        //recyclerViewHome.setLayoutManager(layoutManager);
-        //recyclerViewHome.setHasFixedSize(true);
-        //recyclerViewHome.setAdapter(adapterTarefa);
-        //recyclerViewHome.addItemDecoration(new DividerItemDecoration(recyclerViewHome.getContext(), DividerItemDecoration.VERTICAL));
-
         //Config RecyclerView alunos
         RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(getContext());
         recyclerViewAluno.setLayoutManager(layoutManagerAluno);
@@ -131,12 +125,14 @@ public class HomeFragment extends Fragment {
                         Date date = null;
                         String diaSemana = new String();
                         for(DataSnapshot dados: snapshot.getChildren()){
+
                             Tarefa tarefa = dados.getValue(Tarefa.class);
                             try {
                                 c.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             };
+
                             if(c.get(Calendar.WEEK_OF_MONTH) == week){ // only shows currently week tarefas
 
                                 //get weekDay string from tarefa
@@ -147,30 +143,98 @@ public class HomeFragment extends Fragment {
                                     e.printStackTrace();
                                 }
 
+                                //Instanciar alertDialog
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
                                 switch (diaSemana){
                                     case "seg":
-                                        textViewSegunda = view.findViewById(R.id.textViewSegunda);
-                                        textViewSegunda.setText(tarefa.getDescricao());
+                                        textViewDescricao = view.findViewById(R.id.textViewSegunda);
                                         break;
                                     case "ter":
-                                        textViewTerca = view.findViewById(R.id.textViewTerca);
-                                        textViewTerca.setText(tarefa.getDescricao());
+                                        textViewDescricao = view.findViewById(R.id.textViewTerca);
                                         break;
                                     case "qua":
-                                        textViewQuarta = view.findViewById(R.id.textViewQuarta);
-                                        textViewQuarta.setText(tarefa.getDescricao());
+                                        textViewDescricao = view.findViewById(R.id.textViewQuarta);
                                         break;
                                     case "qui":
-                                        textViewQuinta = view.findViewById(R.id.textViewQuinta);
-                                        textViewQuinta.setText(tarefa.getDescricao());
+                                        textViewDescricao = view.findViewById(R.id.textViewQuinta);
                                         break;
                                     case "sex":
-                                        textViewSexta = view.findViewById(R.id.textViewSexta);
-                                        textViewSexta.setText(tarefa.getDescricao());
+                                        textViewDescricao = view.findViewById(R.id.textViewSexta);
                                         break;
                                     default:
                                         throw new IllegalStateException("Unexpected value: " + diaSemana);
                                 }
+                                textViewDescricao.setText(tarefa.getDescricao());
+
+                                dialog.setTitle(tarefa.getTitulo());
+                                dialog.setMessage(tarefa.getDescricao());
+                                //Config ações para sim ou não
+                                dialog.setPositiveButton("Editar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int which) { //on clicking to edit, will open a new dialogAlert
+                                        AlertDialog.Builder dialogEditDescricao = new AlertDialog.Builder(getContext());
+                                        dialogEditDescricao.setTitle("Editar "+tarefa.getTitulo());
+                                        dialogEditDescricao.setMessage("Digite a nova descrição");
+                                        //Config input view
+                                        final EditText input = new EditText(getContext());
+                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
+                                        dialogEditDescricao.setView(input);
+
+                                        input.setHint(tarefa.getDescricao());
+                                        dialogEditDescricao.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int which) {
+                                                tarefa.setDescricao(input.getText().toString());
+                                                textViewDescricao.setText(input.getText().toString());
+                                                dialog.setMessage(tarefa.getDescricao());
+                                            }
+                                        });
+                                        dialogEditDescricao.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                        dialogEditDescricao.create();
+                                        dialogEditDescricao.show();
+                                    }
+                                });
+
+                                dialog.setNegativeButton("Remover", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        AlertDialog.Builder dialogConfirmRemoval = new AlertDialog.Builder(getContext());
+                                        dialogConfirmRemoval.setMessage("Deseja mesmo remover "+tarefa.getTitulo()+"?");
+                                        dialogConfirmRemoval.setPositiveButton("Remover", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Toast.makeText(getContext(), "Tarefa "+tarefa.getTitulo()+" removida", Toast.LENGTH_SHORT).show();
+                                                tarefa.deletarTarefa();
+                                                textViewDescricao.setText("Sem tarefa");
+                                                textViewDescricao.setOnClickListener(null); // remove the click listener
+                                            }
+                                        });
+                                        dialogConfirmRemoval.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                        dialogConfirmRemoval.create();
+                                        dialogConfirmRemoval.show();
+                                    }
+                                });
+
+                                //set click listener to open dialog when clicking the description of tarefa
+                                textViewDescricao.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        //Criar e exibir AlertDialog
+                                        dialog.create();
+                                        dialog.show();
+                                    }
+                                });
+
                                 tarefas.add(tarefa);
                                 adapterTarefa.notifyDataSetChanged();
                             }

@@ -2,8 +2,10 @@ package com.cursoandroid.app_hwreminder.ui.aluno;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -27,8 +29,12 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,6 +44,7 @@ import java.util.List;
 public class AdicionarAlunoFragment extends Fragment {
 
     List<AlunoAddPendente> listAlunos = new ArrayList<>();
+    private AdapterAddAlunoPendente adapterAluno = null;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -97,7 +104,7 @@ public class AdicionarAlunoFragment extends Fragment {
         });
 
         //Config recyclerView
-        AdapterAddAlunoPendente adapterAluno = new AdapterAddAlunoPendente(listAlunos, getContext());
+        adapterAluno = new AdapterAddAlunoPendente(listAlunos, getContext());
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAlunoPendente);
         RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManagerAluno);
@@ -124,6 +131,8 @@ public class AdicionarAlunoFragment extends Fragment {
         //Config title and message
         dialog.setTitle("Adicionar aluno");
         dialog.setMessage("Insira o nome do aluno");
+
+        //Config input view
         final EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         dialog.setView(input);
@@ -136,6 +145,7 @@ public class AdicionarAlunoFragment extends Fragment {
 
         //Config actions for yes or no
         dialog.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if(input.getText().toString().equals("")){
@@ -154,6 +164,8 @@ public class AdicionarAlunoFragment extends Fragment {
                     AlunoAddPendente aluno = new AlunoAddPendente();
                     aluno.setNome(input.getText().toString());
                     listAlunos.add(aluno);
+                    sortList(); // sort list alphabetically and notifify the adapter
+                    adapterAluno.notifyDataSetChanged();
                 }
             }
         });
@@ -177,5 +189,11 @@ public class AdicionarAlunoFragment extends Fragment {
             aluno.salvar();
         }
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void sortList(){ //sort list alphabetically
+        listAlunos.sort(Comparator.comparing(AlunoAddPendente::getNome));
+    }
+
 
 }
