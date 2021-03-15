@@ -154,8 +154,6 @@ public class ReminderFragment extends Fragment {
         if(validarCampos()){
             tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
             tarefa.salvar();
-            Aluno aluno = new Aluno("Rafael Martorano");
-            aluno.salvar();
             Toast.makeText(getContext(), "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
             getActivity().finish();
             startActivity(new Intent(getContext(), MainActivity.class));

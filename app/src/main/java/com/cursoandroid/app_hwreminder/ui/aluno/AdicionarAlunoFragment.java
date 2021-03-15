@@ -184,15 +184,16 @@ public class AdicionarAlunoFragment extends Fragment {
     }
 
     public void salvarAlunos(){
-        for(AlunoAddPendente alunoAdd : listAlunos){
-            Aluno aluno = new Aluno(alunoAdd.getNome());
+        for(Aluno alunoAdd : listAlunos) {
+            Aluno aluno = new Aluno();
+            aluno.setNome(alunoAdd.getNome());
             aluno.salvar();
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sortList(){ //sort list alphabetically
-        listAlunos.sort(Comparator.comparing(AlunoAddPendente::getNome));
+        listAlunos.sort(Comparator.comparing(Aluno::getNome));
     }
 
 
