@@ -29,9 +29,11 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Logger;
 import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +59,10 @@ public class HomeFragment extends Fragment {
     private TextView textViewTituloLista, textDiaSemana,
             textViewSemanaHome, textViewDescricao;
 
+    //Atributos para a formatação da string de intervalo da semana
+    private static Calendar c, sexta;
+    private static DecimalFormat mFormat = new DecimalFormat("00");
+
     public HomeFragment() {
     }
     @Override
@@ -76,12 +82,12 @@ public class HomeFragment extends Fragment {
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
         buttonSalvarAlteracoes = view.findViewById(R.id.buttonSalvarAlteracoes);
+        //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
-        DecimalFormat mFormat= new DecimalFormat("00");
         Date date = new Date();
-        Calendar c = Calendar.getInstance();
-        textViewTituloLista.setText("Dever de casa - "+new SimpleDateFormat("MMMM").format(c.getTime()));
+        c = Calendar.getInstance();
+        textViewTituloLista.setText("Dever de casa - "+getMonthString());
         textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(c.getTime())));
         formatDayColorDaily(view); // change color of today to focus on that
         final int week = c.get(Calendar.WEEK_OF_MONTH); // week of the month
@@ -89,9 +95,9 @@ public class HomeFragment extends Fragment {
         c.setTimeInMillis(c.getTimeInMillis()+Long.parseLong("86400000")); // set first day of week to monday not sunday
         long timeMili = c.getTimeInMillis();
         long sextaMili = timeMili+Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
-        Calendar sexta = Calendar.getInstance();
+        sexta = Calendar.getInstance();
         sexta.setTimeInMillis(sextaMili);
-        textViewSemanaHome.setText("Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH))));
+        textViewSemanaHome.setText(getWeekInterval()); // retorna a string formata do intervalo da semana
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
@@ -230,7 +236,6 @@ public class HomeFragment extends Fragment {
                                         dialog.show();
                                     }
                                 });
-
                                 tarefas.add(tarefa);
                                 adapterTarefa.notifyDataSetChanged();
                             }
@@ -298,10 +303,19 @@ public class HomeFragment extends Fragment {
         FirebaseDatabase.getInstance().getReference().child("aluno").
                 addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) { // atualiza objeto quando apertar em algum checkbox
+                        String week = getWeekIntervalAsChildString();
+                        String month = getMonthString();
                         for (DataSnapshot dados : snapshot.getChildren()) {
+                            Log.i("Teste", dados.toString());
                             Aluno aluno = dados.getValue(Aluno.class);
-                            Log.i("Teste", dados.child("checkedBoxSegunda").getKey()+": "+dados.child("checkedBoxSegunda").getValue());
+                            aluno.setCheckBoxSegunda((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxSegunda").getValue());
+                            aluno.setCheckBoxTerca((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxTerca").getValue());
+                            aluno.setCheckBoxQuarta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxQuarta").getValue());
+                            aluno.setCheckBoxQuinta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxQuinta").getValue());
+                            aluno.setCheckBoxSexta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxSexta").getValue());
+                            Log.i("Teste", "Here: "+aluno.isCheckedBoxSegunda()+" | "+aluno.isCheckedBoxTerca()+" | "
+                                    +aluno.isCheckedBoxQuarta()+" | "+aluno.isCheckedBoxQuinta()+" | "+aluno.isCheckedBoxSexta());
                         }
                     }
 
@@ -310,6 +324,18 @@ public class HomeFragment extends Fragment {
 
                     }
                 });
+    }
+
+    public static String getWeekInterval(){
+        return "Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
+    }
+
+    public static String getWeekIntervalAsChildString(){
+        return "Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
+    }
+
+    public static String getMonthString(){
+        return new SimpleDateFormat("MMMM").format(c.getTime());
     }
 
 }

@@ -9,11 +9,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -37,37 +43,62 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Aluno aluno = alunos.get(position);
         holder.nome.setText(aluno.getNome());
+        //atualiza seleção das checkBoxes
+        String week = new HomeFragment().getWeekIntervalAsChildString();
+        String month = new HomeFragment().getMonthString();
+        FirebaseDatabase.getInstance().getReference().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Aluno alunoTmp = snapshot.getValue(Aluno.class);
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxSegunda").getValue())
+                    holder.checkBoxSegunda.setChecked(false);
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxTerca").getValue())
+                    holder.checkBoxTerca.setChecked(false);
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxQuarta").getValue())
+                    holder.checkBoxQuarta.setChecked(false);
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxQuinta").getValue())
+                    holder.checkBoxQuinta.setChecked(false);
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxSexta").getValue())
+                    holder.checkBoxSexta.setChecked(false);
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
         //add um listener pra cada checkBox
         holder.checkBoxSegunda.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 aluno.setCheckBoxSegunda(isChecked);
-                aluno.update();
-                Log.i("Teste","Bind view: "+aluno.isCheckedBoxSegunda());
+                aluno.salvarCheckBox();
             }
         });
         holder.checkBoxTerca.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 aluno.setCheckBoxTerca(isChecked);
+                aluno.salvarCheckBox();
             }
         });
         holder.checkBoxQuarta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 aluno.setCheckBoxQuarta(isChecked);
+                aluno.salvarCheckBox();
             }
         });
         holder.checkBoxQuinta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 aluno.setCheckBoxQuinta(isChecked);
+                aluno.salvarCheckBox();
             }
         });
         holder.checkBoxSexta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 aluno.setCheckBoxSexta(isChecked);
+                aluno.salvarCheckBox();
             }
         });
     }
