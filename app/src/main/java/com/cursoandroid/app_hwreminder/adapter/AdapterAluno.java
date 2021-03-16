@@ -13,11 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -44,23 +46,25 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         Aluno aluno = alunos.get(position);
         holder.nome.setText(aluno.getNome());
         //atualiza seleção das checkBoxes
-        String week = new HomeFragment().getWeekIntervalAsChildString();
-        String month = new HomeFragment().getMonthString();
-        FirebaseDatabase.getInstance().getReference().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+        HomeFragment homeFragment = new HomeFragment();
+        String week = homeFragment.getWeekIntervalAsChildString();
+        String month = homeFragment.getMonthString();
+        String year = homeFragment.getYearString();
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+        firebaseRef.child("aluno").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Aluno alunoTmp = snapshot.getValue(Aluno.class);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxSegunda").getValue())
+                Log.i("Teste",aluno.getNome()+" "+aluno.isCheckedBoxSegunda());
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
                     holder.checkBoxSegunda.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxTerca").getValue())
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
                     holder.checkBoxTerca.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxQuarta").getValue())
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxQuarta").getValue())
                     holder.checkBoxQuarta.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxQuinta").getValue())
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxQuinta").getValue())
                     holder.checkBoxQuinta.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(month).child(week).child("checkedBoxSexta").getValue())
+                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxSexta").getValue())
                     holder.checkBoxSexta.setChecked(false);
-
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}

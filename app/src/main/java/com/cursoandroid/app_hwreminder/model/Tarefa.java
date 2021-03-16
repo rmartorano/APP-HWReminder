@@ -7,9 +7,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tarefa {
 
     private String titulo, disciplina, dataEntrega, descricao, key;
+    private List<String> listAlunosFizeram = new ArrayList<>();
+    private List<String> listAlunosNaoFizeram = new ArrayList<>();
 
     public Tarefa() {
     }
@@ -77,6 +82,22 @@ public class Tarefa {
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase.child("tarefa").child(this.key).removeValue();
 
+    }
+
+    public List<String> getListAlunosFizeram() {
+        return listAlunosFizeram;
+    }
+
+    public void setListAlunosFizeram(List<String> listAlunosFizeram) {
+        this.listAlunosFizeram = listAlunosFizeram;
+    }
+
+    public List<String> getListAlunosNaoFizeram() {
+        return listAlunosNaoFizeram;
+    }
+
+    public void setListAlunosNaoFizeram(List<String> listAlunosNaoFizeram) {
+        this.listAlunosNaoFizeram = listAlunosNaoFizeram;
     }
 
 }

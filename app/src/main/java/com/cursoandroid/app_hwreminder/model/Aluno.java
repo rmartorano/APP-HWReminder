@@ -101,6 +101,7 @@ public class Aluno {
         firebase.child("aluno")
                 .child(this.nome)
                 .child("frequencia")
+                .child(new HomeFragment().getYearString())
                 .child(new HomeFragment().getMonthString())
                 .child(new HomeFragment().getWeekIntervalAsChildString())
                 .setValue(checkBoxes);

@@ -27,11 +27,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.google.firebase.database.ValueEventListener;
@@ -54,7 +56,8 @@ public class HomeFragment extends Fragment {
     private AdapterAluno adapterAluno;
     private List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
-    private Button buttonSalvarAlteracoes;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+    private ValueEventListener valueEventListenerTarefa, valueEventListenerAluno;
 
     private TextView textViewTituloLista, textDiaSemana,
             textViewSemanaHome, textViewDescricao;
@@ -81,7 +84,6 @@ public class HomeFragment extends Fragment {
         textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
-        buttonSalvarAlteracoes = view.findViewById(R.id.buttonSalvarAlteracoes);
         //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
@@ -111,10 +113,11 @@ public class HomeFragment extends Fragment {
         recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
 
         //List 'tarefas' in the home screen
-        FirebaseDatabase.getInstance().getReference().child("tarefa")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        valueEventListenerTarefa = firebaseRef.child("tarefa").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        tarefas.clear();
+                        Calendar calendar = Calendar.getInstance();
                         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yy");
                         Date date = null;
                         String diaSemana = new String();
@@ -122,12 +125,12 @@ public class HomeFragment extends Fragment {
 
                             Tarefa tarefa = dados.getValue(Tarefa.class);
                             try {
-                                c.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
+                                calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             };
 
-                            if(c.get(Calendar.WEEK_OF_MONTH) == week){ // only shows currently week tarefas
+                            if(calendar.get(Calendar.WEEK_OF_MONTH) == week){ // only shows currently week tarefas
 
                                 //get weekDay string from tarefa
                                 try {
@@ -201,7 +204,6 @@ public class HomeFragment extends Fragment {
                                         dialogEditDescricao.show();
                                     }
                                 });
-
                                 dialog.setNegativeButton("Remover", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -237,9 +239,9 @@ public class HomeFragment extends Fragment {
                                     }
                                 });
                                 tarefas.add(tarefa);
-                                adapterTarefa.notifyDataSetChanged();
                             }
                         }
+                        adapterTarefa.notifyDataSetChanged();
                     }
 
                     @Override
@@ -249,30 +251,28 @@ public class HomeFragment extends Fragment {
                 });
 
         //List 'alunos' in the home screen
-        FirebaseDatabase.getInstance().getReference().child("aluno")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        valueEventListenerAluno = firebaseRef.child("aluno").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        alunos.clear();
                         for(DataSnapshot dados: snapshot.getChildren()){
                             Aluno aluno = dados.getValue(Aluno.class);
                             alunos.add(aluno);
-                            adapterAluno.notifyDataSetChanged();
                         }
+                        adapterAluno.notifyDataSetChanged();
+                        updateFrequenciaTarefa(tarefas);
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
                     }
                 });
+    }
 
-        //Botão para salvar alterações na tela inicial
-        buttonSalvarAlteracoes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                salvarAlteracoesCheckBoxes();
-            }
-        });
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        firebaseRef.removeEventListener(valueEventListenerAluno);
+        firebaseRef.removeEventListener(valueEventListenerTarefa);
     }
 
     private void formatDayColorDaily(View view){
@@ -299,33 +299,6 @@ public class HomeFragment extends Fragment {
         textView.setTextColor(getResources().getColor(R.color.teal_200));
     }
 
-    private void salvarAlteracoesCheckBoxes() {
-        FirebaseDatabase.getInstance().getReference().child("aluno").
-                addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) { // atualiza objeto quando apertar em algum checkbox
-                        String week = getWeekIntervalAsChildString();
-                        String month = getMonthString();
-                        for (DataSnapshot dados : snapshot.getChildren()) {
-                            Log.i("Teste", dados.toString());
-                            Aluno aluno = dados.getValue(Aluno.class);
-                            aluno.setCheckBoxSegunda((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxSegunda").getValue());
-                            aluno.setCheckBoxTerca((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxTerca").getValue());
-                            aluno.setCheckBoxQuarta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxQuarta").getValue());
-                            aluno.setCheckBoxQuinta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxQuinta").getValue());
-                            aluno.setCheckBoxSexta((Boolean) dados.child("frequencia").child(month).child(week).child("checkedBoxSexta").getValue());
-                            Log.i("Teste", "Here: "+aluno.isCheckedBoxSegunda()+" | "+aluno.isCheckedBoxTerca()+" | "
-                                    +aluno.isCheckedBoxQuarta()+" | "+aluno.isCheckedBoxQuinta()+" | "+aluno.isCheckedBoxSexta());
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-    }
-
     public static String getWeekInterval(){
         return "Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
     }
@@ -336,6 +309,105 @@ public class HomeFragment extends Fragment {
 
     public static String getMonthString(){
         return new SimpleDateFormat("MMMM").format(c.getTime());
+    }
+
+    public static String getYearString(){
+        return new SimpleDateFormat("yyyy").format(c.getTime());
+    }
+
+    public void updateFrequenciaTarefa(List<Tarefa> tarefas){
+        for(Tarefa tarefa : tarefas) {
+            firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dados : snapshot.getChildren()) {
+                        Aluno aluno = dados.getValue(Aluno.class);
+                        Date date;
+                        String diaSemana = new String();
+                        //get weekDay string from tarefa
+                        try {
+                            date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
+                            diaSemana = new SimpleDateFormat("EE").format(date);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        String nomeAluno = aluno.getNome();
+                        switch (diaSemana) {
+                            case "seg":
+                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSegunda").getValue())
+                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                else
+                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                break;
+                            case "ter":
+                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxTerca").getValue())
+                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                else
+                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                break;
+                            case "qua":
+                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuarta").getValue())
+                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                else
+                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                break;
+                            case "qui":
+                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuinta").getValue())
+                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                else
+                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                break;
+                            case "sex":
+                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSexta").getValue())
+                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                else
+                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + diaSemana);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+    public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa){
+
+        List<String> listFizeram = tarefa.getListAlunosFizeram();
+        List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
+
+        if(listFizeram.contains(nomeAluno)) {
+            if(!fezTarefa) {
+                listFizeram.remove(nomeAluno);
+                listNaoFizeram.add(nomeAluno);
+            }
+        }
+        else{
+            if(fezTarefa)
+                listFizeram.add(nomeAluno);
+        }
+
+        if(listNaoFizeram.contains(nomeAluno)){
+            if(fezTarefa) {
+                listNaoFizeram.remove(nomeAluno);
+                listFizeram.add(nomeAluno);
+            }
+        }
+        else{
+            if(!fezTarefa)
+                listNaoFizeram.add(nomeAluno);
+        }
+        tarefa.setListAlunosFizeram(listFizeram);
+        tarefa.setListAlunosNaoFizeram(listNaoFizeram);
+        firebaseRef.child("tarefa").child(tarefa.getKey()).child("Alunos que fizeram").setValue(listFizeram);
+        firebaseRef.child("tarefa").child(tarefa.getKey()).child("Alunos que não fizeram").setValue(listNaoFizeram);
+        adapterTarefa.notifyDataSetChanged();
     }
 
 }
