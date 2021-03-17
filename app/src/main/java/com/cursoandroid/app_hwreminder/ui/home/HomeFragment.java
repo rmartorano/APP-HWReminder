@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment {
     private List<Aluno> alunos = new ArrayList<>();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private ValueEventListener valueEventListenerTarefa, valueEventListenerAluno;
+    private int week;
 
     private TextView textViewTituloLista, textDiaSemana,
             textViewSemanaHome, textViewDescricao;
@@ -89,14 +90,14 @@ public class HomeFragment extends Fragment {
         //Change title from month to month, day every day and set currently week interval from monday to friday
         Date date = new Date();
         c = Calendar.getInstance();
-        textViewTituloLista.setText("Dever de casa - "+getMonthString());
+        textViewTituloLista.setText("Dever de casa - " + getMonthString());
         textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(c.getTime())));
         formatDayColorDaily(view); // change color of today to focus on that
-        final int week = c.get(Calendar.WEEK_OF_MONTH); // week of the month
+        week = c.get(Calendar.WEEK_OF_MONTH); // week of the month
         c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
-        c.setTimeInMillis(c.getTimeInMillis()+Long.parseLong("86400000")); // set first day of week to monday not sunday
+        c.setTimeInMillis(c.getTimeInMillis() + Long.parseLong("86400000")); // set first day of week to monday not sunday
         long timeMili = c.getTimeInMillis();
-        long sextaMili = timeMili+Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
+        long sextaMili = timeMili + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
         sexta = Calendar.getInstance();
         sexta.setTimeInMillis(sextaMili);
         textViewSemanaHome.setText(getWeekInterval()); // retorna a string formata do intervalo da semana
@@ -114,164 +115,191 @@ public class HomeFragment extends Fragment {
 
         //List 'tarefas' in the home screen
         valueEventListenerTarefa = firebaseRef.child("tarefa").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        tarefas.clear();
-                        Calendar calendar = Calendar.getInstance();
-                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yy");
-                        Date date = null;
-                        String diaSemana = new String();
-                        for(DataSnapshot dados: snapshot.getChildren()){
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tarefas.clear();
+                Calendar calendar = Calendar.getInstance();
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yy");
+                Date date = null;
+                String diaSemana = new String();
+                for (DataSnapshot dados : snapshot.getChildren()) {
 
-                            Tarefa tarefa = dados.getValue(Tarefa.class);
-                            try {
-                                calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            };
+                    Tarefa tarefa = dados.getValue(Tarefa.class);
+                    try {
+                        calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
 
-                            if(calendar.get(Calendar.WEEK_OF_MONTH) == week){ // only shows currently week tarefas
+                    if (calendar.get(Calendar.WEEK_OF_MONTH) == week) { // only shows currently week tarefas
 
-                                //get weekDay string from tarefa
-                                try {
-                                    date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
-                                    diaSemana = new SimpleDateFormat("EE").format(date);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
+                        //get weekDay string from tarefa
+                        try {
+                            date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
+                            diaSemana = new SimpleDateFormat("EE").format(date);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
 
-                                //Instanciar alertDialog
-                                AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
-                                switch (diaSemana){
-                                    case "seg":
-                                        textViewDescricao = view.findViewById(R.id.textViewSegunda);
-                                        break;
-                                    case "ter":
-                                        textViewDescricao = view.findViewById(R.id.textViewTerca);
-                                        break;
-                                    case "qua":
-                                        textViewDescricao = view.findViewById(R.id.textViewQuarta);
-                                        break;
-                                    case "qui":
-                                        textViewDescricao = view.findViewById(R.id.textViewQuinta);
-                                        break;
-                                    case "sex":
-                                        textViewDescricao = view.findViewById(R.id.textViewSexta);
-                                        break;
-                                    default:
-                                        throw new IllegalStateException("Unexpected value: " + diaSemana);
-                                }
+                        //Instanciar alertDialog
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+                        switch (diaSemana) {
+                            case "seg":
+                                textViewDescricao = view.findViewById(R.id.textViewSegunda);
+                                break;
+                            case "ter":
+                                textViewDescricao = view.findViewById(R.id.textViewTerca);
+                                break;
+                            case "qua":
+                                textViewDescricao = view.findViewById(R.id.textViewQuarta);
+                                break;
+                            case "qui":
+                                textViewDescricao = view.findViewById(R.id.textViewQuinta);
+                                break;
+                            case "sex":
+                                textViewDescricao = view.findViewById(R.id.textViewSexta);
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + diaSemana);
+                        }
 
-                                if(tarefa.getDescricao().length()>40){
-                                    String tmp = tarefa.getDescricao().substring(0,40)+"...";
-                                    textViewDescricao.setText(tmp);
-                                }
-                                else
-                                    textViewDescricao.setText(tarefa.getDescricao());
+                        if (tarefa.getDescricao().length() > 40) {
+                            String tmp = tarefa.getDescricao().substring(0, 40) + "...";
+                            textViewDescricao.setText(tmp);
+                        } else
+                            textViewDescricao.setText(tarefa.getDescricao());
 
 
-                                dialog.setTitle(tarefa.getTitulo());
-                                dialog.setMessage(tarefa.getDescricao());
-                                dialog.setIcon(R.drawable.ic_menu_book);
-                                //Config ações para sim ou não
-                                dialog.setPositiveButton("Editar", new DialogInterface.OnClickListener() {
+                        dialog.setTitle(tarefa.getTitulo());
+                        dialog.setMessage(tarefa.getDescricao());
+                        dialog.setIcon(R.drawable.ic_menu_book);
+                        //Config ações para sim ou não
+                        dialog.setPositiveButton("Editar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) { //on clicking to edit, will open a new dialogAlert
+                                AlertDialog.Builder dialogEditDescricao = new AlertDialog.Builder(getContext());
+                                dialogEditDescricao.setTitle("Editar " + tarefa.getTitulo());
+                                dialogEditDescricao.setMessage("Digite a nova descrição");
+                                //Config input view
+                                final EditText input = new EditText(getContext());
+                                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                                dialogEditDescricao.setView(input);
+
+                                input.setHint(tarefa.getDescricao());
+                                dialogEditDescricao.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onClick(DialogInterface dialogInterface, int which) { //on clicking to edit, will open a new dialogAlert
-                                        AlertDialog.Builder dialogEditDescricao = new AlertDialog.Builder(getContext());
-                                        dialogEditDescricao.setTitle("Editar "+tarefa.getTitulo());
-                                        dialogEditDescricao.setMessage("Digite a nova descrição");
-                                        //Config input view
-                                        final EditText input = new EditText(getContext());
-                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
-                                        dialogEditDescricao.setView(input);
-
-                                        input.setHint(tarefa.getDescricao());
-                                        dialogEditDescricao.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int which) {
-                                                tarefa.setDescricao(input.getText().toString());
-                                                textViewDescricao.setText(input.getText().toString());
-                                                dialog.setMessage(tarefa.getDescricao());
-                                            }
-                                        });
-                                        dialogEditDescricao.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        dialogEditDescricao.create();
-                                        dialogEditDescricao.show();
+                                    public void onClick(DialogInterface dialogInterface, int which) {
+                                        tarefa.setDescricao(input.getText().toString());
+                                        textViewDescricao.setText(input.getText().toString());
+                                        dialog.setMessage(tarefa.getDescricao());
                                     }
                                 });
-                                dialog.setNegativeButton("Remover", new DialogInterface.OnClickListener() {
+                                dialogEditDescricao.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        AlertDialog.Builder dialogConfirmRemoval = new AlertDialog.Builder(getContext());
-                                        dialogConfirmRemoval.setMessage("Deseja mesmo remover '"+tarefa.getTitulo()+"'?");
-                                        dialogConfirmRemoval.setPositiveButton("Remover", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                Toast.makeText(getContext(), "Tarefa "+tarefa.getTitulo()+" removida", Toast.LENGTH_SHORT).show();
-                                                tarefa.deletarTarefa();
-                                                textViewDescricao.setText("Sem tarefa");
-                                                textViewDescricao.setOnClickListener(null); // remove the click listener
-                                            }
-                                        });
-                                        dialogConfirmRemoval.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                        dialogConfirmRemoval.create();
-                                        dialogConfirmRemoval.show();
+                                        dialog.cancel();
                                     }
                                 });
-
-                                //set click listener to open dialog when clicking the description of tarefa
-                                textViewDescricao.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        //Criar e exibir AlertDialog
-                                        dialog.create();
-                                        dialog.show();
-                                    }
-                                });
-                                tarefas.add(tarefa);
+                                dialogEditDescricao.create();
+                                dialogEditDescricao.show();
                             }
-                        }
-                        adapterTarefa.notifyDataSetChanged();
-                    }
+                        });
+                        dialog.setNegativeButton("Remover", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                AlertDialog.Builder dialogConfirmRemoval = new AlertDialog.Builder(getContext());
+                                dialogConfirmRemoval.setMessage("Deseja mesmo remover '" + tarefa.getTitulo() + "'?");
+                                dialogConfirmRemoval.setPositiveButton("Remover", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Toast.makeText(getContext(), "Tarefa " + tarefa.getTitulo() + " removida", Toast.LENGTH_SHORT).show();
+                                        tarefa.deletarTarefa();
+                                        textViewDescricao.setText("Sem tarefa");
+                                        textViewDescricao.setOnClickListener(null); // remove the click listener
+                                    }
+                                });
+                                dialogConfirmRemoval.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                dialogConfirmRemoval.create();
+                                dialogConfirmRemoval.show();
+                            }
+                        });
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
+                        //set click listener to open dialog when clicking the description of tarefa
+                        textViewDescricao.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //Criar e exibir AlertDialog
+                                dialog.create();
+                                dialog.show();
+                            }
+                        });
+                        tarefas.add(tarefa);
                     }
-                });
+                }
+                adapterTarefa.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         //List 'alunos' in the home screen
-        valueEventListenerAluno = firebaseRef.child("aluno").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        alunos.clear();
-                        for(DataSnapshot dados: snapshot.getChildren()){
-                            Aluno aluno = dados.getValue(Aluno.class);
-                            alunos.add(aluno);
-                        }
-                        adapterAluno.notifyDataSetChanged();
-                        updateFrequenciaTarefa(tarefas);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                    }
-                });
+        firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dados : snapshot.getChildren()) {
+                    Aluno aluno = dados.getValue(Aluno.class);
+                    alunos.add(aluno);
+                }
+                adapterAluno.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+        firebaseRef.child("aluno").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Log.i("Teste",snapshot.getKey());
+                Aluno aluno = snapshot.getValue(Aluno.class);
+                updateFrequenciaTarefa(tarefas, aluno);
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        firebaseRef.removeEventListener(valueEventListenerAluno);
         firebaseRef.removeEventListener(valueEventListenerTarefa);
     }
 
@@ -315,58 +343,63 @@ public class HomeFragment extends Fragment {
         return new SimpleDateFormat("yyyy").format(c.getTime());
     }
 
-    public void updateFrequenciaTarefa(List<Tarefa> tarefas){
+    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno){
+        Tarefa tarefaDoDia = null;
+        Calendar calendar = Calendar.getInstance();
+        String diaSemana = new String();
         for(Tarefa tarefa : tarefas) {
-            firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+            Date date;
+            //get weekDay string from tarefa
+            try {
+                date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
+                diaSemana = new SimpleDateFormat("EE").format(date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (calendar.get(Calendar.WEEK_OF_MONTH) == week) {
+                Log.i("Teste","Dia do aluno: "+aluno.getDiaSemana());
+                tarefaDoDia = tarefa;
+                break;
+            }
+        }
+        String finalDiaSemana = diaSemana;
+        Tarefa finalTarefaDoDia = tarefaDoDia;
+        firebaseRef.child("aluno").child(aluno.getNome()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot dados : snapshot.getChildren()) {
-                        Aluno aluno = dados.getValue(Aluno.class);
-                        Date date;
-                        String diaSemana = new String();
-                        //get weekDay string from tarefa
-                        try {
-                            date = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
-                            diaSemana = new SimpleDateFormat("EE").format(date);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
                         String nomeAluno = aluno.getNome();
-                        switch (diaSemana) {
+                        switch (finalDiaSemana) {
                             case "seg":
-                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSegunda").getValue())
-                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                if ((Boolean) snapshot.child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSegunda").getValue())
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, true);
                                 else
-                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, false);
                                 break;
                             case "ter":
-                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxTerca").getValue())
-                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                if ((Boolean) snapshot.child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxTerca").getValue())
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, true);
                                 else
-                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, false);
                                 break;
                             case "qua":
-                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuarta").getValue())
-                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                if ((Boolean) snapshot.child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuarta").getValue())
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, true);
                                 else
-                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, false);
                                 break;
                             case "qui":
-                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuinta").getValue())
-                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                if ((Boolean) snapshot.child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuinta").getValue())
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, true);
                                 else
-                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, false);
                                 break;
                             case "sex":
-                                if ((Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSexta").getValue())
-                                    validarAddFrequencia(tarefa, nomeAluno, true);
+                                if ((Boolean) snapshot.child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSexta").getValue())
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, true);
                                 else
-                                    validarAddFrequencia(tarefa, nomeAluno, false);
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, false);
                                 break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + diaSemana);
                         }
-                    }
                 }
 
                 @Override
@@ -375,7 +408,6 @@ public class HomeFragment extends Fragment {
                 }
             });
         }
-    }
 
     public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa){
 

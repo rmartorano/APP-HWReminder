@@ -50,8 +50,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         String week = homeFragment.getWeekIntervalAsChildString();
         String month = homeFragment.getMonthString();
         String year = homeFragment.getYearString();
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebaseRef.child("aluno").addValueEventListener(new ValueEventListener() {
+        ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Log.i("Teste",aluno.getNome()+" "+aluno.isCheckedBoxSegunda());

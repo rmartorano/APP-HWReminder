@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class Aluno {
 
-    private String nome;
+    private String nome, diaSemana;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
 
     public Aluno() {
@@ -38,6 +38,7 @@ public class Aluno {
 
     public void setCheckBoxSegunda(boolean checkBoxSegunda) {
         this.checkBoxSegunda = checkBoxSegunda;
+        this.diaSemana = "seg";
     }
 
     @Exclude
@@ -47,6 +48,7 @@ public class Aluno {
 
     public void setCheckBoxTerca(boolean checkBoxTerca) {
         this.checkBoxTerca = checkBoxTerca;
+        this.diaSemana = "ter";
     }
 
     @Exclude
@@ -56,6 +58,7 @@ public class Aluno {
 
     public void setCheckBoxQuarta(boolean checkBoxQuarta) {
         this.checkBoxQuarta = checkBoxQuarta;
+        this.diaSemana = "qua";
     }
 
     @Exclude
@@ -65,6 +68,7 @@ public class Aluno {
 
     public void setCheckBoxQuinta(boolean checkBoxQuinta) {
         this.checkBoxQuinta = checkBoxQuinta;
+        this.diaSemana = "qui";
     }
 
     @Exclude
@@ -74,6 +78,12 @@ public class Aluno {
 
     public void setCheckBoxSexta(boolean checkBoxSexta) {
         this.checkBoxSexta = checkBoxSexta;
+        this.diaSemana = "sex";
+    }
+
+    @Exclude
+    public String getDiaSemana() {
+        return this.diaSemana;
     }
 
     public class CheckBoxes{
@@ -96,6 +106,7 @@ public class Aluno {
         checkBoxes.put("checkedBoxQuarta", this.checkBoxQuarta);
         checkBoxes.put("checkedBoxQuinta", this.checkBoxQuinta);
         checkBoxes.put("checkedBoxSexta", this.checkBoxSexta);
+        checkBoxes.put("diaSemana", this.diaSemana);
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase.child("aluno")
