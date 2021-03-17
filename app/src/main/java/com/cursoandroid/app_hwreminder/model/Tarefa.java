@@ -1,6 +1,9 @@
 package com.cursoandroid.app_hwreminder.model;
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
@@ -8,6 +11,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Tarefa {
@@ -84,20 +88,61 @@ public class Tarefa {
 
     }
 
+    @Exclude
+    public void setListAlunosFizeram(List<String> listAlunosFizeram){
+        this.listAlunosFizeram.clear();
+        this.listAlunosFizeram = listAlunosFizeram;
+    }
+
     public List<String> getListAlunosFizeram() {
         return listAlunosFizeram;
     }
 
-    public void setListAlunosFizeram(List<String> listAlunosFizeram) {
-        this.listAlunosFizeram = listAlunosFizeram;
+    @Exclude
+    public void setListAlunosNaoFizeram(List<String> listAlunosNaoFizeram) {
+        this.listAlunosNaoFizeram.clear();
+        this.listAlunosNaoFizeram = listAlunosNaoFizeram;
     }
 
     public List<String> getListAlunosNaoFizeram() {
         return listAlunosNaoFizeram;
     }
 
-    public void setListAlunosNaoFizeram(List<String> listAlunosNaoFizeram) {
-        this.listAlunosNaoFizeram = listAlunosNaoFizeram;
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Exclude
+    public void addToListAlunosFizeram(String element) {
+        this.listAlunosFizeram.add(element);
+        this.salvarListas();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Exclude
+    public void removeFromListAlunosFizeram(String element){
+        this.listAlunosFizeram.remove(element);
+        this.salvarListas();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Exclude
+    public void addToListAlunosNaoFizeram(String element){
+        this.listAlunosNaoFizeram.add(element);
+        this.salvarListas();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Exclude
+    public void removeFromListAlunosNaoFizeram(String element){
+        this.listAlunosNaoFizeram.remove(element);
+        this.salvarListas();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Exclude
+    public void salvarListas(){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+        this.listAlunosFizeram.sort(String::compareTo);
+        this.listAlunosNaoFizeram.sort(String::compareTo);
+        firebaseRef.child("tarefa").child(this.key).child("Alunos que fizeram").setValue(this.listAlunosFizeram);
+        firebaseRef.child("tarefa").child(this.key).child("Alunos que não fizeram").setValue(this.listAlunosNaoFizeram);
+    }
 }

@@ -24,6 +24,7 @@ import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

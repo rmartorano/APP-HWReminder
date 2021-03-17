@@ -53,7 +53,6 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.i("Teste",aluno.getNome()+" "+aluno.isCheckedBoxSegunda());
                 if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
                     holder.checkBoxSegunda.setChecked(false);
                 if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
