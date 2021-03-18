@@ -158,7 +158,7 @@ public class AdicionarAlunoFragment extends Fragment {
                 else {
                     Toast.makeText(
                             getContext().getApplicationContext(),
-                            input.getText().toString()+" adicionado com sucesso!",
+                            input.getText().toString()+" adicionad(o) com sucesso!",
                             Toast.LENGTH_SHORT
                     ).show();
                     AlunoAddPendente aluno = new AlunoAddPendente();

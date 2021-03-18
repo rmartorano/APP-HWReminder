@@ -11,8 +11,8 @@
         android:layout_weight="0"
         android:background="@drawable/textlines_no_spaced_bottom"
         android:clickable="true"
-        android:drawableEnd="@drawable/ic_baseline_remove_24"
         android:text="Nome do aluno"
         android:textColor="@android:color/black"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:drawableRight="@drawable/ic_baseline_remove_24" />
 </LinearLayout>

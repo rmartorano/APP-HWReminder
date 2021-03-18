@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
+import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
@@ -126,7 +127,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Aluno aluno = snapshot.getValue(Aluno.class);
-                updateFrequenciaTarefa(tarefas, aluno);
+                updateFrequenciaTarefa(tarefas, aluno, false);
             }
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
@@ -299,11 +300,21 @@ public class HomeFragment extends Fragment {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 List fizeram = (ArrayList) snapshot.child("Alunos que fizeram").getValue();
-                                if(fizeram!=null)
+                                if(fizeram!=null) {
+                                    if (fizeram.contains(" "))
+                                        fizeram.remove(0); // remove o placeholder que cria a lista no firebase
                                     tarefa.setListAlunosFizeram(fizeram);
+                                }
+                                else
+                                    tarefa.addToListAlunosFizeram(" "); // cria a lista no firebase se não tiver ela ainda
                                 List naoFizeram = (ArrayList) snapshot.child("Alunos que não fizeram").getValue();
-                                if(naoFizeram!=null)
+                                if(naoFizeram!=null) {
+                                    if (naoFizeram.contains(" "))
+                                        fizeram.remove(0); // remove o placeholder que cria a lista no firebase
                                     tarefa.setListAlunosNaoFizeram(naoFizeram);
+                                }
+                                else
+                                    tarefa.addToListAlunosNaoFizeram(" ");
                             }
 
                             @Override
@@ -314,6 +325,8 @@ public class HomeFragment extends Fragment {
                     }
                 }
                 adapterTarefa.notifyDataSetChanged();
+                if(!alunos.isEmpty() && !tarefas.isEmpty())
+                    updateFrequenciaTarefa(tarefas, alunos.get(0), true);
             }
 
             @Override
@@ -334,6 +347,8 @@ public class HomeFragment extends Fragment {
                     alunos.add(aluno);
                 }
                 adapterAluno.notifyDataSetChanged();
+                if(!tarefas.isEmpty() && !alunos.isEmpty())
+                    updateFrequenciaTarefa(tarefas, alunos.get(0), true);
             }
 
             @Override
@@ -382,7 +397,9 @@ public class HomeFragment extends Fragment {
         return new SimpleDateFormat("yyyy").format(c.getTime());
     }
 
-    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno) {
+    int contadorRecursao = 0;
+    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno, boolean updateTodosAlunos) {
+        Log.i("Teste","Contador: "+contadorRecursao);
         Tarefa tarefaDoDia = null;
         Calendar calendar = Calendar.getInstance();
         String diaSemana = new String();
@@ -429,6 +446,7 @@ public class HomeFragment extends Fragment {
                                 validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSexta").getValue());
                                 break;
                         }
+
                     }
 
                 @Override
@@ -436,6 +454,13 @@ public class HomeFragment extends Fragment {
 
                 }
             });
+        if(updateTodosAlunos == true) { //se essa opcao tiver marcada, chama a funcao de novo com o aluno do próximo index
+            contadorRecursao++;
+            if(!(alunos.get(contadorRecursao) == null))
+                updateFrequenciaTarefa(tarefas, alunos.get(contadorRecursao), true);
+            else
+                contadorRecursao = 0;
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -478,21 +503,49 @@ public class HomeFragment extends Fragment {
         dialog.getWindow().setAttributes(lp);
         View view = dialog.getWindow().getDecorView();
 
-        //Search widget
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
-        SearchView searchView = view.findViewById(R.id.searchViewFeedback);
-
+        //Recycler alunos
+        List<Aluno> alunosFiltro = new ArrayList<>();
+        AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback = new AdapterFiltrarAlunoFeedback(alunosFiltro, getContext());
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFeedbackAlunos);
         RecyclerView.LayoutManager layoutManagerFeedbackAluno = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManagerFeedbackAluno);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapterAluno);
+        recyclerView.setAdapter(adapterFiltrarAlunoFeedback);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+
+        filtrarAlunos("", adapterFiltrarAlunoFeedback, alunosFiltro);
+
+        //Search widget
+        SearchView searchView = (SearchView) view.findViewById(R.id.searchViewFeedback);
+        searchView.setBackgroundColor(getResources().getColor(R.color.teal_200));
+        searchView.setIconifiedByDefault(false);
+        searchView.setQueryHint("Digite o nome de um aluno");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filtrarAlunos(newText, adapterFiltrarAlunoFeedback, alunosFiltro);
+                return false;
+            }
+        });
     }
 
-    public AdapterAluno getAdapterAluno(){
-        return adapterAluno;
+    void filtrarAlunos(String query, AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback, List<Aluno> alunosFiltro){
+        alunosFiltro.clear();
+        if(query.equals("")) {
+            alunosFiltro.addAll(alunos); //mostra todos os alunos
+        }
+        else{
+            for(Aluno aluno : alunos){
+                if(aluno.getNome().toLowerCase().contains(query.toLowerCase()))
+                    alunosFiltro.add(aluno); //mostra só os que contém os caracteres digitados
+            }
+        }
+        adapterFiltrarAlunoFeedback.notifyDataSetChanged();
     }
 
 }
