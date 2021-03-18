@@ -107,7 +107,7 @@ public class Aluno {
         checkBoxes.put("checkedBoxQuarta", this.checkBoxQuarta);
         checkBoxes.put("checkedBoxQuinta", this.checkBoxQuinta);
         checkBoxes.put("checkedBoxSexta", this.checkBoxSexta);
-        checkBoxes.put("diaSemana", homeFragment.diaSemanaAluno);
+        checkBoxes.put("diaSemana", this.getDiaSemana());
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase.child("aluno")

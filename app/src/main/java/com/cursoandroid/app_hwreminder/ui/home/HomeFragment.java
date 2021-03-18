@@ -1,5 +1,9 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
+import android.app.Dialog;
+import android.app.SearchManager;
+import android.app.SearchableInfo;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,7 +12,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +64,7 @@ public class HomeFragment extends Fragment {
     private int week;
 
     private TextView textViewTituloLista, textDiaSemana,
-            textViewSemanaHome, textViewDescricao;
+            textViewSemanaHome, textViewDescricao, textViewAlunosFeedback;
 
     //Atributos para a formatação da string de intervalo da semana
     public static String diaSemanaAluno = "seg";
@@ -81,6 +89,7 @@ public class HomeFragment extends Fragment {
         textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
         textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
+        textViewAlunosFeedback = view.findViewById(R.id.textViewListarAlunos);
         //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
@@ -117,7 +126,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Aluno aluno = snapshot.getValue(Aluno.class);
-                updateFrequenciaTarefa(tarefas, aluno, false);
+                updateFrequenciaTarefa(tarefas, aluno);
             }
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
@@ -130,6 +139,13 @@ public class HomeFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        textViewAlunosFeedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirFeedbackAlunos();
             }
         });
 
@@ -148,6 +164,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void recuperarTarefas(){
+        tarefas.clear();
         firebaseRef.child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -219,7 +236,12 @@ public class HomeFragment extends Fragment {
                                 input.setInputType(InputType.TYPE_CLASS_TEXT);
                                 dialogEditDescricao.setView(input);
 
-                                input.setHint(tarefa.getDescricao());
+                                if (tarefa.getDescricao().length() > 40) {
+                                    String tmp = tarefa.getDescricao().substring(0, 40) + "...";
+                                    input.setHint(tmp);
+                                } else
+                                    input.setHint(tarefa.getDescricao());
+                                dialogEditDescricao.setIcon(R.drawable.ic_pencil_24);
                                 dialogEditDescricao.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int which) {
@@ -303,6 +325,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void recuperarListaAlunos(){
+        alunos.clear();
         firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -311,8 +334,6 @@ public class HomeFragment extends Fragment {
                     alunos.add(aluno);
                 }
                 adapterAluno.notifyDataSetChanged();
-                if(!tarefas.isEmpty())
-                    updateFrequenciaTarefa(tarefas, null, true);
             }
 
             @Override
@@ -361,7 +382,7 @@ public class HomeFragment extends Fragment {
         return new SimpleDateFormat("yyyy").format(c.getTime());
     }
 
-    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno, boolean updateTodosAlunos) {
+    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno) {
         Tarefa tarefaDoDia = null;
         Calendar calendar = Calendar.getInstance();
         String diaSemana = new String();
@@ -375,7 +396,7 @@ public class HomeFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            if ((aluno == null || diaSemana.equals(aluno.getDiaSemana())) && calendar.get(Calendar.WEEK_OF_MONTH) == week && !tarefa.getDescricao().equals("Sem tarefa")) {
+            if (diaSemana.equals(aluno.getDiaSemana()) && calendar.get(Calendar.WEEK_OF_MONTH) == week && !tarefa.getDescricao().equals("Sem tarefa")) {
                 tarefaDoDia = tarefa;
                 break;
             }
@@ -389,15 +410,7 @@ public class HomeFragment extends Fragment {
                 @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String nomeAluno = "";
-                    int endValue = 1;
-                    if(aluno!=null)
-                        nomeAluno = aluno.getNome();
-                    if(updateTodosAlunos)
-                        endValue = alunos.size()-1;
-                    for(int i = 0; i < endValue ; i++) {
-                        if(endValue > 1 || aluno == null)
-                            nomeAluno = alunos.get(i).getNome();
+                        String nomeAluno = aluno.getNome();
                         Log.i("Teste", "Nome do aluno: "+nomeAluno);
                         switch (finalDiaSemana) {
                             case "seg":
@@ -417,22 +430,12 @@ public class HomeFragment extends Fragment {
                                 break;
                         }
                     }
-                }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
 
                 }
             });
-    }
-
-    public int getAlunoPos(Aluno aluno) {
-        for (int i = 0; i < alunos.size(); i++) {
-            if (alunos.get(i) == aluno) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -460,6 +463,36 @@ public class HomeFragment extends Fragment {
             if(!fezTarefa)
                 tarefa.addToListAlunosNaoFizeram(nomeAluno);
         }
+    }
+
+    private void abrirFeedbackAlunos(){ // abre uma view com a frequencia dos alunos
+        Dialog dialog = new Dialog(getContext(), android.R.style.Theme_Material_Light_Dialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.activity_feedback_alunos);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = 1000;
+        lp.height = 2000;
+        dialog.setCancelable(true);
+        dialog.show();
+        dialog.getWindow().setAttributes(lp);
+        View view = dialog.getWindow().getDecorView();
+
+        //Search widget
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
+        SearchView searchView = view.findViewById(R.id.searchViewFeedback);
+
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFeedbackAlunos);
+        RecyclerView.LayoutManager layoutManagerFeedbackAluno = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManagerFeedbackAluno);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapterAluno);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+    }
+
+    public AdapterAluno getAdapterAluno(){
+        return adapterAluno;
     }
 
 }
