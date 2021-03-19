@@ -470,17 +470,15 @@ public final class HomeFragment extends Fragment {
             if(alunos.size() > contadorRecursao) {
                 updateFrequenciaTarefa(finalTarefaDoDia, alunos.get(contadorRecursao), true, false);
             }
-            else
-                contadorRecursao = 0;
         }
-        if(updateTodasTarefas){
+        else if(updateTodasTarefas){
             contadorRecursao++;
             if(tarefas.size() > contadorRecursao){
                 updateFrequenciaTarefa(finalTarefaDoDia, aluno, false, true);
             }
-            else
-                contadorRecursao = 0;
         }
+        else
+            contadorRecursao = 0;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
