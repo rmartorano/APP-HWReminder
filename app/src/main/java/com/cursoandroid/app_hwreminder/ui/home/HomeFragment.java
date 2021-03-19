@@ -1,9 +1,6 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
 import android.app.Dialog;
-import android.app.SearchManager;
-import android.app.SearchableInfo;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -35,7 +31,6 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
-import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -45,17 +40,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class HomeFragment extends Fragment {
+public final class HomeFragment extends Fragment {
 
     private RecyclerView recyclerViewAluno;
     private AdapterTarefa adapterTarefa;
@@ -69,10 +62,7 @@ public class HomeFragment extends Fragment {
     private TextView textViewTituloLista, textDiaSemana,
             textViewSemanaHome, textViewDescricao, textViewAlunosFeedback;
 
-    //Atributos para a formatação da string de intervalo da semana
     public static String diaSemanaAluno = "seg";
-    private static Calendar c, sexta;
-    private static DecimalFormat mFormat = new DecimalFormat("00");
 
     public HomeFragment() {
     }
@@ -96,19 +86,16 @@ public class HomeFragment extends Fragment {
         //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
-        Date date = new Date();
-        c = Calendar.getInstance();
-        textViewTituloLista.setText("Dever de casa - " + getMonthString());
-        textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(c.getTime())));
+
+        com.cursoandroid.app_hwreminder.Date data = new com.cursoandroid.app_hwreminder.Date();
+
+        Calendar calendar = data.getCalendar();
+
+        textViewTituloLista.setText("Dever de casa - " + data.getMonthString());
+        textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE").format(calendar.getTime())));
         formatDayColorDaily(view); // change color of today to focus on that
-        week = c.get(Calendar.WEEK_OF_MONTH); // week of the month
-        c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
-        c.setTimeInMillis(c.getTimeInMillis() + Long.parseLong("86400000")); // set first day of week to monday not sunday
-        long timeMili = c.getTimeInMillis();
-        long sextaMili = timeMili + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
-        sexta = Calendar.getInstance();
-        sexta.setTimeInMillis(sextaMili);
-        textViewSemanaHome.setText(getWeekInterval()); // retorna a string formata do intervalo da semana
+        week = calendar.get(Calendar.WEEK_OF_MONTH); // week of the month
+        textViewSemanaHome.setText(data.getWeekInterval()); // retorna a string formata do intervalo da semana
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
@@ -125,12 +112,17 @@ public class HomeFragment extends Fragment {
         firebaseRef.child("aluno").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if(!tarefas.isEmpty()) {
+                    Log.i("Teste","AQUI");
+                    Aluno aluno = snapshot.getValue(Aluno.class);
+                    updateFrequenciaTarefa(null, aluno, false, true);
+                }
             }
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if(!tarefas.isEmpty()) {
                     Aluno aluno = snapshot.getValue(Aluno.class);
-                    updateFrequenciaTarefa(null, aluno, false);
+                    updateFrequenciaTarefa(null, aluno, false, false);
                 }
             }
             @Override
@@ -152,15 +144,14 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if(!alunos.isEmpty()) {
-                    Log.i("Teste","calling onChildAdded");
                     Tarefa tarefa = snapshot.getValue(Tarefa.class);
-                    updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                    Log.i("Teste","Size tarefas: "+tarefas.size());
+                    updateFrequenciaTarefa(tarefa, alunos.get(0), true, false);
                 }
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName){
             }
 
             @Override
@@ -195,24 +186,25 @@ public class HomeFragment extends Fragment {
         recuperarListaAlunos();
     }
 
+
     @Override
     public void onStop() {
         super.onStop();
     }
 
     private void recuperarTarefas(){
-        tarefas.clear();
         firebaseRef.child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tarefas.clear();
                 Calendar calendar = Calendar.getInstance();
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yy");
                 Date date = null;
                 String diaSemana = new String();
                 for (DataSnapshot dados : snapshot.getChildren()) {
-
                     Tarefa tarefa = dados.getValue(Tarefa.class);
+                    tarefa.setKey(tarefa.getKey());
                     try {
                         calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
                     } catch (ParseException e) {
@@ -331,6 +323,12 @@ public class HomeFragment extends Fragment {
                                 dialog.show();
                             }
                         });
+                        ArrayList listTmpFizeram = (ArrayList) snapshot.child(tarefa.getKey()).child("Alunos que fizeram").getValue();
+                        ArrayList listTmpNaoFizeram = (ArrayList) snapshot.child(tarefa.getKey()).child("Alunos que não fizeram").getValue();
+                        if(listTmpFizeram!=null)
+                            tarefa.setListAlunosFizeram(listTmpFizeram);
+                        if(listTmpNaoFizeram!=null)
+                            tarefa.setListAlunosNaoFizeram(listTmpNaoFizeram);
                         tarefas.add(tarefa);
                     }
                 }
@@ -346,10 +344,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void recuperarListaAlunos(){
-        alunos.clear();
         firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                alunos.clear();
                 for (DataSnapshot dados : snapshot.getChildren()) {
                     Aluno aluno = dados.getValue(Aluno.class);
                     alunos.add(aluno);
@@ -387,25 +385,9 @@ public class HomeFragment extends Fragment {
         textView.setTextColor(getResources().getColor(R.color.teal_200));
     }
 
-    public static String getWeekInterval(){
-        return "Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
-    }
-
-    public static String getWeekIntervalAsChildString(){
-        return "Semana "+mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
-    }
-
-    public static String getMonthString(){
-        return new SimpleDateFormat("MMMM").format(c.getTime());
-    }
-
-    public static String getYearString(){
-        return new SimpleDateFormat("yyyy").format(c.getTime());
-    }
-
-    int contadorRecursao = 0;
+    static int contadorRecursao = 0;
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos) {
+    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos, boolean updateTodasTarefas) {
         Log.i("Teste","Contador: "+contadorRecursao);
         Tarefa tarefaDoDia = null;
         Calendar calendar = Calendar.getInstance();
@@ -420,6 +402,11 @@ public class HomeFragment extends Fragment {
                     diaSemana = new SimpleDateFormat("EE").format(date);
                 } catch (ParseException e) {
                     e.printStackTrace();
+                }
+                if(updateTodasTarefas){ //atualiza todas as tarefas
+                    tarefaDoDia = tarefas.get(contadorRecursao);
+                    Log.i("Teste", "tarefa escolhida: "+tarefaDoDia.getTitulo());
+                    break;
                 }
                 if (diaSemana.equals(aluno.getDiaSemana()) && calendar.get(Calendar.WEEK_OF_MONTH) == week && !tarefaIn.getDescricao().equals("Sem tarefa")) {
                     tarefaDoDia = tarefaIn;
@@ -443,6 +430,10 @@ public class HomeFragment extends Fragment {
         }
         String finalDiaSemana = diaSemana;
         Tarefa finalTarefaDoDia = tarefaDoDia;
+        com.cursoandroid.app_hwreminder.Date date = new com.cursoandroid.app_hwreminder.Date();
+        String yearString = date.getYearString();
+        String monthString = date.getMonthString();
+        String weekIntervalAsChild = date.getWeekIntervalAsChildString();
         firebaseRef.child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
                 @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
@@ -451,19 +442,19 @@ public class HomeFragment extends Fragment {
                         Log.i("Teste", "Nome do aluno: "+nomeAluno);
                         switch (finalDiaSemana) {
                             case "seg":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSegunda").getValue());
+                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(yearString).child(monthString).child(weekIntervalAsChild).child("checkedBoxSegunda").getValue());
                                 break;
                             case "ter":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxTerca").getValue());
+                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(yearString).child(monthString).child(weekIntervalAsChild).child("checkedBoxTerca").getValue());
                                 break;
                             case "qua":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuarta").getValue());
+                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(yearString).child(monthString).child(weekIntervalAsChild).child("checkedBoxQuarta").getValue());
                                 break;
                             case "qui":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxQuinta").getValue());
+                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(yearString).child(monthString).child(weekIntervalAsChild).child("checkedBoxQuinta").getValue());
                                 break;
                             case "sex":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(getYearString()).child(getMonthString()).child(getWeekIntervalAsChildString()).child("checkedBoxSexta").getValue());
+                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child(nomeAluno).child("frequencia").child(yearString).child(monthString).child(weekIntervalAsChild).child("checkedBoxSexta").getValue());
                                 break;
                         }
 
@@ -477,7 +468,15 @@ public class HomeFragment extends Fragment {
         if(updateTodosAlunos) { //se essa opcao tiver marcada, chama a funcao de novo com o aluno do próximo index
             contadorRecursao++;
             if(alunos.size() > contadorRecursao) {
-                updateFrequenciaTarefa(tarefa, alunos.get(contadorRecursao), true);
+                updateFrequenciaTarefa(finalTarefaDoDia, alunos.get(contadorRecursao), true, false);
+            }
+            else
+                contadorRecursao = 0;
+        }
+        if(updateTodasTarefas){
+            contadorRecursao++;
+            if(tarefas.size() > contadorRecursao){
+                updateFrequenciaTarefa(finalTarefaDoDia, aluno, false, true);
             }
             else
                 contadorRecursao = 0;
@@ -486,10 +485,8 @@ public class HomeFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa){
-
         List<String> listFizeram = tarefa.getListAlunosFizeram();
         List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
-        Log.i("Teste", "Lista fizeram: "+listFizeram.size());
 
         if(listFizeram.contains(nomeAluno)) {
             if (!fezTarefa) {

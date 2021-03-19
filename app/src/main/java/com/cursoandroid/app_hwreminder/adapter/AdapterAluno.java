@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cursoandroid.app_hwreminder.Date;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
@@ -46,10 +47,10 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         Aluno aluno = alunos.get(position);
         holder.nome.setText(aluno.getNome());
         //atualiza seleção das checkBoxes
-        HomeFragment homeFragment = new HomeFragment();
-        String week = homeFragment.getWeekIntervalAsChildString();
-        String month = homeFragment.getMonthString();
-        String year = homeFragment.getYearString();
+        Date date = new Date();
+        String week = date.getWeekIntervalAsChildString();
+        String month = date.getMonthString();
+        String year = date .getYearString();
         ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

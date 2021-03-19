@@ -91,9 +91,10 @@ public class Tarefa {
     @Exclude
     public void setListAlunosFizeram(List<String> listAlunosFizeram){
         this.listAlunosFizeram.clear();
-        this.listAlunosFizeram = listAlunosFizeram;
+        this.listAlunosFizeram.addAll(listAlunosFizeram);
     }
 
+    @Exclude
     public List<String> getListAlunosFizeram() {
         return listAlunosFizeram;
     }
@@ -101,9 +102,10 @@ public class Tarefa {
     @Exclude
     public void setListAlunosNaoFizeram(List<String> listAlunosNaoFizeram) {
         this.listAlunosNaoFizeram.clear();
-        this.listAlunosNaoFizeram = listAlunosNaoFizeram;
+        this.listAlunosNaoFizeram.addAll(listAlunosNaoFizeram);
     }
 
+    @Exclude
     public List<String> getListAlunosNaoFizeram() {
         return listAlunosNaoFizeram;
     }
@@ -140,8 +142,6 @@ public class Tarefa {
     @Exclude
     public void salvarListas(){
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        this.listAlunosFizeram.sort(String::compareTo);
-        this.listAlunosNaoFizeram.sort(String::compareTo);
         firebaseRef.child("tarefa").child(this.key).child("Alunos que fizeram").setValue(this.listAlunosFizeram);
         firebaseRef.child("tarefa").child(this.key).child("Alunos que não fizeram").setValue(this.listAlunosNaoFizeram);
     }

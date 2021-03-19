@@ -27,7 +27,9 @@ import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -104,6 +106,7 @@ public class ReminderFragment extends Fragment {
 
         //onClick para salvar tarefa
         buttonSalvar.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 salvarTarefa(v);
@@ -151,6 +154,7 @@ public class ReminderFragment extends Fragment {
         editDate.setText(sdf.format(myCalendar.getTime()));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void salvarTarefa(View view){
         if(validarCampos()){
             tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());

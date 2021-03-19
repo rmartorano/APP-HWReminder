@@ -2,6 +2,7 @@ package com.cursoandroid.app_hwreminder.model;
 
 import android.widget.CheckBox;
 
+import com.cursoandroid.app_hwreminder.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DatabaseReference;
@@ -14,7 +15,6 @@ public class Aluno {
 
     private String nome;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
-    private HomeFragment homeFragment = new HomeFragment();
 
     public Aluno() {
         checkBoxSegunda = checkBoxTerca = checkBoxQuarta = checkBoxQuinta = checkBoxSexta = true;
@@ -39,7 +39,7 @@ public class Aluno {
 
     public void setCheckBoxSegunda(boolean checkBoxSegunda) {
         this.checkBoxSegunda = checkBoxSegunda;
-        homeFragment.diaSemanaAluno = "seg";
+        HomeFragment.diaSemanaAluno = "seg";
     }
 
     @Exclude
@@ -49,7 +49,7 @@ public class Aluno {
 
     public void setCheckBoxTerca(boolean checkBoxTerca) {
         this.checkBoxTerca = checkBoxTerca;
-        homeFragment.diaSemanaAluno = "ter";
+        HomeFragment.diaSemanaAluno = "ter";
     }
 
     @Exclude
@@ -59,7 +59,7 @@ public class Aluno {
 
     public void setCheckBoxQuarta(boolean checkBoxQuarta) {
         this.checkBoxQuarta = checkBoxQuarta;
-        homeFragment.diaSemanaAluno = "qua";
+        HomeFragment.diaSemanaAluno = "qua";
     }
 
     @Exclude
@@ -69,7 +69,7 @@ public class Aluno {
 
     public void setCheckBoxQuinta(boolean checkBoxQuinta) {
         this.checkBoxQuinta = checkBoxQuinta;
-        homeFragment.diaSemanaAluno = "qui";
+        HomeFragment.diaSemanaAluno = "qui";
     }
 
     @Exclude
@@ -79,12 +79,12 @@ public class Aluno {
 
     public void setCheckBoxSexta(boolean checkBoxSexta) {
         this.checkBoxSexta = checkBoxSexta;
-        homeFragment.diaSemanaAluno = "sex";
+        HomeFragment.diaSemanaAluno = "sex";
     }
 
     @Exclude
     public String getDiaSemana() {
-        return homeFragment.diaSemanaAluno;
+        return HomeFragment.diaSemanaAluno;
     }
 
     public class CheckBoxes{
@@ -109,13 +109,14 @@ public class Aluno {
         checkBoxes.put("checkedBoxSexta", this.checkBoxSexta);
         checkBoxes.put("diaSemana", this.getDiaSemana());
 
+        Date date = new Date();
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase.child("aluno")
                 .child(this.nome)
                 .child("frequencia")
-                .child(new HomeFragment().getYearString())
-                .child(new HomeFragment().getMonthString())
-                .child(new HomeFragment().getWeekIntervalAsChildString())
+                .child(date.getYearString())
+                .child(date.getMonthString())
+                .child(date.getWeekIntervalAsChildString())
                 .setValue(checkBoxes);
     }
 
