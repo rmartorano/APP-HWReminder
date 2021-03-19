@@ -35,6 +35,7 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
+import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -50,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -119,15 +121,17 @@ public class HomeFragment extends Fragment {
         recyclerViewAluno.setAdapter(adapterAluno);
         recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
 
+        //listener para quando um aluo for alterado
         firebaseRef.child("aluno").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
             }
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Aluno aluno = snapshot.getValue(Aluno.class);
-                updateFrequenciaTarefa(tarefas, aluno, false);
+                if(!tarefas.isEmpty()) {
+                    Aluno aluno = snapshot.getValue(Aluno.class);
+                    updateFrequenciaTarefa(null, aluno, false);
+                }
             }
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
@@ -137,6 +141,38 @@ public class HomeFragment extends Fragment {
             public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
             }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //listener para quando uma tarefa for alterada
+        firebaseRef.child("tarefa").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if(!alunos.isEmpty()) {
+                    Log.i("Teste","calling onChildAdded");
+                    Tarefa tarefa = snapshot.getValue(Tarefa.class);
+                    updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -296,37 +332,9 @@ public class HomeFragment extends Fragment {
                             }
                         });
                         tarefas.add(tarefa);
-                        firebaseRef.child("tarefa").child(tarefa.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                List fizeram = (ArrayList) snapshot.child("Alunos que fizeram").getValue();
-                                if(fizeram!=null) {
-                                    if (fizeram.contains(" "))
-                                        fizeram.remove(0); // remove o placeholder que cria a lista no firebase
-                                    tarefa.setListAlunosFizeram(fizeram);
-                                }
-                                else
-                                    tarefa.addToListAlunosFizeram(" "); // cria a lista no firebase se não tiver ela ainda
-                                List naoFizeram = (ArrayList) snapshot.child("Alunos que não fizeram").getValue();
-                                if(naoFizeram!=null) {
-                                    if (naoFizeram.contains(" "))
-                                        fizeram.remove(0); // remove o placeholder que cria a lista no firebase
-                                    tarefa.setListAlunosNaoFizeram(naoFizeram);
-                                }
-                                else
-                                    tarefa.addToListAlunosNaoFizeram(" ");
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
                     }
                 }
                 adapterTarefa.notifyDataSetChanged();
-                if(!alunos.isEmpty() && !tarefas.isEmpty())
-                    updateFrequenciaTarefa(tarefas, alunos.get(0), true);
             }
 
             @Override
@@ -347,8 +355,6 @@ public class HomeFragment extends Fragment {
                     alunos.add(aluno);
                 }
                 adapterAluno.notifyDataSetChanged();
-                if(!tarefas.isEmpty() && !alunos.isEmpty())
-                    updateFrequenciaTarefa(tarefas, alunos.get(0), true);
             }
 
             @Override
@@ -398,13 +404,33 @@ public class HomeFragment extends Fragment {
     }
 
     int contadorRecursao = 0;
-    public void updateFrequenciaTarefa(List<Tarefa> tarefas, Aluno aluno, boolean updateTodosAlunos) {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos) {
         Log.i("Teste","Contador: "+contadorRecursao);
         Tarefa tarefaDoDia = null;
         Calendar calendar = Calendar.getInstance();
         String diaSemana = new String();
-        int count = 0;
-        for (Tarefa tarefa : tarefas) {
+        if(tarefa == null) { //se passar tarefa como null, procura pela tarefa da semana
+            int count = 0;
+            for (Tarefa tarefaIn : tarefas) {
+                Date date;
+                //get weekDay string from tarefa
+                try {
+                    date = new SimpleDateFormat("dd/MM/yy").parse(tarefaIn.getDataEntrega());
+                    diaSemana = new SimpleDateFormat("EE").format(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if (diaSemana.equals(aluno.getDiaSemana()) && calendar.get(Calendar.WEEK_OF_MONTH) == week && !tarefaIn.getDescricao().equals("Sem tarefa")) {
+                    tarefaDoDia = tarefaIn;
+                    break;
+                }
+                if (count == tarefas.size() - 1) //se chegar no final da lista e não achar nada, sai da função e não faz nada
+                    return;
+                count++;
+            }
+        }
+        else{
             Date date;
             //get weekDay string from tarefa
             try {
@@ -413,13 +439,7 @@ public class HomeFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            if (diaSemana.equals(aluno.getDiaSemana()) && calendar.get(Calendar.WEEK_OF_MONTH) == week && !tarefa.getDescricao().equals("Sem tarefa")) {
-                tarefaDoDia = tarefa;
-                break;
-            }
-            if (count == tarefas.size() - 1) //se chegar no final da lista e não achar nada, sai da função e não faz nada
-                return;
-            count++;
+            tarefaDoDia = tarefa;
         }
         String finalDiaSemana = diaSemana;
         Tarefa finalTarefaDoDia = tarefaDoDia;
@@ -454,10 +474,11 @@ public class HomeFragment extends Fragment {
 
                 }
             });
-        if(updateTodosAlunos == true) { //se essa opcao tiver marcada, chama a funcao de novo com o aluno do próximo index
+        if(updateTodosAlunos) { //se essa opcao tiver marcada, chama a funcao de novo com o aluno do próximo index
             contadorRecursao++;
-            if(!(alunos.get(contadorRecursao) == null))
-                updateFrequenciaTarefa(tarefas, alunos.get(contadorRecursao), true);
+            if(alunos.size() > contadorRecursao) {
+                updateFrequenciaTarefa(tarefa, alunos.get(contadorRecursao), true);
+            }
             else
                 contadorRecursao = 0;
         }
@@ -468,6 +489,7 @@ public class HomeFragment extends Fragment {
 
         List<String> listFizeram = tarefa.getListAlunosFizeram();
         List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
+        Log.i("Teste", "Lista fizeram: "+listFizeram.size());
 
         if(listFizeram.contains(nomeAluno)) {
             if (!fezTarefa) {
