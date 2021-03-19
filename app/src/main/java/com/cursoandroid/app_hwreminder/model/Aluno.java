@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Aluno {
 
-    private String nome;
+    private String nome, diaSemana;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
 
     public Aluno() {
@@ -39,7 +39,7 @@ public class Aluno {
 
     public void setCheckBoxSegunda(boolean checkBoxSegunda) {
         this.checkBoxSegunda = checkBoxSegunda;
-        HomeFragment.diaSemanaAluno = "seg";
+        this.diaSemana = "seg";
     }
 
     @Exclude
@@ -49,7 +49,7 @@ public class Aluno {
 
     public void setCheckBoxTerca(boolean checkBoxTerca) {
         this.checkBoxTerca = checkBoxTerca;
-        HomeFragment.diaSemanaAluno = "ter";
+        this.diaSemana = "ter";
     }
 
     @Exclude
@@ -59,7 +59,7 @@ public class Aluno {
 
     public void setCheckBoxQuarta(boolean checkBoxQuarta) {
         this.checkBoxQuarta = checkBoxQuarta;
-        HomeFragment.diaSemanaAluno = "qua";
+        this.diaSemana = "qua";
     }
 
     @Exclude
@@ -69,7 +69,7 @@ public class Aluno {
 
     public void setCheckBoxQuinta(boolean checkBoxQuinta) {
         this.checkBoxQuinta = checkBoxQuinta;
-        HomeFragment.diaSemanaAluno = "qui";
+        this.diaSemana = "qui";
     }
 
     @Exclude
@@ -79,12 +79,15 @@ public class Aluno {
 
     public void setCheckBoxSexta(boolean checkBoxSexta) {
         this.checkBoxSexta = checkBoxSexta;
-        HomeFragment.diaSemanaAluno = "sex";
+        this.diaSemana = "sex";
     }
 
-    @Exclude
     public String getDiaSemana() {
-        return HomeFragment.diaSemanaAluno;
+        return this.diaSemana;
+    }
+
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
     }
 
     public class CheckBoxes{

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.cursoandroid.app_hwreminder.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -62,11 +63,13 @@ public class Tarefa {
         this.descricao = descricao;
     }
 
+
+    @Exclude
     public String getKey() {
         return key;
     }
 
-    @Exclude
+
     public void setKey(String key) {
         this.key = key;
     }
@@ -74,9 +77,13 @@ public class Tarefa {
     public void salvar(){
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
+        Date date = new Date();
         this.key = firebase.push().getKey();
         firebase.child("tarefa")
-                .child(key)
+                .child(date.getYearString())
+                .child(date.getMonthString())
+                .child(date.getWeekIntervalAsChildString())
+                .child(this.key)
                 .setValue(this);
 
     }
@@ -84,7 +91,13 @@ public class Tarefa {
     public void deletarTarefa(){
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebase.child("tarefa").child(this.key).removeValue();
+        Date date = new Date();
+        firebase.child("tarefa")
+                .child(date.getYearString())
+                .child(date.getMonthString())
+                .child(date.getWeekIntervalAsChildString())
+                .child(this.key)
+                .removeValue();
 
     }
 
@@ -114,35 +127,45 @@ public class Tarefa {
     @Exclude
     public void addToListAlunosFizeram(String element) {
         this.listAlunosFizeram.add(element);
-        this.salvarListas();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Exclude
     public void removeFromListAlunosFizeram(String element){
         this.listAlunosFizeram.remove(element);
-        this.salvarListas();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Exclude
     public void addToListAlunosNaoFizeram(String element){
         this.listAlunosNaoFizeram.add(element);
-        this.salvarListas();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Exclude
     public void removeFromListAlunosNaoFizeram(String element){
         this.listAlunosNaoFizeram.remove(element);
-        this.salvarListas();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Exclude
     public void salvarListas(){
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebaseRef.child("tarefa").child(this.key).child("Alunos que fizeram").setValue(this.listAlunosFizeram);
-        firebaseRef.child("tarefa").child(this.key).child("Alunos que não fizeram").setValue(this.listAlunosNaoFizeram);
+        Date date = new Date();
+        firebaseRef.child("tarefa")
+                .child(date.getYearString())
+                .child(date.getMonthString())
+                .child(date.getWeekIntervalAsChildString())
+                .child(this.key)
+                .child("Alunos que fizeram")
+                .setValue(this.listAlunosFizeram);
+
+        firebaseRef.child("tarefa")
+                .child(date.getYearString())
+                .child(date.getMonthString())
+                .child(date.getWeekIntervalAsChildString())
+                .child(this.key)
+                .child("Alunos que não fizeram")
+                .setValue(this.listAlunosNaoFizeram);
     }
 }
