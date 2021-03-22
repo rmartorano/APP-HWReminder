@@ -12,6 +12,7 @@
         android:layout_weight="0"
         android:background="@drawable/textlines_right_and_bottom_divisor"
         android:gravity="center"
+        android:longClickable="true"
         android:text="Nome do(a) aluno(a)"
         android:textColor="@android:color/black"
         android:textSize="14sp" />

@@ -1,13 +1,17 @@
 package com.cursoandroid.app_hwreminder.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +48,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         Aluno aluno = alunos.get(position);
         holder.nome.setText(aluno.getNome());
         //atualiza seleção das checkBoxes
@@ -51,18 +56,18 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         String week = date.getWeekIntervalAsChildString();
         String month = date.getMonthString();
         String year = date .getYearString();
-        ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").addListenerForSingleValueEvent(new ValueEventListener() {
+        ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").child(aluno.getNome()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
+                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
                     holder.checkBoxSegunda.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
+                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
                     holder.checkBoxTerca.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxQuarta").getValue())
+                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuarta").getValue())
                     holder.checkBoxQuarta.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxQuinta").getValue())
+                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuinta").getValue())
                     holder.checkBoxQuinta.setChecked(false);
-                if(!(Boolean) snapshot.child(aluno.getNome()).child("frequencia").child(year).child(month).child(week).child("checkedBoxSexta").getValue())
+                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSexta").getValue())
                     holder.checkBoxSexta.setChecked(false);
             }
             @Override
@@ -104,6 +109,27 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                 aluno.salvarCheckBox();
             }
         });
+
+        /*
+        holder.nome.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                firebaseRef.child("aluno").child(aluno.getNome()).removeValue();
+                Toast.makeText(context, "Aluno "+aluno.getNome()+" removido", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        */
+        holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                Log.i("Teste","Criando context menu");
+                menu.setHeaderTitle(aluno.getNome());
+                menu.add(0, v.getId(), 0, "Editar").setIcon(R.drawable.ic_add);//groupId, itemId, order, title
+                menu.add(0, v.getId(), 0, "Deletar").setIcon(R.drawable.ic_baseline_person_remove_24);
+            }
+        });
+
     }
 
 
