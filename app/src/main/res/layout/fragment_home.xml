@@ -69,9 +69,10 @@
                 android:layout_gravity="center"
                 android:background="@drawable/textlines_spaced_bottom"
                 android:clickable="true"
+                android:drawableBottom="@drawable/ic_baseline_format_list_bulleted_24"
                 android:gravity="center"
                 android:paddingTop="8dp"
-                android:text="Alunos"
+                android:text="Acessar histórico dos alunos"
                 android:textColor="@color/red"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -222,7 +223,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAluno"
         android:layout_width="match_parent"
-        android:layout_height="440dp"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:foregroundGravity="center">
 

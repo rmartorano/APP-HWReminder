@@ -1,11 +1,11 @@
 package com.cursoandroid.app_hwreminder.adapter;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -14,18 +14,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cursoandroid.app_hwreminder.Date;
+import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
-import com.cursoandroid.app_hwreminder.model.Tarefa;
-import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
@@ -110,23 +108,47 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             }
         });
 
-        /*
-        holder.nome.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                firebaseRef.child("aluno").child(aluno.getNome()).removeValue();
-                Toast.makeText(context, "Aluno "+aluno.getNome()+" removido", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        */
         holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
                 Log.i("Teste","Criando context menu");
                 menu.setHeaderTitle(aluno.getNome());
-                menu.add(0, v.getId(), 0, "Editar").setIcon(R.drawable.ic_add);//groupId, itemId, order, title
-                menu.add(0, v.getId(), 0, "Deletar").setIcon(R.drawable.ic_baseline_person_remove_24);
+
+                //Histórico de atividades
+                menu.add(0, v.getId(), 0, "Histórico de atividades")
+                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        return false;
+                    }
+                });
+
+                //Excluir aluno
+                menu.add(0, v.getId(), 0, "Excluir").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        //Instanciar alertDialog
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(v.getContext());
+                        dialog.setTitle("Confirmar exclusão?");
+                        dialog.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                firebaseRef.child("aluno").child(aluno.getNome()).removeValue();
+                                Toast.makeText(context, "Aluno(a) "+aluno.getNome()+" removido(a)", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        dialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        dialog.create().show();
+                        return false;
+                    }
+                });
+
             }
         });
 

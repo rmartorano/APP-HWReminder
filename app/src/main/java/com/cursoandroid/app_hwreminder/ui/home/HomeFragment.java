@@ -6,9 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -33,7 +31,6 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Aluno;
-import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -45,10 +42,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -56,7 +51,7 @@ public final class HomeFragment extends Fragment {
 
     private AdapterTarefa adapterTarefa;
     private AdapterAluno adapterAluno;
-    private List<Tarefa> tarefas = new ArrayList<>();
+    private static List<Tarefa> tarefas = new ArrayList<>();
     private List<Aluno> alunos = new ArrayList<>();
     private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private ValueEventListener valueEventListenerTarefa, valueEventListenerAluno;
@@ -87,7 +82,7 @@ public final class HomeFragment extends Fragment {
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
 
-        com.cursoandroid.app_hwreminder.Date data = new com.cursoandroid.app_hwreminder.Date();
+        com.cursoandroid.app_hwreminder.config.Date data = new com.cursoandroid.app_hwreminder.config.Date();
 
         Calendar calendar = data.getCalendar();
 
@@ -117,16 +112,6 @@ public final class HomeFragment extends Fragment {
 
     }
 
-    @Override
-    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        Log.i("Teste","Criando context menu");
-        if(v.getId() == R.id.textAdapterAlunoNome){
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.menu_list_long_click_aluno, menu);
-        }
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onStart() {
@@ -146,7 +131,7 @@ public final class HomeFragment extends Fragment {
     public void addListeners(){
 
         //listener para quando um aluo for alterado
-        com.cursoandroid.app_hwreminder.Date data = new com.cursoandroid.app_hwreminder.Date();
+        com.cursoandroid.app_hwreminder.config.Date data = new com.cursoandroid.app_hwreminder.config.Date();
         firebaseRef.child("aluno").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -220,7 +205,7 @@ public final class HomeFragment extends Fragment {
     }
 
     private void recuperarTarefas(){
-        com.cursoandroid.app_hwreminder.Date dateProject = new com.cursoandroid.app_hwreminder.Date();
+        com.cursoandroid.app_hwreminder.config.Date dateProject = new com.cursoandroid.app_hwreminder.config.Date();
         firebaseRef.child("tarefa").child(dateProject.getYearString()).child(dateProject.getMonthString())
                 .child(dateProject.getWeekIntervalAsChildString())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -462,7 +447,7 @@ public final class HomeFragment extends Fragment {
         }
         String finalDiaSemana = diaSemana;
         Tarefa finalTarefaDoDia = tarefaDoDia;
-        com.cursoandroid.app_hwreminder.Date date = new com.cursoandroid.app_hwreminder.Date();
+        com.cursoandroid.app_hwreminder.config.Date date = new com.cursoandroid.app_hwreminder.config.Date();
         String yearString = date.getYearString();
         String monthString = date.getMonthString();
         String weekIntervalAsChild = date.getWeekIntervalAsChildString();
@@ -604,4 +589,7 @@ public final class HomeFragment extends Fragment {
         adapterFiltrarAlunoFeedback.notifyDataSetChanged();
     }
 
+    public static List<Tarefa> getListTarefas(){
+        return tarefas;
+    }
 }

@@ -1,10 +1,7 @@
 package com.cursoandroid.app_hwreminder.model;
 
-import android.widget.CheckBox;
-
-import com.cursoandroid.app_hwreminder.Date;
+import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
-import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 

@@ -1,18 +1,19 @@
 package com.cursoandroid.app_hwreminder.model;
 
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import com.cursoandroid.app_hwreminder.Date;
+import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Calendar;
 import java.util.List;
 
 public class Tarefa {
@@ -145,6 +146,23 @@ public class Tarefa {
     @Exclude
     public void removeFromListAlunosNaoFizeram(String element){
         this.listAlunosNaoFizeram.remove(element);
+    }
+
+    public String getDataEntregaAsChildString(){
+        DecimalFormat mFormat = new DecimalFormat("00");
+        Calendar calendar = Calendar.getInstance();
+        Calendar sexta = Calendar.getInstance();
+        try {
+            calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(this.getDataEntrega()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000"));
+        long sextaMili = calendar.getTimeInMillis() + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
+        sexta.setTimeInMillis(sextaMili);
+        return "Semana "+mFormat.format(Double.valueOf(calendar.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(calendar.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

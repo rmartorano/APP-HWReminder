@@ -20,5 +20,10 @@
             android:icon="@drawable/ic_baseline_person_add_24"
             android:title="Adicionar aluno" />
 
+        <item
+            android:id="@+id/nav_acompanhamento"
+            android:icon="@drawable/ic_menu_send"
+            android:title="Acompanhamento"/>
+
     </group>
 </menu>

@@ -1,4 +1,4 @@
-package com.cursoandroid.app_hwreminder;
+package com.cursoandroid.app_hwreminder.config;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;

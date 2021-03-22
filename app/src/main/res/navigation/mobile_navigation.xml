@@ -23,4 +23,10 @@
         android:label="Adicionar aluno"
         tools:layout="@layout/fragment_adicionar_aluno" />
 
+    <fragment
+        android:id="@+id/nav_acompanhamento"
+        android:name="com.cursoandroid.app_hwreminder.ui.acompanhamento.AcompanhamentoMainFragment"
+        android:label="Acompanhamento"
+        tools:layout="@layout/fragment_acompanhamento_main"/>
+
 </navigation>
