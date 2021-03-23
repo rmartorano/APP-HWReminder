@@ -19,13 +19,22 @@ import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.firebase.database.DatabaseReference;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -121,35 +130,79 @@ public class AcompanhamentoMainFragment extends Fragment {
         Calendar sexta = Calendar.getInstance();
         sexta.setTimeInMillis(quinta.getTimeInMillis() + Long.parseLong("86400000")); // sexta
 
-        GraphView linegraph = view.findViewById(R.id.line_graph);
-        linegraph.setTitle("Acompanhamento semanal");
-        linegraph.setTitleColor(R.color.black);
-        linegraph.setTitleTextSize(60);
-        LineGraphSeries<DataPoint> lineSeriesFizeram = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(calendar.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("seg", true)),
-                new DataPoint(terca.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("ter", true)),
-                new DataPoint(quarta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("qua", true)),
-                new DataPoint(quinta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("qui", true)),
-                new DataPoint(sexta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("sex", true))
-        });
-        linegraph.addSeries(lineSeriesFizeram);
-        lineSeriesFizeram.setColor(Color.GREEN);
-        lineSeriesFizeram.setTitle("Fizeram");
-        lineSeriesFizeram.setThickness(8);
-        lineSeriesFizeram.setDataPointsRadius(10);
+        //Configuração do gráfico
+        DecimalFormat mFormat = new DecimalFormat("00");
+        final String[] diasSemana = new String[] {
+                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH))+" (seg)",
+                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH))+" (ter)",
+                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH))+" (qua)",
+                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH))+" (qui)",
+                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH))+" (sex)"
+            };
 
-        LineGraphSeries<DataPoint> lineSeriesNaoFizeram = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(calendar.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("seg", false)),
-                new DataPoint(terca.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("ter", false)),
-                new DataPoint(quarta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("qua", false)),
-                new DataPoint(quinta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("qui", false)),
-                new DataPoint(sexta.get(Calendar.DAY_OF_MONTH), recuperarQtdTarefasSemanal("sex", false))
-        });
-        linegraph.addSeries(lineSeriesNaoFizeram);
-        lineSeriesNaoFizeram.setColor(Color.RED);
-        lineSeriesNaoFizeram.setTitle("Não fizeram");
-        lineSeriesNaoFizeram.setThickness(8);
-        lineSeriesNaoFizeram.setDataPointsRadius(10);
+        LineChart chart = view.findViewById(R.id.line_chart);
+
+        ValueFormatter formatter = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return diasSemana[(int) value];
+            }
+        };
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+        xAxis.setValueFormatter(formatter);
+        xAxis.setTextSize(9);
+        xAxis.setTextColor(R.color.teal_200);
+
+        ValueFormatter pointFormatter = new ValueFormatter() {
+            private DecimalFormat format = new DecimalFormat("0");
+            @Override
+            public String getPointLabel(Entry entry) {
+                return format.format(entry);
+            }
+        };
+
+        List<Entry> entriesFizeram = new ArrayList<>();
+        entriesFizeram.add(new Entry(0, recuperarQtdTarefasSemanal("seg", true)));
+        entriesFizeram.add(new Entry(1, recuperarQtdTarefasSemanal("ter", true)));
+        entriesFizeram.add(new Entry(2, recuperarQtdTarefasSemanal("qua", true)));
+        entriesFizeram.add(new Entry(3, recuperarQtdTarefasSemanal("qui", true)));
+        entriesFizeram.add(new Entry(4, recuperarQtdTarefasSemanal("sex", true)));
+
+        List<Entry> entriesNaoFizeram = new ArrayList<>();
+        entriesNaoFizeram.add(new Entry(0, recuperarQtdTarefasSemanal("seg", false)));
+        entriesNaoFizeram.add(new Entry(1, recuperarQtdTarefasSemanal("ter", false)));
+        entriesNaoFizeram.add(new Entry(2, recuperarQtdTarefasSemanal("qua", false)));
+        entriesNaoFizeram.add(new Entry(3, recuperarQtdTarefasSemanal("qui", false)));
+        entriesNaoFizeram.add(new Entry(4, recuperarQtdTarefasSemanal("sex", false)));
+
+        LineDataSet dataSetFizeram = new LineDataSet(entriesFizeram, "Quantidade fizeram");
+        dataSetFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSetFizeram.setColor(Color.GREEN);
+        dataSetFizeram.setValueTextColor(Color.BLACK);
+        dataSetFizeram.setValueTextSize(10);
+        //dataSetFizeram.setValueFormatter(pointFormatter);
+
+        LineDataSet dataSetNaoFizeram = new LineDataSet(entriesNaoFizeram, "Quantidade não fizeram");
+        dataSetNaoFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSetNaoFizeram.setColor(Color.RED);
+        dataSetNaoFizeram.setValueTextColor(Color.BLACK);
+        dataSetNaoFizeram.setValueTextSize(10);
+        //dataSetNaoFizeram.setValueFormatter(pointFormatter);
+
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(dataSetFizeram);
+        dataSets.add(dataSetNaoFizeram);
+
+        Description description = new Description();
+        description.setText("");
+
+        LineData lineData = new LineData(dataSets);
+        chart.setDescription(description);
+        chart.setData(lineData);
+        chart.setAutoScaleMinMaxEnabled(true);
+        chart.invalidate();
+
     }
 
     // "seg", "ter", "qua", "qui", "sex" / listaFizeram true para listFizeram e false para listNaoFizeram
