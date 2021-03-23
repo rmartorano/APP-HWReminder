@@ -52,7 +52,7 @@ public final class HomeFragment extends Fragment {
     private AdapterTarefa adapterTarefa;
     private AdapterAluno adapterAluno;
     private static List<Tarefa> tarefas = new ArrayList<>();
-    private List<Aluno> alunos = new ArrayList<>();
+    private static List<Aluno> alunos = new ArrayList<>();
     private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private ValueEventListener valueEventListenerTarefa, valueEventListenerAluno;
     private int week;
@@ -591,5 +591,8 @@ public final class HomeFragment extends Fragment {
 
     public static List<Tarefa> getListTarefas(){
         return tarefas;
+    }
+    public static List<Aluno> getListAlunos(){
+        return alunos;
     }
 }

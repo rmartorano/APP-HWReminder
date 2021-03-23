@@ -1,5 +1,6 @@
 package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,17 +9,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.R;
-import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.cursoandroid.app_hwreminder.ui.aluno.AdicionarAlunoFragment;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragmentMonthly;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
@@ -29,7 +36,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.google.firebase.database.DatabaseReference;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.ogaclejapan.smarttablayout.SmartTabLayout;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -47,10 +58,10 @@ import java.util.Map;
  */
 public class AcompanhamentoMainFragment extends Fragment {
 
-    private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private final List<Tarefa> listTarefas = HomeFragment.getListTarefas();
-    private Map<String, Integer> mapFizeram = new HashMap<>();
-    private Map<String, Integer> mapNaoFizeram = new HashMap<>();
+    private final List<Aluno> listAlunos = HomeFragment.getListAlunos();
+    private final Map<String, Integer> mapFizeram = new HashMap<>();
+    private final Map<String, Integer> mapNaoFizeram = new HashMap<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -99,10 +110,12 @@ public class AcompanhamentoMainFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_acompanhamento_main, container, false);
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        TextView tituloAcompanhamento = view.findViewById(R.id.textViewTituloAcompanhamento);
 
         //preencher mapas
         mapFizeram.put("seg", 0);
@@ -158,7 +171,7 @@ public class AcompanhamentoMainFragment extends Fragment {
             private DecimalFormat format = new DecimalFormat("0");
             @Override
             public String getPointLabel(Entry entry) {
-                return format.format(entry);
+                return format.format(entry.getY());
             }
         };
 
@@ -181,27 +194,43 @@ public class AcompanhamentoMainFragment extends Fragment {
         dataSetFizeram.setColor(Color.GREEN);
         dataSetFizeram.setValueTextColor(Color.BLACK);
         dataSetFizeram.setValueTextSize(10);
-        //dataSetFizeram.setValueFormatter(pointFormatter);
+        dataSetFizeram.setValueFormatter(pointFormatter);
 
         LineDataSet dataSetNaoFizeram = new LineDataSet(entriesNaoFizeram, "Quantidade não fizeram");
         dataSetNaoFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetNaoFizeram.setColor(Color.RED);
         dataSetNaoFizeram.setValueTextColor(Color.BLACK);
         dataSetNaoFizeram.setValueTextSize(10);
-        //dataSetNaoFizeram.setValueFormatter(pointFormatter);
+        dataSetNaoFizeram.setValueFormatter(pointFormatter);
 
         List<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(dataSetFizeram);
         dataSets.add(dataSetNaoFizeram);
 
         Description description = new Description();
-        description.setText("");
+        description.setText("Quantidade total de alunos: "+listAlunos.size());
+        description.setTextSize(10);
 
         LineData lineData = new LineData(dataSets);
         chart.setDescription(description);
         chart.setData(lineData);
         chart.setAutoScaleMinMaxEnabled(true);
         chart.invalidate();
+
+        Date date = new Date();
+        tituloAcompanhamento.setText("Acompanhamento díario\n"+date.getWeekInterval());
+
+        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
+                getActivity().getSupportFragmentManager(), FragmentPagerItems.with(getContext())
+                .add("Geral", HomeFragmentMonthly.class)
+                .add("Filtrar", HomeFragmentMonthly.class)
+                .create());
+
+        ViewPager viewPager = view.findViewById(R.id.viewpager);
+        viewPager.setAdapter(adapter);
+
+        SmartTabLayout viewPagerTab = view.findViewById(R.id.viewpagertab);
+        viewPagerTab.setViewPager(viewPager);
 
     }
 
