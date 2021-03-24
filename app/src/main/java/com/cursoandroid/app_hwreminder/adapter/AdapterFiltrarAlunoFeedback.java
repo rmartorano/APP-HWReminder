@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,12 @@ public class AdapterFiltrarAlunoFeedback extends RecyclerView.Adapter<AdapterFil
 
         Aluno aluno = listAlunos.get(position);
         holder.nome.setText(aluno.getNome());
+        holder.nome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("Teste","Nome clicado: "+aluno.getNome());
+            }
+        });
     }
 
     @Override

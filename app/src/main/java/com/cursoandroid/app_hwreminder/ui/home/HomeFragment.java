@@ -54,7 +54,6 @@ public final class HomeFragment extends Fragment {
     private static List<Tarefa> tarefas = new ArrayList<>();
     private static List<Aluno> alunos = new ArrayList<>();
     private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-    private ValueEventListener valueEventListenerTarefa, valueEventListenerAluno;
     private int week;
 
     private TextView textViewDescricao;
@@ -77,7 +76,6 @@ public final class HomeFragment extends Fragment {
         TextView textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
         TextView textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         RecyclerView recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
-        TextView textViewAlunosFeedback = view.findViewById(R.id.textViewListarAlunos);
         //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
@@ -102,13 +100,6 @@ public final class HomeFragment extends Fragment {
         recyclerViewAluno.setHasFixedSize(true);
         recyclerViewAluno.setAdapter(adapterAluno);
         recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
-
-        textViewAlunosFeedback.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirFeedbackAlunos();
-            }
-        });
 
     }
 
@@ -529,64 +520,6 @@ public final class HomeFragment extends Fragment {
                 tarefa.addToListAlunosNaoFizeram(nomeAluno);
         }
         tarefa.salvarListas();
-    }
-
-    private void abrirFeedbackAlunos(){ // abre uma view com a frequencia dos alunos
-        Dialog dialog = new Dialog(getContext(), android.R.style.Theme_Material_Light_Dialog);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.activity_feedback_alunos);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
-        lp.width = 1000;
-        lp.height = 2000;
-        dialog.setCancelable(true);
-        dialog.show();
-        dialog.getWindow().setAttributes(lp);
-        View view = dialog.getWindow().getDecorView();
-
-        //Recycler alunos
-        List<Aluno> alunosFiltro = new ArrayList<>();
-        AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback = new AdapterFiltrarAlunoFeedback(alunosFiltro, getContext());
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFeedbackAlunos);
-        RecyclerView.LayoutManager layoutManagerFeedbackAluno = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManagerFeedbackAluno);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapterFiltrarAlunoFeedback);
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-
-        filtrarAlunos("", adapterFiltrarAlunoFeedback, alunosFiltro);
-
-        //Search widget
-        SearchView searchView = (SearchView) view.findViewById(R.id.searchViewFeedback);
-        searchView.setBackgroundColor(getResources().getColor(R.color.teal_200));
-        searchView.setIconifiedByDefault(false);
-        searchView.setQueryHint("Digite o nome de um aluno");
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                filtrarAlunos(newText, adapterFiltrarAlunoFeedback, alunosFiltro);
-                return false;
-            }
-        });
-    }
-
-    void filtrarAlunos(String query, AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback, List<Aluno> alunosFiltro){
-        alunosFiltro.clear();
-        if(query.equals("")) {
-            alunosFiltro.addAll(alunos); //mostra todos os alunos
-        }
-        else{
-            for(Aluno aluno : alunos){
-                if(aluno.getNome().toLowerCase().contains(query.toLowerCase()))
-                    alunosFiltro.add(aluno); //mostra só os que contém os caracteres digitados
-            }
-        }
-        adapterFiltrarAlunoFeedback.notifyDataSetChanged();
     }
 
     public static List<Tarefa> getListTarefas(){
