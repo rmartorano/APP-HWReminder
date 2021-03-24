@@ -1,6 +1,8 @@
 package com.cursoandroid.app_hwreminder.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Aluno;
+import com.cursoandroid.app_hwreminder.ui.aluno.InfoAlunoActivity;
+import com.github.mikephil.charting.charts.PieChart;
 
 import java.util.List;
 
@@ -42,6 +46,10 @@ public class AdapterFiltrarAlunoFeedback extends RecyclerView.Adapter<AdapterFil
             @Override
             public void onClick(View v) {
                 Log.i("Teste","Nome clicado: "+aluno.getNome());
+                Intent newActivity = new Intent(context.getApplicationContext(), InfoAlunoActivity.class);
+                newActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                newActivity.putExtra("nomeAluno", aluno.getNome());
+                context.getApplicationContext().startActivity(newActivity);
             }
         });
     }
