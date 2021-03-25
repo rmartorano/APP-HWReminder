@@ -1,6 +1,5 @@
 package com.cursoandroid.app_hwreminder.ui.home;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,10 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,9 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
-import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.adapter.AdapterTarefa;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.google.firebase.database.ChildEventListener;
@@ -55,6 +51,7 @@ public final class HomeFragment extends Fragment {
     private static List<Aluno> alunos = new ArrayList<>();
     private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private int week;
+    private static String monthLastTarefaModified, yearLastTarefaModified, weekIntervalLastTarefaModified;
 
     private TextView textViewDescricao;
 
@@ -107,7 +104,7 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        recuperarTarefas();
+        recuperarConfigs();
         recuperarListaAlunos();
         addListeners();
     }
@@ -116,6 +113,27 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        HomeFragmentConfigs.salvarConfigs();
+    }
+
+    public void recuperarConfigs(){
+        ValueEventListener listener = firebaseRef.child("Configurações HomeFragment").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() == null)
+                    return;
+                HomeFragment.setYearLastTarefaModified(snapshot.child("ano").getValue().toString());
+                HomeFragment.setMonthLastTarefaModified(snapshot.child("mes").getValue().toString());
+                HomeFragment.setWeekIntervalLastTarefaModified(snapshot.child("intervalo da semana").getValue().toString());
+                recuperarTarefas();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        firebaseRef.removeEventListener(listener);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -143,11 +161,19 @@ public final class HomeFragment extends Fragment {
                 for(Tarefa tarefa : tarefas){
                     if(tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
                         tarefa.removeFromListAlunosFizeram(aluno.getNome());
-                        tarefa.salvarListas();
+                        try {
+                            tarefa.salvarListas();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                     if(tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
                         tarefa.removeFromListAlunosNaoFizeram(aluno.getNome());
-                        tarefa.salvarListas();
+                        try {
+                            tarefa.salvarListas();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 alunos.remove(aluno);
@@ -164,13 +190,13 @@ public final class HomeFragment extends Fragment {
         });
 
         //listener para quando uma tarefa for alterada
-        firebaseRef.child("tarefa").child(data.getYearString()).child(data.getMonthString()).child(data.getWeekIntervalAsChildString()).addChildEventListener(new ChildEventListener() {
+        firebaseRef.child("tarefa").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if(!alunos.isEmpty()) {
                     Tarefa tarefa = snapshot.getValue(Tarefa.class);
                     tarefa.setKey(snapshot.getKey());
-                    updateFrequenciaTarefa(tarefa, alunos.get(0), true, false);
+                  //  updateFrequenciaTarefa(null, alunos.get(0), true, true);
                 }
             }
 
@@ -196,14 +222,12 @@ public final class HomeFragment extends Fragment {
     }
 
     private void recuperarTarefas(){
-        com.cursoandroid.app_hwreminder.config.Date dateProject = new com.cursoandroid.app_hwreminder.config.Date();
-        firebaseRef.child("tarefa").child(dateProject.getYearString()).child(dateProject.getMonthString())
-                .child(dateProject.getWeekIntervalAsChildString())
+        firebaseRef.child("tarefa").child(yearLastTarefaModified).child(monthLastTarefaModified)
+                .child(weekIntervalLastTarefaModified)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                tarefas.clear();
                 Calendar calendar = Calendar.getInstance();
                 Date date = null;
                 String diaSemana = new String();
@@ -303,7 +327,11 @@ public final class HomeFragment extends Fragment {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         Toast.makeText(getContext(), "Tarefa " + tarefa.getTitulo() + " removida", Toast.LENGTH_SHORT).show();
-                                        tarefa.deletarTarefa();
+                                        try {
+                                            tarefa.deletarTarefa();
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
                                         textViewDescricao.setText("Sem tarefa");
                                         textViewDescricao.setOnClickListener(null); // remove the click listener
                                     }
@@ -330,7 +358,6 @@ public final class HomeFragment extends Fragment {
                         });
 
                         ArrayList listTmpFizeram = (ArrayList) dados.child("Alunos que fizeram").getValue();
-                        Log.i("Teste", "lista fizeram: "+listTmpFizeram);
 
                         ArrayList listTmpNaoFizeram = (ArrayList) dados.child("Alunos que não fizeram").getValue();
 
@@ -452,19 +479,39 @@ public final class HomeFragment extends Fragment {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                         switch (finalDiaSemana) {
                             case "seg":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxSegunda").getValue());
+                                try {
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxSegunda").getValue());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case "ter":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxTerca").getValue());
+                                try {
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxTerca").getValue());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case "qua":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxQuarta").getValue());
+                                try {
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxQuarta").getValue());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case "qui":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxQuinta").getValue());
+                                try {
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxQuinta").getValue());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case "sex":
-                                validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxSexta").getValue());
+                                try {
+                                    validarAddFrequencia(finalTarefaDoDia, nomeAluno, (Boolean) snapshot.child("checkedBoxSexta").getValue());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                         }
 
@@ -496,7 +543,7 @@ public final class HomeFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa){
+    public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa) throws ParseException {
         List<String> listFizeram = tarefa.getListAlunosFizeram();
         List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
 
@@ -527,5 +574,29 @@ public final class HomeFragment extends Fragment {
     }
     public static List<Aluno> getListAlunos(){
         return alunos;
+    }
+
+    public static void setMonthLastTarefaModified(String monthLastTarefaAdded) {
+        HomeFragment.monthLastTarefaModified = monthLastTarefaAdded;
+    }
+
+    public static void setYearLastTarefaModified(String yearLastTarefaAdded) {
+        HomeFragment.yearLastTarefaModified = yearLastTarefaAdded;
+    }
+
+    public static void setWeekIntervalLastTarefaModified(String weekIntervalLastTarefaAdded) {
+        HomeFragment.weekIntervalLastTarefaModified = weekIntervalLastTarefaAdded;
+    }
+
+    public static String getMonthLastTarefaModified() {
+        return monthLastTarefaModified;
+    }
+
+    public static String getYearLastTarefaModified() {
+        return yearLastTarefaModified;
+    }
+
+    public static String getWeekIntervalLastTarefaModified() {
+        return weekIntervalLastTarefaModified;
     }
 }

@@ -250,8 +250,8 @@ public class AcompanhamentoMainFragment extends Fragment {
         java.util.Date dateJava = new java.util.Date();
         String diaSemanaTarefa = "";
         for (Tarefa tarefa : listTarefas) {
-            Log.i("Teste", "Data: " + tarefa.getDataEntregaAsChildString() + " outra data: " + data.getWeekIntervalAsChildString());
-            if (tarefa.getDataEntregaAsChildString().equals(data.getWeekIntervalAsChildString())) {
+
+            if (tarefa.getWeekIntervalAsChildString().equals(data.getWeekIntervalAsChildString())) {
                 //get weekDay string from tarefa
                 try {
                     dateJava = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());

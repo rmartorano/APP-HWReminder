@@ -45,7 +45,6 @@ public class AdapterFiltrarAlunoFeedback extends RecyclerView.Adapter<AdapterFil
         holder.nome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("Teste","Nome clicado: "+aluno.getNome());
                 Intent newActivity = new Intent(context.getApplicationContext(), InfoAlunoActivity.class);
                 newActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 newActivity.putExtra("nomeAluno", aluno.getNome());

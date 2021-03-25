@@ -75,28 +75,26 @@ public class Tarefa {
         this.key = key;
     }
 
-    public void salvar(){
+    public void salvar() throws ParseException {
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        Date date = new Date();
         this.key = firebase.push().getKey();
         firebase.child("tarefa")
-                .child(date.getYearString())
-                .child(date.getMonthString())
-                .child(date.getWeekIntervalAsChildString())
+                .child(this.getYearString())
+                .child(this.getMonthString())
+                .child(this.getWeekIntervalAsChildString())
                 .child(this.key)
                 .setValue(this);
 
     }
 
-    public void deletarTarefa(){
+    public void deletarTarefa() throws ParseException {
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        Date date = new Date();
         firebase.child("tarefa")
-                .child(date.getYearString())
-                .child(date.getMonthString())
-                .child(date.getWeekIntervalAsChildString())
+                .child(this.getYearString())
+                .child(this.getMonthString())
+                .child(this.getWeekIntervalAsChildString())
                 .child(this.key)
                 .removeValue();
 
@@ -148,7 +146,20 @@ public class Tarefa {
         this.listAlunosNaoFizeram.remove(element);
     }
 
-    public String getDataEntregaAsChildString(){
+    @Exclude
+    public String getMonthString() throws ParseException {
+        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega());
+        return new SimpleDateFormat("MMMM").format(date);
+    }
+
+    @Exclude
+    public String getYearString() throws ParseException {
+        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega());
+        return new SimpleDateFormat("yyyy").format(date);
+    }
+
+    @Exclude
+    public String getWeekIntervalAsChildString(){
         DecimalFormat mFormat = new DecimalFormat("00");
         Calendar calendar = Calendar.getInstance();
         Calendar sexta = Calendar.getInstance();
@@ -167,21 +178,21 @@ public class Tarefa {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Exclude
-    public void salvarListas(){
+    public void salvarListas() throws ParseException {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         Date date = new Date();
         firebaseRef.child("tarefa")
-                .child(date.getYearString())
-                .child(date.getMonthString())
-                .child(date.getWeekIntervalAsChildString())
+                .child(this.getYearString())
+                .child(this.getMonthString())
+                .child(this.getWeekIntervalAsChildString())
                 .child(this.key)
                 .child("Alunos que fizeram")
                 .setValue(this.listAlunosFizeram);
 
         firebaseRef.child("tarefa")
-                .child(date.getYearString())
-                .child(date.getMonthString())
-                .child(date.getWeekIntervalAsChildString())
+                .child(this.getYearString())
+                .child(this.getMonthString())
+                .child(this.getWeekIntervalAsChildString())
                 .child(this.key)
                 .child("Alunos que não fizeram")
                 .setValue(this.listAlunosNaoFizeram);

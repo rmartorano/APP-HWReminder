@@ -22,14 +22,12 @@ import android.widget.Toast;
 
 import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
-import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -109,7 +107,11 @@ public class ReminderFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                salvarTarefa(v);
+                try {
+                    salvarTarefa(v);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -148,17 +150,20 @@ public class ReminderFragment extends Fragment {
     }
 
     private void updateLabel() {
-        String myFormat = "dd/MM/yy"; //Date format
+        String myFormat = "dd/MM/yyyy"; //Date format
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
         editDate.setText(sdf.format(myCalendar.getTime()));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void salvarTarefa(View view){
+    public void salvarTarefa(View view) throws ParseException {
         if(validarCampos()){
             tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
             tarefa.salvar();
+            HomeFragment.setMonthLastTarefaModified(tarefa.getMonthString());
+            HomeFragment.setYearLastTarefaModified(tarefa.getYearString());
+            HomeFragment.setWeekIntervalLastTarefaModified(tarefa.getWeekIntervalAsChildString());
             Toast.makeText(getContext(), "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
             getActivity().finish();
             startActivity(new Intent(getContext(), MainActivity.class));
