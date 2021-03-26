@@ -142,6 +142,7 @@ public class AcompanhamentoMainFragment extends Fragment {
         //configura dias para mostrar no gráfico
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH)+1);
         calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // segunda
         Calendar terca = Calendar.getInstance();
         terca.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // terça
@@ -155,11 +156,11 @@ public class AcompanhamentoMainFragment extends Fragment {
         //Configuração do gráfico
         DecimalFormat mFormat = new DecimalFormat("00");
         final String[] diasSemana = new String[] {
-                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH))+" (seg)",
-                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH))+" (ter)",
-                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH))+" (qua)",
-                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH))+" (qui)",
-                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH))+" (sex)"
+                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH)+1)+" (seg)",
+                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH)+1)+" (ter)",
+                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH)+1)+" (qua)",
+                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH)+1)+" (qui)",
+                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH)+1)+" (sex)"
             };
 
         LineChart chart = view.findViewById(R.id.line_chart);

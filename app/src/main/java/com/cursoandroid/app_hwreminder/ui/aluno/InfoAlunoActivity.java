@@ -12,6 +12,11 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.cursoandroid.app_hwreminder.R;
@@ -47,6 +52,27 @@ public class InfoAlunoActivity extends AppCompatActivity {
     private final List<Tarefa> listTarefas = HomeFragment.getListTarefas();
     private PieChart pieChart;
     private Map<String, Integer> mapQtdTarefas = new HashMap<>();
+    private Spinner spinner, secondSpinner;
+
+    //Enums
+    private final int SEMANAL = 0;
+    private final int MENSAL = 1;
+    private final int BIMESTRAL = 2;
+    private final int SEMESTRAL = 3;
+    private final int ANUAL = 4;
+
+    private final int JANEIRO = 0;
+    private final int FEVEREIRO = 1;
+    private final int MARCO = 2;
+    private final int ABRIL = 3;
+    private final int MAIO = 4;
+    private final int JUNHO = 5;
+    private final int JULHO = 6;
+    private final int AGOSTO = 7;
+    private final int SETEMBRO = 8;
+    private final int OUTUBRO = 9;
+    private final int NOVEMBRO = 10;
+    private final int DEZEMBRO = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +80,9 @@ public class InfoAlunoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info_aluno);
 
         textViewNome = findViewById(R.id.textViewInfoNomeAluno);
+        spinner = findViewById(R.id.spinnerFiltroInfoAluno);
+        secondSpinner = findViewById(R.id.secondSpinner);
+
         pieChart = findViewById(R.id.pieChart);
         String nomeFromExtra = getIntent().getStringExtra("nomeAluno");
         getSupportActionBar().setTitle("Frequência do aluno");
@@ -65,18 +94,35 @@ public class InfoAlunoActivity extends AppCompatActivity {
             }
         }
 
-        if(aluno.getNome() == null){
-            textViewNome.setText(nomeFromExtra+" não encontrado!");
+        if(aluno.getNome() == null) {
+            textViewNome.setText(nomeFromExtra + " não encontrado!");
             return;
         }
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                generateChart(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         textViewNome.setText(nomeFromExtra);
 
-        getQtdTarefas();
+    }
+
+    private void generateChart(int periodo){
+
+        fillSecondSpinner(periodo);
+        getQtdTarefas(periodo);
+
         List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(mapQtdTarefas.get("qtdFizeramNaSemana"), "Tarefas feitas"));
-        entries.add(new PieEntry(mapQtdTarefas.get("qtdNaoFizeramNaSemana"), "Tarefas não feitas"));
+        entries.add(new PieEntry(mapQtdTarefas.get("qtdFizeram"), "Tarefas feitas"));
+        entries.add(new PieEntry(mapQtdTarefas.get("qtdNaoFizeram"), "Tarefas não feitas"));
 
         PieDataSet dataSet = new PieDataSet(entries,"");
         dataSet.setColors(Color.GREEN, Color.RED);
@@ -84,10 +130,10 @@ public class InfoAlunoActivity extends AppCompatActivity {
         dataSet.setSliceSpace(3);
         dataSet.setValueLineColor(Color.BLACK);
 
-        int qtdTotalSemana = mapQtdTarefas.get("qtdFizeramNaSemana") + mapQtdTarefas.get("qtdNaoFizeramNaSemana");
-        int qtdTotalMes = mapQtdTarefas.get("qtdFizeramNoMes") + mapQtdTarefas.get("qtdNaoFizeramNoMes");
+        int qtdTotal = mapQtdTarefas.get("qtdFizeram") + mapQtdTarefas.get("qtdNaoFizeram");
 
-        pieChart.setCenterText("Quantidade total de tarefas\n\nNeste mês: "+qtdTotalMes+"\nNesta semana: "+qtdTotalSemana);
+        pieChart.setCenterText("Quantidade total de tarefas\n\n"+qtdTotal);
+        pieChart.setCenterTextSize(14);
         Legend legend = pieChart.getLegend();
         legend.setTextSize(14);
 
@@ -102,36 +148,117 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
     }
 
-    private void getQtdTarefas(){
+    private void fillSecondSpinner(int periodo){
+
+        ArrayList<String> spinnerArray = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        Date date = new Date();
+
+        switch (periodo){
+
+            case SEMANAL:
+                switch (HomeFragment.getMonthLastTarefaModified().toLowerCase()){
+                    case "janeiro":
+                        secondSpinner.setSelection(JANEIRO);
+                        break;
+                    case "fevereiro":
+                        secondSpinner.setSelection(FEVEREIRO);
+                        break;
+                    case "março":
+                        secondSpinner.setSelection(MARCO);
+                        break;
+                    case "abril":
+                        secondSpinner.setSelection(ABRIL);
+                        break;
+                    case "maio":
+                        secondSpinner.setSelection(MAIO);
+                        break;
+                    case "junho":
+                        secondSpinner.setSelection(JUNHO);
+                        break;
+                    case "julho":
+                        secondSpinner.setSelection(JULHO);
+                        break;
+                    case "agosto":
+                        secondSpinner.setSelection(AGOSTO);
+                        break;
+                    case "setembro":
+                        secondSpinner.setSelection(SETEMBRO);
+                        break;
+                    case "outubro":
+                        secondSpinner.setSelection(OUTUBRO);
+                        break;
+                    case "novembro":
+                        secondSpinner.setSelection(NOVEMBRO);
+                        break;
+                    case "dezembro":
+                        secondSpinner.setSelection(DEZEMBRO);
+                        break;
+                }
+                calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
+                Log.i("Teste","Mês map: "+date.getAllWeekIntervals(secondSpinner.getSelectedItemPosition()));
+                break;
+
+
+        }
+
+    }
+
+    private void getQtdTarefas(int periodo){
 
         Date date = new Date();
 
         Calendar calendar = Calendar.getInstance();
-        int week = date.getCalendar().get(Calendar.WEEK_OF_MONTH); //semana atual do mês
-        int month = date.getCalendar().get(Calendar.MONTH);
+        int semana = date.getCalendar().get(Calendar.WEEK_OF_MONTH); //semana atual do mês
+        int mes = date.getCalendar().get(Calendar.MONTH);
+        Calendar cBimestre = Calendar.getInstance();
+        cBimestre.set(Calendar.MONTH, calendar.get(Calendar.MONTH)-2);
+        int biMestre = cBimestre.get(Calendar.MONTH);
+        Calendar cSemestre = Calendar.getInstance();
+        cSemestre.set(Calendar.MONTH, calendar.get(Calendar.MONTH)-6);
+        int semestre = cSemestre.get(Calendar.MONTH);
+        int ano = date.getCalendar().get(Calendar.YEAR);
 
-        mapQtdTarefas.put("qtdFizeramNaSemana", 0);
-        mapQtdTarefas.put("qtdNaoFizeramNaSemana", 0);
-        mapQtdTarefas.put("qtdFizeramNoMes", 0);
-        mapQtdTarefas.put("qtdNaoFizeramNoMes", 0);
+        mapQtdTarefas.put("qtdFizeram", 0);
+        mapQtdTarefas.put("qtdNaoFizeram", 0);
 
         for(Tarefa tarefa : listTarefas){
             try {
-                calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega()));
+                calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega()));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            if(calendar.get(Calendar.WEEK_OF_MONTH) == week) {
-                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdFizeramNaSemana", mapQtdTarefas.get("qtdFizeramNaSemana") + 1);
-                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdNaoFizeramNaSemana", mapQtdTarefas.get("qtdNaoFizeramNaSemana") + 1);
+            if(calendar.get(Calendar.WEEK_OF_MONTH) == semana) {
+                if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
+                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
+                }
+                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
+                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
+                }
             }
-            if(calendar.get(Calendar.MONTH) == month){
+            else if(calendar.get(Calendar.MONTH) == mes && periodo >= MENSAL){
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdFizeramNoMes", mapQtdTarefas.get("qtdFizeramNoMes") + 1);
+                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdNaoFizeramNoMes", mapQtdTarefas.get("qtdNaoFizeramNoMes") + 1);
+                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
+            }
+            else if(calendar.get(Calendar.MONTH) >= biMestre && calendar.get(Calendar.YEAR) == cBimestre.get(Calendar.YEAR) && periodo >= BIMESTRAL){
+                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
+                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
+            }
+            else if(calendar.get(Calendar.MONTH) >= semestre && calendar.get(Calendar.YEAR) == cSemestre.get(Calendar.YEAR) && periodo >= SEMESTRAL){
+                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
+                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
+            }
+            else if(calendar.get(Calendar.YEAR) == ano && periodo >= ANUAL){
+                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
+                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
             }
         }
 

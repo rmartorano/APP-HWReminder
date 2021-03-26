@@ -162,9 +162,10 @@ public class Tarefa {
     public String getWeekIntervalAsChildString(){
         DecimalFormat mFormat = new DecimalFormat("00");
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH)+1);
         Calendar sexta = Calendar.getInstance();
         try {
-            calendar.setTime(new SimpleDateFormat("dd/MM/yy").parse(this.getDataEntrega()));
+            calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega()));
         } catch (ParseException e) {
             e.printStackTrace();
         }

@@ -4,6 +4,7 @@ import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HomeFragmentConfigs {
@@ -21,6 +22,7 @@ public class HomeFragmentConfigs {
         map.put("intervalo da semana", HomeFragment.getWeekIntervalLastTarefaModified());
 
         firebaseRef.child("Configurações HomeFragment")
+                .child("geral")
                 .setValue(map);
     }
 

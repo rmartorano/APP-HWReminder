@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
@@ -160,10 +162,11 @@ public class ReminderFragment extends Fragment {
     public void salvarTarefa(View view) throws ParseException {
         if(validarCampos()){
             tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
-            tarefa.salvar();
             HomeFragment.setMonthLastTarefaModified(tarefa.getMonthString());
             HomeFragment.setYearLastTarefaModified(tarefa.getYearString());
             HomeFragment.setWeekIntervalLastTarefaModified(tarefa.getWeekIntervalAsChildString());
+            HomeFragmentConfigs.salvarConfigs();
+            tarefa.salvar();
             Toast.makeText(getContext(), "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
             getActivity().finish();
             startActivity(new Intent(getContext(), MainActivity.class));
