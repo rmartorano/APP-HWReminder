@@ -127,7 +127,7 @@
             android:theme="@style/MatchSpinnerTheme"/>
 
         <Spinner
-            android:id="@+id/spinner2"
+            android:id="@+id/thirdSpinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

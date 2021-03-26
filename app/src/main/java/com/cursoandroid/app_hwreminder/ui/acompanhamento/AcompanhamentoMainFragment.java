@@ -156,11 +156,11 @@ public class AcompanhamentoMainFragment extends Fragment {
         //Configuração do gráfico
         DecimalFormat mFormat = new DecimalFormat("00");
         final String[] diasSemana = new String[] {
-                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH)+1)+" (seg)",
-                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH)+1)+" (ter)",
-                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH)+1)+" (qua)",
-                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH)+1)+" (qui)",
-                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH)+1)+" (sex)"
+                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH))+" (seg)",
+                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH))+" (ter)",
+                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH))+" (qua)",
+                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH))+" (qui)",
+                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH))+" (sex)"
             };
 
         LineChart chart = view.findViewById(R.id.line_chart);
@@ -255,7 +255,7 @@ public class AcompanhamentoMainFragment extends Fragment {
             if (tarefa.getWeekIntervalAsChildString().equals(data.getWeekIntervalAsChildString())) {
                 //get weekDay string from tarefa
                 try {
-                    dateJava = new SimpleDateFormat("dd/MM/yy").parse(tarefa.getDataEntrega());
+                    dateJava = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
                     diaSemanaTarefa = new SimpleDateFormat("EE").format(dateJava);
                 } catch (ParseException e) {
                     e.printStackTrace();

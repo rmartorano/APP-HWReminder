@@ -162,7 +162,6 @@ public class Tarefa {
     public String getWeekIntervalAsChildString(){
         DecimalFormat mFormat = new DecimalFormat("00");
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH)+1);
         Calendar sexta = Calendar.getInstance();
         try {
             calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega()));
@@ -173,7 +172,7 @@ public class Tarefa {
         calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000"));
         long sextaMili = calendar.getTimeInMillis() + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
         sexta.setTimeInMillis(sextaMili);
-        return "Semana "+mFormat.format(Double.valueOf(calendar.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(calendar.get(Calendar.MONTH)))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)));
+        return "Semana "+mFormat.format(Double.valueOf(calendar.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(calendar.get(Calendar.MONTH)+1))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1));
 
     }
 

@@ -236,11 +236,12 @@ public final class HomeFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Calendar calendar = Calendar.getInstance();
                 Date date = null;
+                com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
                 String diaSemana = new String();
                 tarefas.clear();
-                for (DataSnapshot tmpDados : snapshot.child(yearLastTarefaModified).child(monthLastTarefaModified).getChildren()) { // recupera apenas as tarefas dentro de 1 mês
+                for (DataSnapshot tmpDados : snapshot.child(yearLastTarefaModified).child(dateFromProject.getMonthString()).getChildren()) { // recupera apenas as tarefas dentro de 1 mês
                     for (DataSnapshot dados : tmpDados.getChildren()) {
-                        Tarefa tarefa = dados.getValue(Tarefa.class);
+                        Tarefa tarefa = dados.getValue(Tarefa.class);   
                         tarefa.setKey(dados.getKey());
                         try {
                             calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega()));
@@ -248,6 +249,7 @@ public final class HomeFragment extends Fragment {
                             e.printStackTrace();
                         }
 
+                        Log.i("Teste", "calendar week: "+calendar.get(Calendar.WEEK_OF_MONTH)+" week: "+week);
                         if (calendar.get(Calendar.WEEK_OF_MONTH) == week) { // only shows currently week tarefas
 
                             //get weekDay string from tarefa

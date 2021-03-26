@@ -33,7 +33,6 @@
     <string-array name="array_filtro_info_aluno">
         <item>Semanal</item>
         <item>Mensal</item>
-        <item>Bimestral</item>
         <item>Semestral</item>
         <item>Anual</item>
     </string-array>
