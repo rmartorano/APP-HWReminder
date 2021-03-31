@@ -53,20 +53,26 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         Date date = new Date();
         String week = date.getWeekIntervalAsChildString();
         String month = date.getMonthString();
-        String year = date .getYearString();
+        String year = date.getYearString();
         ConfiguracaoFirebase.getFirebaseDatabase().child("aluno").child(aluno.getNome()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
-                    holder.checkBoxSegunda.setChecked(false);
-                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
-                    holder.checkBoxTerca.setChecked(false);
-                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuarta").getValue())
-                    holder.checkBoxQuarta.setChecked(false);
-                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuinta").getValue())
-                    holder.checkBoxQuinta.setChecked(false);
-                if(!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSexta").getValue())
-                    holder.checkBoxSexta.setChecked(false);
+                if(snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue() == null){
+                    aluno.salvarCheckBox();
+                }
+                else {
+                    if (!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSegunda").getValue())
+                        holder.checkBoxSegunda.setChecked(false);
+                    if (!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxTerca").getValue())
+                        holder.checkBoxTerca.setChecked(false);
+                    if (!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuarta").getValue())
+                        holder.checkBoxQuarta.setChecked(false);
+                    if (!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxQuinta").getValue()) {
+                        holder.checkBoxQuinta.setChecked(false);
+                    }
+                    if (!(Boolean) snapshot.child("frequencia").child(year).child(month).child(week).child("checkedBoxSexta").getValue())
+                        holder.checkBoxSexta.setChecked(false);
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}

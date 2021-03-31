@@ -149,7 +149,19 @@ public class Tarefa {
     @Exclude
     public String getMonthString() throws ParseException {
         java.util.Date date = new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega());
-        return new SimpleDateFormat("MMMM").format(date);
+        Calendar calendar = Calendar.getInstance();
+        Calendar sexta = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // primeiro dia da semana como segunda feira
+        long sextaMili = calendar.getTimeInMillis() + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
+        sexta.setTimeInMillis(sextaMili);
+
+        if(sexta.get(Calendar.MONTH) != calendar.get(Calendar.MONTH)){ //se o mês de segunda e sexta forem diferentes, retorna o mês de segunda
+            return new SimpleDateFormat("MMMM").format(calendar.getTime());
+        }
+        else
+            return new SimpleDateFormat("MMMM").format(sexta.getTime());
     }
 
     @Exclude
@@ -180,7 +192,6 @@ public class Tarefa {
     @Exclude
     public void salvarListas() throws ParseException {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        Date date = new Date();
         firebaseRef.child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())

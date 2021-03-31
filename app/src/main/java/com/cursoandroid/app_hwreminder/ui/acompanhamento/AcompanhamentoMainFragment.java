@@ -156,11 +156,11 @@ public class AcompanhamentoMainFragment extends Fragment {
         //Configuração do gráfico
         DecimalFormat mFormat = new DecimalFormat("00");
         final String[] diasSemana = new String[] {
-                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH))+" (seg)",
-                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH))+" (ter)",
-                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH))+" (qua)",
-                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH))+" (qui)",
-                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH))+" (sex)"
+                mFormat.format((double) calendar.get(Calendar.DAY_OF_MONTH)) +"/"+mFormat.format((double)calendar.get(Calendar.MONTH)),
+                mFormat.format((double) terca.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)terca.get(Calendar.MONTH)),
+                mFormat.format((double)quarta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quarta.get(Calendar.MONTH)),
+                mFormat.format((double)quinta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)quinta.get(Calendar.MONTH)),
+                mFormat.format((double)sexta.get(Calendar.DAY_OF_MONTH))+"/"+mFormat.format((double)sexta.get(Calendar.MONTH))
             };
 
         LineChart chart = view.findViewById(R.id.line_chart);
@@ -174,8 +174,9 @@ public class AcompanhamentoMainFragment extends Fragment {
         XAxis xAxis = chart.getXAxis();
         xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
         xAxis.setValueFormatter(formatter);
-        xAxis.setTextSize(9);
+        xAxis.setTextSize(11);
         xAxis.setTextColor(R.color.teal_200);
+        xAxis.setAvoidFirstLastClipping(true);
 
         ValueFormatter pointFormatter = new ValueFormatter() {
             private DecimalFormat format = new DecimalFormat("0");
@@ -251,7 +252,6 @@ public class AcompanhamentoMainFragment extends Fragment {
         java.util.Date dateJava = new java.util.Date();
         String diaSemanaTarefa = "";
         for (Tarefa tarefa : listTarefas) {
-
             if (tarefa.getWeekIntervalAsChildString().equals(data.getWeekIntervalAsChildString())) {
                 //get weekDay string from tarefa
                 try {

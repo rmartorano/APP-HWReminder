@@ -1,5 +1,7 @@
 package com.cursoandroid.app_hwreminder.model;
 
+import android.util.Log;
+
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.google.firebase.database.DatabaseReference;

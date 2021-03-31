@@ -45,12 +45,18 @@ public class Date {
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MONTH, mes);
+        calendar.set(Calendar.WEEK_OF_MONTH, 1);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        calendar.set(Calendar.DAY_OF_WEEK_IN_MONTH, 1);
         int qtdSemanas = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
 
-        for(int i=1 ; i<qtdSemanas ; i++) {
-            calendar.set(Calendar.WEEK_OF_MONTH, i-1);
+        for(int i=1 ; i<=qtdSemanas ; i++) {
+            Log.i("Teste","month 1: "+calendar.get(Calendar.MONTH)+" month 2: "+month);
+            if(calendar.get(Calendar.MONTH)!= month)
+                break;
             Calendar sexta = Calendar.getInstance();
-            sexta.set(Calendar.MONTH, calendar.get(Calendar.MONTH));
+            sexta.setTime(calendar.getTime());
             long timeMili = calendar.getTimeInMillis();
             long sextaMili = timeMili + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
             sexta.setTimeInMillis(sextaMili);
@@ -60,8 +66,8 @@ public class Date {
                             " a " + mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH))) +
                             "/" + mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1))
             );
+            calendar.setTimeInMillis(calendar.getTimeInMillis()+604800000); //+7 dias
         }
-
         return map;
     }
 

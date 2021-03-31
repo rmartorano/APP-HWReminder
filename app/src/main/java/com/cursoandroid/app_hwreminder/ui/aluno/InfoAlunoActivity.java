@@ -1,5 +1,6 @@
 package com.cursoandroid.app_hwreminder.ui.aluno;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,15 +14,18 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
@@ -35,6 +39,10 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -43,19 +51,28 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+
+import static com.cursoandroid.app_hwreminder.ui.home.HomeFragment.getListAlunos;
 
 public class InfoAlunoActivity extends AppCompatActivity {
 
     private TextView textViewNome;
     private Aluno aluno;
-    private final List<Aluno> listAlunos = HomeFragment.getListAlunos();
-    private final List<Tarefa> listTarefas = HomeFragment.getListTarefas();
+    private final List<Aluno> listAlunos = getListAlunos();
+    private List<Tarefa> listTarefas = HomeFragment.getListTarefas();
     private PieChart pieChart;
     private Map<String, Integer> mapQtdTarefas = new HashMap<>();
     private Spinner spinner, secondSpinner, thirdSpinner;
+    private boolean hasThirdSpinnerIdChanged, hasSecondSpinnerIdChanged = false, hasFirstSpinnerIdChanged = false;
+    private boolean firstTimeLoading = true;
+    private int firstSpinnerLastPos = 0, secondSpinnerLastPos, thirdSpinnerLastPos;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+    private ProgressBar indeterminateBar;
 
     //Enums
     private final int SEMANAL = 0;
@@ -78,6 +95,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
     private Map<Integer, String> mapMeses = new HashMap<>();
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +105,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
         spinner = findViewById(R.id.spinnerFiltroInfoAluno);
         secondSpinner = findViewById(R.id.secondSpinner);
         thirdSpinner = findViewById(R.id.thirdSpinner);
+        indeterminateBar = findViewById(R.id.indeterminateBar);
 
         mapMeses.put(0, "janeiro");
         mapMeses.put(1, "fevereiro");
@@ -105,14 +124,14 @@ public class InfoAlunoActivity extends AppCompatActivity {
         String nomeFromExtra = getIntent().getStringExtra("nomeAluno");
         getSupportActionBar().setTitle("Frequência do aluno");
 
-        for(Aluno a : listAlunos){
-            if(a.getNome().equals(nomeFromExtra)){
+        for (Aluno a : listAlunos) {
+            if (a.getNome().equals(nomeFromExtra)) {
                 aluno = a;
                 break;
             }
         }
 
-        if(aluno.getNome() == null) {
+        if (aluno.getNome() == null) {
             textViewNome.setText(nomeFromExtra + " não encontrado!");
             return;
         }
@@ -161,60 +180,30 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 break;
         } //preenche o segundo spinner com os meses
 
-        Date date = new Date();
-        ArrayList<String> spinnerArray = new ArrayList<>();
-        calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
-        Map<String, String> mapIntervals = date.getAllWeekIntervals(secondSpinner.getSelectedItemPosition());
-        for(int i=1; i<5 ; i++){
-            spinnerArray.add(mapIntervals.get("Semana "+i));
-        }
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item,
-                spinnerArray); //selected item will look like a spinner set from XML
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout
-                .simple_spinner_dropdown_item);
-        thirdSpinner.setAdapter(spinnerArrayAdapter);
-        thirdSpinner.setSelection(calendar.get(Calendar.WEEK_OF_MONTH)-1);
+        secondSpinnerLastPos = secondSpinner.getSelectedItemPosition();
+        thirdSpinnerLastPos = calendar.get(Calendar.WEEK_OF_MONTH) - 1;
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                generateChart(position, secondSpinner.getSelectedItemPosition(), thirdSpinner.getSelectedItemPosition());
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        secondSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                generateChart(spinner.getSelectedItemPosition(), position, thirdSpinner.getSelectedItemPosition());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        generateChart(SEMANAL);
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void generateChart(int periodo, int sSpinner, int tSpinner){
+    private void generateChart(int periodo) {
 
+        indeterminateBar.setVisibility(View.VISIBLE);
+        pieChart.setCenterText(" ");
         fillSpinners(periodo);
-        getQtdTarefas(periodo);
+
+    }
+
+    private void generateChartData() {
 
         List<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry(mapQtdTarefas.get("qtdFizeram"), "Tarefas feitas"));
         entries.add(new PieEntry(mapQtdTarefas.get("qtdNaoFizeram"), "Tarefas não feitas"));
 
-        PieDataSet dataSet = new PieDataSet(entries,"");
+        PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(Color.GREEN, Color.RED);
         dataSet.setValueTextSize(14);
         dataSet.setSliceSpace(3);
@@ -222,7 +211,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
         int qtdTotal = mapQtdTarefas.get("qtdFizeram") + mapQtdTarefas.get("qtdNaoFizeram");
 
-        pieChart.setCenterText("Quantidade total de tarefas\n\n"+qtdTotal);
+        pieChart.setCenterText("Quantidade total de tarefas\n\n" + qtdTotal);
         pieChart.setCenterTextSize(14);
         Legend legend = pieChart.getLegend();
         legend.setTextSize(14);
@@ -236,91 +225,328 @@ public class InfoAlunoActivity extends AppCompatActivity {
         pieChart.setData(pieData);
         pieChart.invalidate();
 
+        if (firstTimeLoading) {
+            setListeners();
+            firstTimeLoading = false;
+        }
+        indeterminateBar.setVisibility(View.INVISIBLE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void fillSpinners(int periodo){
+    private void fillSpinners(int periodo) {
 
-        ArrayList<String> spinnerArray = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        Date date = new Date();
+        switch (periodo) {
 
-        switch (periodo){
-
-            case MENSAL:
             case SEMANAL: { //preenche terceiro spinner com os intervalos da semana
-                calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
-                Map<String, String> mapIntervals = date.getAllWeekIntervals(secondSpinner.getSelectedItemPosition());
-                Log.i("Teste","max : "+calendar.getActualMaximum(Calendar.WEEK_OF_MONTH));
-                for(int i=1; i<calendar.getActualMaximum(Calendar.WEEK_OF_MONTH) ; i++){
-                    spinnerArray.add(mapIntervals.get("Semana "+i));
+                ArrayList<String> spinnerArray = new ArrayList<>();
+                Calendar calendar = Calendar.getInstance();
+                Date date = new Date();
+                if (hasSecondSpinnerIdChanged || hasFirstSpinnerIdChanged || firstTimeLoading) {
+                    listTarefas = HomeFragment.getListTarefas();
+                    calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
+                    Map<String, String> mapIntervals = date.getAllWeekIntervals(secondSpinner.getSelectedItemPosition()); //recupera todos os intervalos da semana do mês
+                    for (int i = 0; i < mapIntervals.size(); i++) {
+                        spinnerArray.add(mapIntervals.get("Semana " + (i + 1)));
+                    }
+                    ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
+                            this, android.R.layout.simple_spinner_item,
+                            spinnerArray);
+                    spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    thirdSpinner.setAdapter(spinnerArrayAdapter);
+                    if (firstTimeLoading) {
+                        thirdSpinner.setSelection(calendar.get(Calendar.WEEK_OF_MONTH) - 1);
+                    }
+                    hasSecondSpinnerIdChanged = false;
+                    hasFirstSpinnerIdChanged = false;
                 }
-                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                        this, android.R.layout.simple_spinner_item,
-                        spinnerArray); //selected item will look like a spinner set from XML
-                spinnerArrayAdapter.setDropDownViewResource(android.R.layout
-                        .simple_spinner_dropdown_item);
-                thirdSpinner.setAdapter(spinnerArrayAdapter);
-                thirdSpinner.setSelection(calendar.get(Calendar.WEEK_OF_MONTH)-1);
+                if(thirdSpinner.getVisibility()!=View.VISIBLE)
+                    thirdSpinner.setVisibility(View.VISIBLE);
+                if (secondSpinner.getSelectedItemPosition() != secondSpinnerLastPos) {
+                    recuperarTarefas(secondSpinner.getSelectedItemPosition());
+                    secondSpinnerLastPos = secondSpinner.getSelectedItemPosition();
+                } else {
+                    getQtdTarefas(spinner.getSelectedItemPosition());
+                }
+                break;
+            }
+
+            case MENSAL: {
+                if (hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged) {
+                    if (secondSpinner.getCount() < 12) {
+                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                                R.array.array_filtro_info_aluno_meses, android.R.layout.simple_spinner_item);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        secondSpinner.setAdapter(adapter);
+                        Calendar calendar = Calendar.getInstance();
+                        secondSpinner.setSelection(calendar.get(Calendar.MONTH));
+                    }
+                    thirdSpinner.setVisibility(View.GONE);
+                    hasFirstSpinnerIdChanged = false;
+                    hasSecondSpinnerIdChanged = false;
+                }
+                if(thirdSpinner.getVisibility()!=View.VISIBLE)
+                    thirdSpinner.setVisibility(View.VISIBLE);
+                recuperarTarefas(secondSpinner.getSelectedItemPosition());
+                break;
+            }
+
+            case SEMESTRAL: {
+                if (hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged) {
+                    if (secondSpinner.getCount() > 2) { //se tiver mais que 2 opções no dropdown quer dizer que está os meses configurados e não os semestres
+                        ArrayList<String> spinnerArray = new ArrayList<>();
+                        spinnerArray.add("1º semestre");
+                        spinnerArray.add("2º semestre");
+                        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
+                                this, android.R.layout.simple_spinner_item,
+                                spinnerArray);
+                        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        secondSpinner.setAdapter(spinnerArrayAdapter);
+                        secondSpinnerLastPos = 0;
+                    }
+                    if(thirdSpinner.getVisibility()!=View.GONE)
+                        thirdSpinner.setVisibility(View.GONE);
+                    recuperarTarefas(0);
+                }
+                break;
+            }
+
+            case ANUAL:
+            {
+                if(hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged){
+
+                    firebaseRef.child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            Calendar calendar = Calendar.getInstance();
+                            boolean isConfigured = false;
+                            for(int i = 0 ; i < secondSpinner.getCount() ; i++){
+                                Log.i("teste", "config: "+secondSpinner.getItemAtPosition(i).toString()+" year: "+calendar.get(Calendar.YEAR));
+                                if(secondSpinner.getItemAtPosition(i).toString().equals(String.valueOf(calendar.get(Calendar.YEAR)))) {
+                                    isConfigured = true;
+                                    break;
+                                }
+                            }
+                            if(!isConfigured) {
+                                ArrayList<String> spinnerArray = new ArrayList<>();
+                                for (DataSnapshot ano : snapshot.getChildren()) {
+                                    spinnerArray.add(ano.getKey());
+                                }
+                                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
+                                        getApplicationContext(), android.R.layout.simple_spinner_item,
+                                        spinnerArray);
+                                spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                secondSpinner.setAdapter(spinnerArrayAdapter);
+                                secondSpinnerLastPos = 0;
+                            }
+                            recuperarTarefas(0);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    if(thirdSpinner.getVisibility()!=View.GONE)
+                        thirdSpinner.setVisibility(View.GONE);
+                }
                 break;
             }
 
         }
-
     }
 
-    private void getQtdTarefas(int periodo){
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void getQtdTarefas(int periodo) {
 
         Date date = new Date();
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
-        int semana = thirdSpinner.getSelectedItemPosition()+1; //semana atual do mês
-        int mes = calendar.get(Calendar.MONTH)+1;
+        int semana = thirdSpinner.getSelectedItemPosition() + 1; //semana atual do mês
+        int mes = secondSpinner.getSelectedItemPosition() + 1; //mês atual
         int ano = date.getCalendar().get(Calendar.YEAR);
         Calendar calendarTarefa = Calendar.getInstance();
-        calendarTarefa.setTime(calendar.getTime());
 
         mapQtdTarefas.put("qtdFizeram", 0);
         mapQtdTarefas.put("qtdNaoFizeram", 0);
 
-        for(Tarefa tarefa : listTarefas){
+        Log.i("Teste", "tarefas size: " + listTarefas.size());
+
+        for (Tarefa tarefa : listTarefas) {
             try {
                 calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega()));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
-            if(calendarTarefa.get(Calendar.WEEK_OF_MONTH) == semana) {
+            calendarTarefa.setFirstDayOfWeek(Calendar.MONDAY);
+            Log.i("Teste", "semana: " + semana + " semana tarefa: " + calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH));
+            if (calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH) == semana && periodo == SEMANAL && calendarTarefa.get(Calendar.MONTH) + 1 == mes) {
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
                     mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
                 }
                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
                     mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
                 }
-            }
-            else if(calendarTarefa.get(Calendar.MONTH)+1 == mes && periodo >= MENSAL){
+            } else if (calendarTarefa.get(Calendar.MONTH) + 1 == mes && periodo >= MENSAL && calendarTarefa.get(Calendar.YEAR) == ano) {
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
-            }
-            else if(calendarTarefa.get(Calendar.MONTH)+1 >= mes-5 && calendarTarefa.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && periodo >= SEMESTRAL){
+            } else if (calendarTarefa.get(Calendar.MONTH) + 1 >= mes - 5 && calendarTarefa.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && periodo >= SEMESTRAL) {
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
-            }
-            else if(calendarTarefa.get(Calendar.YEAR) == ano && periodo >= ANUAL){
+            } else if (calendarTarefa.get(Calendar.YEAR) == ano && periodo >= ANUAL) {
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
                     mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
             }
         }
+
+        generateChartData();
+
     }
 
-    public void recuperarTarefas(int mesInicial, int mesFinal){
+    public void setListeners() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (firstSpinnerLastPos != position) {
+                    Log.i("Teste", "changed first spinner");
+                    firstSpinnerLastPos = position;
+                    hasFirstSpinnerIdChanged = true;
+                    if (position == SEMANAL) {
+                        firstTimeLoading = true;
+                    }
+                    generateChart(position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        secondSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (secondSpinnerLastPos != position) {
+                    Log.i("Teste", "changed second spinner");
+                    hasSecondSpinnerIdChanged = true;
+                    generateChart(spinner.getSelectedItemPosition());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        thirdSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (thirdSpinnerLastPos != position) {
+                    Log.i("Teste", "changed third spinner");
+                    thirdSpinnerLastPos = position;
+                    hasThirdSpinnerIdChanged = true;
+                    generateChart(spinner.getSelectedItemPosition());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    public void recuperarTarefas(int mes) {
+
+        int mesFinal;
+        if (secondSpinner.getSelectedItem().toString().equals("1º semestre") || secondSpinner.getSelectedItem().toString().equals("2º semestre")) { //se passar uma string quer dizer que é semestre
+            if (secondSpinner.getSelectedItem().toString().equals("1º semestre")) {
+                mes = 0;
+                mesFinal = 5;
+            } else {
+                mes = 6;
+                mesFinal = 11;
+            }
+        }
+        else if(spinner.getSelectedItemPosition() == ANUAL){
+            Log.i("Teste", "anual: "+secondSpinner.getSelectedItem().toString());
+            mes = 0;
+            mesFinal = 11;
+        }
+        else
+            mesFinal = mes;
+
+        listTarefas.clear();
+        for (; mes <= mesFinal; mes++) {
+            Calendar calendar = Calendar.getInstance();
+            int finalMes = mes;
+            firebaseRef.child("tarefa")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.N)
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            String ano;
+                            if(spinner.getSelectedItemPosition() == ANUAL)
+                                ano = secondSpinner.getSelectedItem().toString();
+                            else
+                                ano = new SimpleDateFormat("yyyy").format(calendar.getTime());
+
+                            Log.i("Teste", "ano: "+ano);
+
+                            for (DataSnapshot tmpDado : snapshot
+                                    .child(ano)
+                                    .child(mapMeses.get(finalMes))
+                                    .getChildren()) {
+                                for (DataSnapshot dados : tmpDado.getChildren()) {
+                                    Tarefa tarefa = dados.getValue(Tarefa.class);
+                                    tarefa.setKey(dados.getKey());
+                                    ArrayList listTmpFizeram = (ArrayList) dados.child("Alunos que fizeram").getValue();
+                                    if (listTmpFizeram == null) {
+                                        listTmpFizeram = new ArrayList();
+                                        for (Aluno aluno : getListAlunos()) {
+                                            listTmpFizeram.add(aluno.getNome());
+                                        }
+                                        tarefa.setListAlunosFizeram(listTmpFizeram);
+                                        try {
+                                            tarefa.salvarListas();
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else {
+                                        tarefa.setListAlunosFizeram((ArrayList) dados.child("Alunos que fizeram").getValue());
+                                        if (dados.child("Alunos que não fizeram").getValue() != null)
+                                            tarefa.setListAlunosNaoFizeram((ArrayList) dados.child("Alunos que não fizeram").getValue());
+                                    }
+                                    for(Tarefa tarefaTmp : listTarefas){
+                                        if(tarefa.getKey() == tarefaTmp.getKey())
+                                            return;
+                                    }
+                                    listTarefas.add(tarefa);
+                                }
+                            }
+                            if(finalMes == mesFinal)
+                                getQtdTarefas(spinner.getSelectedItemPosition());
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+        }
 
     }
 

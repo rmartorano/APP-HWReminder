@@ -157,7 +157,11 @@ public final class HomeFragment extends Fragment {
                     Aluno aluno = snapshot.getValue(Aluno.class);
                     String diaSemana = (String) snapshot.child("frequencia").child(data.getYearString()).child(data.getMonthString()).child(data.getWeekIntervalAsChildString()).child("diaSemana").getValue();
                     aluno.setDiaSemana(diaSemana);
-                    updateFrequenciaTarefa(null, aluno, false, true);
+                    try {
+                        updateFrequenciaTarefa(null, aluno, false, true);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -204,7 +208,11 @@ public final class HomeFragment extends Fragment {
                 if (!alunos.isEmpty()) {
                     Tarefa tarefa = snapshot.getValue(Tarefa.class);
                     tarefa.setKey(snapshot.getKey());
-                    updateFrequenciaTarefa(tarefa, alunos.get(0), true, false);
+                    try {
+                        updateFrequenciaTarefa(tarefa, alunos.get(0), true, false);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -239,7 +247,7 @@ public final class HomeFragment extends Fragment {
                 com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
                 String diaSemana = new String();
                 tarefas.clear();
-                for (DataSnapshot tmpDados : snapshot.child(yearLastTarefaModified).child(dateFromProject.getMonthString()).getChildren()) { // recupera apenas as tarefas dentro de 1 mês
+                for (DataSnapshot tmpDados : snapshot.child(dateFromProject.getYearString()).child(dateFromProject.getMonthString()).getChildren()) { // recupera apenas as tarefas dentro de 1 mês
                     for (DataSnapshot dados : tmpDados.getChildren()) {
                         Tarefa tarefa = dados.getValue(Tarefa.class);   
                         tarefa.setKey(dados.getKey());
@@ -248,8 +256,9 @@ public final class HomeFragment extends Fragment {
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
-
-                        Log.i("Teste", "calendar week: "+calendar.get(Calendar.WEEK_OF_MONTH)+" week: "+week);
+                        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                        calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // primeiro dia da semana como segunda feira
+                        Log.i("Teste", "calendar week: "+calendar.get(Calendar.WEEK_OF_MONTH)+" week: "+week+" tarefa: "+tarefa.getTitulo());
                         if (calendar.get(Calendar.WEEK_OF_MONTH) == week) { // only shows currently week tarefas
 
                             //get weekDay string from tarefa
@@ -313,6 +322,47 @@ public final class HomeFragment extends Fragment {
                                     dialogEditDescricao.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int which) {
+                                            Date date = new Date();
+                                            String diaSemana = "";
+                                            try {
+                                                date = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
+                                                diaSemana = new SimpleDateFormat("EE").format(date);
+                                            } catch (ParseException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            //Instanciar alertDialog
+                                            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+                                            switch (diaSemana) {
+                                                case "seg":
+                                                    textViewDescricao = getView().findViewById(R.id.textViewSegunda);
+                                                    break;
+                                                case "ter":
+                                                    textViewDescricao = getView().findViewById(R.id.textViewTerca);
+                                                    break;
+                                                case "qua":
+                                                    textViewDescricao = getView().findViewById(R.id.textViewQuarta);
+                                                    break;
+                                                case "qui":
+                                                    textViewDescricao = getView().findViewById(R.id.textViewQuinta);
+                                                    break;
+                                                case "sex":
+                                                    textViewDescricao = getView().findViewById(R.id.textViewSexta);
+                                                    break;
+                                                default:
+                                                    throw new IllegalStateException("Unexpected value: " + diaSemana);
+                                            }
+                                            try {
+                                                firebaseRef.child("tarefa")
+                                                        .child(tarefa.getYearString())
+                                                        .child(tarefa.getMonthString())
+                                                        .child(tarefa.getWeekIntervalAsChildString())
+                                                        .child(tarefa.getKey())
+                                                        .child("descricao")
+                                                        .setValue(input.getText().toString());
+                                            } catch (ParseException e) {
+                                                e.printStackTrace();
+                                            }
                                             tarefa.setDescricao(input.getText().toString());
                                             textViewDescricao.setText(input.getText().toString());
                                             dialog.setMessage(tarefa.getDescricao());
@@ -390,7 +440,6 @@ public final class HomeFragment extends Fragment {
 
                         if (listTmpNaoFizeram != null)
                             tarefa.setListAlunosNaoFizeram(listTmpNaoFizeram);
-
                         tarefas.add(tarefa);
                     }
                 }
@@ -452,10 +501,12 @@ public final class HomeFragment extends Fragment {
     static int contadorRecursao = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos, boolean updateTodasTarefas) {
+    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos, boolean updateTodasTarefas) throws ParseException {
         Tarefa tarefaDoDia = null;
         Calendar calendar = Calendar.getInstance();
         String diaSemana = new String();
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // primeiro dia da semana como segunda feira
         if (tarefa == null) { //se passar tarefa como null, procura pela tarefa da semana ou todas se updateTodasTarefas for true
             int count = 0;
             for (Tarefa tarefaIn : tarefas) {
@@ -488,6 +539,9 @@ public final class HomeFragment extends Fragment {
             }
             int weekTmp = calendar.get(Calendar.WEEK_OF_MONTH);
             calendar.setTime(date);
+            calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+            calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // primeiro dia da semana como segunda feira
+            Log.i("Teste", calendar.get(Calendar.WEEK_OF_MONTH)+ " weekTmp: "+week);
             if(!(calendar.get(Calendar.WEEK_OF_MONTH) == weekTmp))
                 return;
             tarefaDoDia = tarefa;
@@ -495,9 +549,9 @@ public final class HomeFragment extends Fragment {
         String finalDiaSemana = diaSemana;
         Tarefa finalTarefaDoDia = tarefaDoDia;
         com.cursoandroid.app_hwreminder.config.Date date = new com.cursoandroid.app_hwreminder.config.Date();
-        String yearString = date.getYearString();
-        String monthString = date.getMonthString();
-        String weekIntervalAsChild = date.getWeekIntervalAsChildString();
+        String yearString = finalTarefaDoDia.getYearString();
+        String monthString = finalTarefaDoDia.getMonthString();
+        String weekIntervalAsChild = finalTarefaDoDia.getWeekIntervalAsChildString();
         String nomeAluno = aluno.getNome();
         firebaseRef.child("aluno").child(nomeAluno).child("frequencia")
                 .child(yearString).child(monthString).child(weekIntervalAsChild).
