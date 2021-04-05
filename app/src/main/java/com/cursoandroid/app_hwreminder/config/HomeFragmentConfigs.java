@@ -20,6 +20,7 @@ public class HomeFragmentConfigs {
         map.put("ano", HomeFragment.getYearLastTarefaModified());
         map.put("mes", HomeFragment.getMonthLastTarefaModified());
         map.put("intervalo da semana", HomeFragment.getWeekIntervalLastTarefaModified());
+        map.put("turma", HomeFragment.getLastTurmaModified());
 
         firebaseRef.child("Configurações HomeFragment")
                 .child("geral")

@@ -60,6 +60,7 @@ public class AdapterAddAlunoPendente extends RecyclerView.Adapter<AdapterAddAlun
         });
 
         holder.nome.setText(aluno.getNome());
+        holder.turma.setText("Turma: "+aluno.getTurma());
 
     }
 
@@ -71,12 +72,13 @@ public class AdapterAddAlunoPendente extends RecyclerView.Adapter<AdapterAddAlun
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView nome;
+        TextView nome, turma;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             nome = itemView.findViewById(R.id.textAdapterAlunoPendenteNome);
+            turma = itemView.findViewById(R.id.textViewTurmaAddPendente);
 
         }
 

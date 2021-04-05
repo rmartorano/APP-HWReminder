@@ -140,6 +140,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
         //prenche o gráfico com valores iniciais, na config de semanalmente
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
         switch (new SimpleDateFormat("MMMM").format(calendar.getTime()).toLowerCase()) {
             case "janeiro":
@@ -254,7 +255,10 @@ public class InfoAlunoActivity extends AppCompatActivity {
                     spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     thirdSpinner.setAdapter(spinnerArrayAdapter);
                     if (firstTimeLoading) {
-                        thirdSpinner.setSelection(calendar.get(Calendar.WEEK_OF_MONTH) - 1);
+                        Calendar calendarTeste = Calendar.getInstance();
+                        calendarTeste.setMinimalDaysInFirstWeek(7);
+                        calendarTeste.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                        thirdSpinner.setSelection(calendarTeste.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1);
                     }
                     hasSecondSpinnerIdChanged = false;
                     hasFirstSpinnerIdChanged = false;
@@ -262,8 +266,8 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 if(thirdSpinner.getVisibility()!=View.VISIBLE)
                     thirdSpinner.setVisibility(View.VISIBLE);
                 if (secondSpinner.getSelectedItemPosition() != secondSpinnerLastPos) {
-                    recuperarTarefas(secondSpinner.getSelectedItemPosition());
                     secondSpinnerLastPos = secondSpinner.getSelectedItemPosition();
+                    recuperarTarefas(secondSpinner.getSelectedItemPosition());
                 } else {
                     getQtdTarefas(spinner.getSelectedItemPosition());
                 }
@@ -284,15 +288,15 @@ public class InfoAlunoActivity extends AppCompatActivity {
                     hasFirstSpinnerIdChanged = false;
                     hasSecondSpinnerIdChanged = false;
                 }
-                if(thirdSpinner.getVisibility()!=View.VISIBLE)
-                    thirdSpinner.setVisibility(View.VISIBLE);
+                if(thirdSpinner.getVisibility()!=View.GONE)
+                    thirdSpinner.setVisibility(View.GONE);
                 recuperarTarefas(secondSpinner.getSelectedItemPosition());
                 break;
             }
 
             case SEMESTRAL: {
                 if (hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged) {
-                    if (secondSpinner.getCount() > 2) { //se tiver mais que 2 opções no dropdown quer dizer que está os meses configurados e não os semestres
+                    if (!secondSpinner.getItemAtPosition(0).toString().equals("1º semestre")) { //se tiver mais que 2 opções no dropdown quer dizer que está os meses configurados e não os semestres
                         ArrayList<String> spinnerArray = new ArrayList<>();
                         spinnerArray.add("1º semestre");
                         spinnerArray.add("2º semestre");
@@ -305,6 +309,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                     }
                     if(thirdSpinner.getVisibility()!=View.GONE)
                         thirdSpinner.setVisibility(View.GONE);
+                    secondSpinnerLastPos = secondSpinner.getSelectedItemPosition();
                     recuperarTarefas(0);
                 }
                 break;
@@ -320,7 +325,6 @@ public class InfoAlunoActivity extends AppCompatActivity {
                             Calendar calendar = Calendar.getInstance();
                             boolean isConfigured = false;
                             for(int i = 0 ; i < secondSpinner.getCount() ; i++){
-                                Log.i("teste", "config: "+secondSpinner.getItemAtPosition(i).toString()+" year: "+calendar.get(Calendar.YEAR));
                                 if(secondSpinner.getItemAtPosition(i).toString().equals(String.valueOf(calendar.get(Calendar.YEAR)))) {
                                     isConfigured = true;
                                     break;
@@ -338,6 +342,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                                 secondSpinner.setAdapter(spinnerArrayAdapter);
                                 secondSpinnerLastPos = 0;
                             }
+                            secondSpinnerLastPos = secondSpinner.getSelectedItemPosition();
                             recuperarTarefas(0);
                         }
 
@@ -365,7 +370,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
         calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
         int semana = thirdSpinner.getSelectedItemPosition() + 1; //semana atual do mês
         int mes = secondSpinner.getSelectedItemPosition() + 1; //mês atual
-        int ano = date.getCalendar().get(Calendar.YEAR);
+        int ano = periodo == ANUAL ? Integer.parseInt(secondSpinner.getSelectedItem().toString()) : date.getCalendar().get(Calendar.YEAR);
         Calendar calendarTarefa = Calendar.getInstance();
 
         mapQtdTarefas.put("qtdFizeram", 0);
@@ -379,7 +384,8 @@ public class InfoAlunoActivity extends AppCompatActivity {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            calendarTarefa.setFirstDayOfWeek(Calendar.MONDAY);
+            calendarTarefa.setMinimalDaysInFirstWeek(7);
+            calendarTarefa.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
             Log.i("Teste", "semana: " + semana + " semana tarefa: " + calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH));
             if (calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH) == semana && periodo == SEMANAL && calendarTarefa.get(Calendar.MONTH) + 1 == mes) {
                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
@@ -520,11 +526,6 @@ public class InfoAlunoActivity extends AppCompatActivity {
                                             listTmpFizeram.add(aluno.getNome());
                                         }
                                         tarefa.setListAlunosFizeram(listTmpFizeram);
-                                        try {
-                                            tarefa.salvarListas();
-                                        } catch (ParseException e) {
-                                            e.printStackTrace();
-                                        }
                                     } else {
                                         tarefa.setListAlunosFizeram((ArrayList) dados.child("Alunos que fizeram").getValue());
                                         if (dados.child("Alunos que não fizeram").getValue() != null)

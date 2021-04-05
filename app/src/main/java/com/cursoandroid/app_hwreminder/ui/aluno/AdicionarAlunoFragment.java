@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterAddAlunoPendente;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -128,14 +130,28 @@ public class AdicionarAlunoFragment extends Fragment {
         //Instance alertDialog
         AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
 
-        //Config title and message
         dialog.setTitle("Adicionar aluno");
-        dialog.setMessage("Insira o nome do aluno");
+        dialog.setMessage("Insira o nome e turma do aluno");
 
         //Config input view
-        final EditText input = new EditText(getContext());
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout layoutTurma = new LinearLayout(getContext());
+        layoutTurma.setLayoutParams(new LinearLayout.LayoutParams(2000, LinearLayout.LayoutParams.WRAP_CONTENT));
+        layoutTurma.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(layoutTurma);
+        EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        dialog.setView(input);
+        input.setHint("Nome do aluno");
+        layoutTurma.addView(input);
+        EditText turma = new EditText(getContext());
+        turma.setInputType(InputType.TYPE_CLASS_TEXT);
+        turma.setHint("Turma");
+        layoutTurma.addView(turma);
+
+        dialog.setView(layout);
 
         //Config cancel (can't be closed unless choosing an option)
         dialog.setCancelable(false);
@@ -163,6 +179,7 @@ public class AdicionarAlunoFragment extends Fragment {
                     ).show();
                     AlunoAddPendente aluno = new AlunoAddPendente();
                     aluno.setNome(input.getText().toString());
+                    aluno.setTurma(turma.getText().toString());
                     listAlunos.add(aluno);
                     sortList(); // sort list alphabetically and notifify the adapter
                     adapterAluno.notifyDataSetChanged();
@@ -187,7 +204,9 @@ public class AdicionarAlunoFragment extends Fragment {
         for(AlunoAddPendente alunoAdd : listAlunos) {
             Aluno aluno = new Aluno();
             aluno.setNome(alunoAdd.getNome());
+            aluno.setTurma(alunoAdd.getTurma());
             aluno.salvar();
+            HomeFragment.setLastTurmaModified(alunoAdd.getTurma());
         }
     }
 

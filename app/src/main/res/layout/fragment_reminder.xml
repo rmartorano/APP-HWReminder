@@ -7,122 +7,142 @@
     android:layout_height="match_parent"
     tools:context=".ui.tarefa.ReminderFragment">
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/imageView4"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/boy_studding"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/boy_studding" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSalvar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4"
+        app:layout_constraintVertical_bias="0.0">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_marginTop="16dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editTitulo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/transparent"
-                android:hint="Título" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/textlines"
-            android:orientation="horizontal">
+            android:background="@color/transparent"
+            android:hint="Título" />
 
-            <TextView
-                android:id="@+id/textViewTercaFix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:text="Disciplina: "
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/disciplines_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:gravity="start"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/textlines_no_spaced_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/textlines"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/textViewQuartaFix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:text="Data de entrega: "
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/deadlineDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/transparent"
-                android:clickable="true"
-                android:focusable="false"
-                android:hint="selecionar data"
-                android:inputType="none"
-                android:paddingLeft="8dp" />
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/editDescricao"
-            style="@style/Widget.AppCompat.AutoCompleteTextView"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/border_back"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="Descrição (ex: Pág 23 a 25)"
-            android:inputType="textMultiLine"
-            android:paddingLeft="8dp"
-            android:singleLine="false" />
-
-        <Button
-            android:id="@+id/buttonSalvar"
+        <TextView
+            android:id="@+id/textViewTercaFix"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:onClick="salvarTarefa"
-            android:text="Salvar"
-            app:backgroundTint="@color/teal_700"
-            app:iconTintMode="multiply" />
+            android:paddingLeft="8dp"
+            android:text="Disciplina: "
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
+        <Spinner
+            android:id="@+id/disciplines_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:gravity="start"
+            android:spinnerMode="dropdown" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/textlines_no_spaced_bottom"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+        <TextView
+            android:id="@+id/textViewQuartaFix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text="Data de entrega: "
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/deadlineDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="selecionar data"
+            android:inputType="none" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editDescricao"
+        style="@style/Widget.AppCompat.AutoCompleteTextView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="73dp"
+        android:background="@drawable/border_back"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="Descrição (ex: Pág 23 a 25)"
+        android:inputType="textMultiLine"
+        android:paddingLeft="8dp"
+        android:singleLine="false"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSalvar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+
+    <Button
+        android:id="@+id/buttonSalvar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:gravity="center"
+        android:onClick="salvarTarefa"
+        android:text="Salvar"
+        app:backgroundTint="@color/teal_700"
+        app:iconTintMode="multiply"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

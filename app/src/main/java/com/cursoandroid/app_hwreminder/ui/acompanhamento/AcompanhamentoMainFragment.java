@@ -2,6 +2,8 @@ package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,34 +19,48 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.cursoandroid.app_hwreminder.activity.MainActivity;
+import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.aluno.AdicionarAlunoFragment;
+import com.cursoandroid.app_hwreminder.ui.aluno.InfoAlunoActivity;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragmentMonthly;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.IMarker;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
@@ -206,6 +222,9 @@ public class AcompanhamentoMainFragment extends Fragment {
         dataSetFizeram.setValueTextColor(Color.BLACK);
         dataSetFizeram.setValueTextSize(10);
         dataSetFizeram.setValueFormatter(pointFormatter);
+        dataSetFizeram.setHighlightEnabled(true);
+        dataSetFizeram.setHighLightColor(Color.BLACK);
+        dataSetFizeram.setDrawHighlightIndicators(true);
 
         LineDataSet dataSetNaoFizeram = new LineDataSet(entriesNaoFizeram, "Quantidade não fizeram");
         dataSetNaoFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -242,6 +261,77 @@ public class AcompanhamentoMainFragment extends Fragment {
 
         SmartTabLayout viewPagerTab = view.findViewById(R.id.viewpagertab);
         viewPagerTab.setViewPager(viewPager);
+
+
+        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Log.i("Teste", "highlight: "+h);
+                Dialog dialog = new Dialog(getContext(), android.R.style.Theme_Material_Light_Dialog);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.acompanhamento_grafico_geral_get_alunos);
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(dialog.getWindow().getAttributes());
+                lp.width = 1000;
+                lp.height = 2000;
+                dialog.show();
+                dialog.getWindow().setAttributes(lp);
+                View view = dialog.getWindow().getDecorView();
+
+                TextView textViewTitulo = view.findViewById(R.id.textViewTituloGraficoAcompanhamento);
+
+                //Recycler alunos; vou aproveitar o adapter do filtrarFeebdback, o que tem uma setinha na direita >
+                List<Aluno> alunosFiltro = new ArrayList<>();
+                AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback = new AdapterFiltrarAlunoFeedback(alunosFiltro, getContext());
+                RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFeedbackAlunosGrafico);
+                RecyclerView.LayoutManager layoutManagerFeedbackAluno = new LinearLayoutManager(getContext());
+                recyclerView.setLayoutManager(layoutManagerFeedbackAluno);
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setAdapter(adapterFiltrarAlunoFeedback);
+                recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+
+                for(Tarefa tarefa : listTarefas){
+                    java.util.Date date = null;
+                    try {
+                        date = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
+                    } catch (ParseException parseException) {
+                        parseException.printStackTrace();
+                    }
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    calendar.setFirstDayOfWeek(Calendar.MONDAY);
+                    Log.i("Teste", "day of week: "+calendar.get(Calendar.DAY_OF_WEEK));
+                    if(calendar.get(Calendar.DAY_OF_WEEK)-2 == (int) e.getX()){
+                        List<Aluno> alunosList = new ArrayList<>();
+                        for(Aluno aluno : listAlunos){
+                            if(h.getDataSetIndex() == 0) {
+                                textViewTitulo.setText("Alunos que fizeram as tarefas do dia: "+diasSemana[(int) e.getX()]);
+                                if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
+                                    Log.i("Teste", "contains");
+                                    alunosList.add(aluno);
+                                }
+                            }
+                            else{
+                                textViewTitulo.setText("Alunos que não fizeram as tarefas do dia: "+diasSemana[(int) e.getX()]);
+                                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
+                                    Log.i("Teste", "contains não fizeram");
+                                    alunosList.add(aluno);
+                                }
+                            }
+                        }
+                        alunosFiltro.addAll(alunosList);
+                    }
+                    Log.i("Teste", "dia semana: "+(calendar.get(Calendar.DAY_OF_WEEK)-2)+" x: "+(int) e.getX()+" tarefa: "+tarefa.getListAlunosFizeram());
+                }
+                adapterFiltrarAlunoFeedback.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
 
     }
 
