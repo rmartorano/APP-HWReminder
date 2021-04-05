@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,6 +118,7 @@ public class AdicionarAlunoFragment extends Fragment {
 
         TextView textViewAddAluno = view.findViewById(R.id.textViewAddAluno);
         textViewAddAluno.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onClick(View v) {
                 abrirDialog(v);
@@ -125,6 +128,7 @@ public class AdicionarAlunoFragment extends Fragment {
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     public void abrirDialog(View view){
 
         //Instance alertDialog
@@ -142,14 +146,33 @@ public class AdicionarAlunoFragment extends Fragment {
         layoutTurma.setLayoutParams(new LinearLayout.LayoutParams(2000, LinearLayout.LayoutParams.WRAP_CONTENT));
         layoutTurma.setOrientation(LinearLayout.VERTICAL);
         layout.addView(layoutTurma);
+
         EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setHint("Nome do aluno");
         layoutTurma.addView(input);
+
+        LinearLayout layout2 = new LinearLayout(getContext());
+        layout2.setOrientation(LinearLayout.HORIZONTAL);
+        layout2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout2.setGravity(Gravity.CENTER | Gravity.LEFT);
+        layoutTurma.addView(layout2);
+
         EditText turma = new EditText(getContext());
         turma.setInputType(InputType.TYPE_CLASS_TEXT);
         turma.setHint("Turma");
-        layoutTurma.addView(turma);
+        layout2.addView(turma);
+
+        TextView textViewAddTurma = new TextView(getContext());
+        textViewAddTurma.setText("Adicionar turma");
+        textViewAddTurma.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_add_green_24, 0, 0, 0);
+        layout2.addView(textViewAddTurma);
+        textViewAddTurma.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                criarTurma();
+            }
+        });
 
         dialog.setView(layout);
 
@@ -197,6 +220,10 @@ public class AdicionarAlunoFragment extends Fragment {
         //Criar e exibir AlertDialog
         dialog.create();
         dialog.show();
+
+    }
+
+    public void criarTurma(){
 
     }
 
