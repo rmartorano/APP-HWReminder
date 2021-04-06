@@ -75,8 +75,16 @@ public class Date {
         return calendar;
     }
 
+    public void setCalendarTime(java.util.Date time){
+        this.calendar.setTime(time);
+    }
+
     public Calendar getSexta(){
         return sexta;
+    }
+
+    public void setSextaInMili(long mili){
+        this.sexta.setTimeInMillis(mili);
     }
 
     public long getSextaMili() {
