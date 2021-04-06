@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -18,10 +19,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,16 +32,26 @@ import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAddAlunoPendente;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,8 +60,14 @@ import java.util.Locale;
  */
 public class AdicionarAlunoFragment extends Fragment {
 
-    List<AlunoAddPendente> listAlunos = new ArrayList<>();
+    private List<AlunoAddPendente> listAlunos = new ArrayList<>();
     private AdapterAddAlunoPendente adapterAluno = null;
+    private List<String> listTurmas = new LinkedList<>();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+    private DatabaseReference turmaRef;
+    private int lastTurma = 0;
+    private Spinner spinnerTurma;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -107,6 +126,12 @@ public class AdicionarAlunoFragment extends Fragment {
             }
         });
 
+        Date date = new Date();
+
+        turmaRef = firebaseRef.child("Configurações HomeFragment")
+                .child("turmas")
+                .child(date.getYearString());
+
         //Config recyclerView
         adapterAluno = new AdapterAddAlunoPendente(listAlunos, getContext());
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAlunoPendente);
@@ -121,7 +146,11 @@ public class AdicionarAlunoFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onClick(View v) {
-                abrirDialog(v);
+                if(listTurmas.isEmpty()){
+                    recuperarTurmas();
+                }
+                else
+                    abrirDialog();
             }
         });
 
@@ -129,7 +158,7 @@ public class AdicionarAlunoFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public void abrirDialog(View view){
+    public void abrirDialog(){
 
         //Instance alertDialog
         AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
@@ -158,10 +187,13 @@ public class AdicionarAlunoFragment extends Fragment {
         layout2.setGravity(Gravity.CENTER | Gravity.LEFT);
         layoutTurma.addView(layout2);
 
-        EditText turma = new EditText(getContext());
-        turma.setInputType(InputType.TYPE_CLASS_TEXT);
-        turma.setHint("Turma");
-        layout2.addView(turma);
+        spinnerTurma = new Spinner(getContext());
+        if(listTurmas.isEmpty() || !listTurmas.get(0).equalsIgnoreCase("Selecionar turma"))
+            listTurmas.add(0, "Selecionar turma");
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, listTurmas);
+        spinnerTurma.setAdapter(spinnerArrayAdapter);
+        spinnerTurma.setSelection(lastTurma);
+        layout2.addView(spinnerTurma);
 
         TextView textViewAddTurma = new TextView(getContext());
         textViewAddTurma.setText("Adicionar turma");
@@ -170,7 +202,7 @@ public class AdicionarAlunoFragment extends Fragment {
         textViewAddTurma.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                criarTurma();
+                criarTurma(getView());
             }
         });
 
@@ -182,31 +214,81 @@ public class AdicionarAlunoFragment extends Fragment {
         //Config icon
         dialog.setIcon(R.drawable.ic_baseline_person_add_24);
 
-        //Config actions for yes or no
-        dialog.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
+
+        dialog.setNegativeButton("Cancelar", null);
+        dialog.setPositiveButton("Adicionar", null);
+
+        AlertDialog alertDialog = dialog.create();
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onClick(View v) {
+                        if(input.getText().toString().equals("")){
+                            Toast.makeText(
+                                    getContext().getApplicationContext(),
+                                    "Cancelado",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                            dialog.dismiss();
+                        }
+                        else {
+                            if (validarAluno(input.getText().toString(), spinnerTurma.getSelectedItem().toString())) {
+                                Toast.makeText(
+                                        getContext().getApplicationContext(),
+                                        input.getText().toString() + " adicionad(o) com sucesso!",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                                AlunoAddPendente aluno = new AlunoAddPendente();
+                                aluno.setNome(input.getText().toString());
+                                aluno.setTurma(spinnerTurma.getSelectedItem().toString());
+                                listAlunos.add(aluno);
+                                sortList(); // sort list alphabetically and notifify the adapter
+                                adapterAluno.notifyDataSetChanged();
+                                lastTurma = spinnerTurma.getSelectedItemPosition();
+                                dialog.dismiss();
+                            }
+                            else{
+                                Toast.makeText(
+                                        getContext().getApplicationContext(),
+                                        input.getText().toString() + " já existe na turma "+spinnerTurma.getSelectedItem().toString(),
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        alertDialog.show();
+
+    }
+
+    public void criarTurma(View v){
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+
+        dialog.setTitle("Criar turma");
+        dialog.setMessage("Insira o nome ou sigla da turma");
+
+        EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("Turma");
+        dialog.setView(input);
+
+        dialog.setPositiveButton("Criar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(input.getText().toString().equals("")){
-                    Toast.makeText(
-                            getContext().getApplicationContext(),
-                            "Cancelado",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-                else {
-                    Toast.makeText(
-                            getContext().getApplicationContext(),
-                            input.getText().toString()+" adicionad(o) com sucesso!",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    AlunoAddPendente aluno = new AlunoAddPendente();
-                    aluno.setNome(input.getText().toString());
-                    aluno.setTurma(turma.getText().toString());
-                    listAlunos.add(aluno);
-                    sortList(); // sort list alphabetically and notifify the adapter
-                    adapterAluno.notifyDataSetChanged();
-                }
+                String inputText = input.getText().toString();
+                listTurmas.add(inputText);
+                turmaRef.setValue(listTurmas);
+                Toast.makeText(getContext(), "Turma "+inputText+" adicionada com sucesso", Toast.LENGTH_SHORT).show();
+                spinnerTurma.setSelection(listTurmas.indexOf(inputText));
             }
         });
 
@@ -217,13 +299,29 @@ public class AdicionarAlunoFragment extends Fragment {
             }
         });
 
-        //Criar e exibir AlertDialog
         dialog.create();
         dialog.show();
 
     }
 
-    public void criarTurma(){
+    public boolean validarAluno(String nome, String turma){
+
+        List<Aluno> alunos = HomeFragment.getListAlunos();
+        List<String> alunosNome = new LinkedList<>();
+        Map<String, String> mapTurmas = new HashMap<>();
+        for(Aluno aluno : alunos){
+            alunosNome.add(aluno.getNome());
+            mapTurmas.put(aluno.getNome(), aluno.getTurma());
+        }
+        for(AlunoAddPendente aluno : listAlunos){
+            alunosNome.add(aluno.getNome());
+            mapTurmas.put(aluno.getNome(), aluno.getTurma());
+        }
+
+        if(alunosNome.contains(nome) && mapTurmas.get(nome).equalsIgnoreCase(turma))
+            return false;
+
+        return true;
 
     }
 
@@ -240,6 +338,27 @@ public class AdicionarAlunoFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sortList(){ //sort list alphabetically
         listAlunos.sort(Comparator.comparing(AlunoAddPendente::getNome));
+    }
+
+    public void recuperarTurmas(){
+
+        turmaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot turmaSnapshot : snapshot.getChildren()){
+                    String turma = turmaSnapshot.getValue().toString();
+                    listTurmas.add(turma);
+                }
+                abrirDialog();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
 

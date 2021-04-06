@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -100,6 +101,30 @@ public final class HomeFragment extends Fragment {
         recyclerViewAluno.setHasFixedSize(true);
         recyclerViewAluno.setAdapter(adapterAluno);
         recyclerViewAluno.addItemDecoration(new DividerItemDecoration(recyclerViewAluno.getContext(), DividerItemDecoration.VERTICAL));
+
+        textViewSemanaHome.setOnTouchListener(new View.OnTouchListener() {
+            final int DRAWABLE_LEFT = 0;
+            final int DRAWABLE_TOP = 1;
+            final int DRAWABLE_RIGHT = 2;
+            final int DRAWABLE_BOTTOM = 3;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    if(event.getRawX() >= (textViewSemanaHome.getRight() - textViewSemanaHome.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())){ // opens dialog when clicking the drawable on the right
+                        Log.i("Teste", "clicked right");
+                        return true;
+                    }
+                    else if(event.getRawX() >= (textViewSemanaHome.getLeft() - textViewSemanaHome.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())){
+                        Log.i("Teste", "clicked left");
+                        return true;
+                    }
+                    else{
+                        Log.i("Teste", "rawX: "+event.getRawX()+" bound: "+(textViewSemanaHome.getLeft() - textViewSemanaHome.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width()));
+                    }
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -200,41 +225,33 @@ public final class HomeFragment extends Fragment {
             }
         });
 
-        final int[] count = {0};
         //listener para quando uma tarefa for adicionada
         firebaseRef.child("tarefa").child(yearLastTarefaModified).child(monthLastTarefaModified).child(weekIntervalLastTarefaModified).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (!firstTimeLoadingTarefas) {
-                    if (!alunos.isEmpty()) {
-                        Tarefa tarefa = snapshot.getValue(Tarefa.class);
-                        tarefa.setKey(snapshot.getKey());
-                        com.cursoandroid.app_hwreminder.config.Date date = new com.cursoandroid.app_hwreminder.config.Date();
-                        if (weekIntervalLastTarefaModified.equals(date.getWeekIntervalAsChildString())) {
-                            try {
-                                Log.i("Teste", "tarefa in update added");
-                                updateFrequenciaTarefa(tarefa, alunos.get(0), true);
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                Log.i("Teste", "not first time");
+                if (!alunos.isEmpty()) {
+                    Tarefa tarefa = snapshot.getValue(Tarefa.class);
+                    tarefa.setKey(snapshot.getKey());
+                    com.cursoandroid.app_hwreminder.config.Date date = new com.cursoandroid.app_hwreminder.config.Date();
+                    if (weekIntervalLastTarefaModified.equals(date.getWeekIntervalAsChildString())) {
+                        try {
+                            Log.i("Teste", "tarefa in update added");
+                            updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
-                        else{
-                            List<String> listTmpFizeram = new ArrayList();
-                            for (Aluno aluno : getListAlunos()) {
-                                listTmpFizeram.add(aluno.getNome());
-                            }
-                            tarefa.setListAlunosFizeram(listTmpFizeram);
-                            try {
-                                tarefa.salvarListas();
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                    } else {
+                        List<String> listTmpFizeram = new ArrayList();
+                        for (Aluno aluno : getListAlunos()) {
+                            listTmpFizeram.add(aluno.getNome());
                         }
-                    }
-                }
-                else{
-                    if(count[0]++ == tarefas.size()){
-                        firstTimeLoadingTarefas = false;
+                        tarefa.setListAlunosFizeram(listTmpFizeram);
+                        try {
+                            tarefa.salvarListas();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
