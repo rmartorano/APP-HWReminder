@@ -25,11 +25,11 @@ public class Date {
     }
 
     public String getMonthString(){
-        return new SimpleDateFormat("MMMM").format(this.calendar.getTime());
+        return new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(this.calendar.getTime());
     }
 
     public String getYearString(){
-        return new SimpleDateFormat("yyyy").format(this.calendar.getTime());
+        return new SimpleDateFormat("yyyy", new java.util.Locale("pt","BR")).format(this.calendar.getTime());
     }
 
     public String getWeekIntervalAsChildString(){

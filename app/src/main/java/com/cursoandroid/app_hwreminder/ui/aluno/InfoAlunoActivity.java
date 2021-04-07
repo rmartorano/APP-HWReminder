@@ -142,7 +142,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
-        switch (new SimpleDateFormat("MMMM").format(calendar.getTime()).toLowerCase()) {
+        switch (new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(calendar.getTime()).toLowerCase()) {
             case "janeiro":
                 secondSpinner.setSelection(JANEIRO);
                 break;
@@ -380,7 +380,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
         for (Tarefa tarefa : listTarefas) {
             try {
-                calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega()));
+                calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega()));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -508,7 +508,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                             if(spinner.getSelectedItemPosition() == ANUAL)
                                 ano = secondSpinner.getSelectedItem().toString();
                             else
-                                ano = new SimpleDateFormat("yyyy").format(calendar.getTime());
+                                ano = new SimpleDateFormat("yyyy", new java.util.Locale("pt","BR")).format(calendar.getTime());
 
                             Log.i("Teste", "ano: "+ano);
 

@@ -293,7 +293,7 @@ public class AcompanhamentoMainFragment extends Fragment {
                 for(Tarefa tarefa : listTarefas){
                     java.util.Date date = null;
                     try {
-                        date = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
+                        date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
                     } catch (ParseException parseException) {
                         parseException.printStackTrace();
                     }
@@ -345,8 +345,8 @@ public class AcompanhamentoMainFragment extends Fragment {
             if (tarefa.getWeekIntervalAsChildString().equals(data.getWeekIntervalAsChildString())) {
                 //get weekDay string from tarefa
                 try {
-                    dateJava = new SimpleDateFormat("dd/MM/yyyy").parse(tarefa.getDataEntrega());
-                    diaSemanaTarefa = new SimpleDateFormat("EE").format(dateJava);
+                    dateJava = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
+                    diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(dateJava);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

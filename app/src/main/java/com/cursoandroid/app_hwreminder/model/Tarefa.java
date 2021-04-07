@@ -148,7 +148,7 @@ public class Tarefa {
 
     @Exclude
     public String getMonthString() throws ParseException {
-        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega());
+        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(this.getDataEntrega());
         Calendar calendar = Calendar.getInstance();
         Calendar sexta = Calendar.getInstance();
         calendar.setTime(date);
@@ -158,16 +158,16 @@ public class Tarefa {
         sexta.setTimeInMillis(sextaMili);
 
         if(sexta.get(Calendar.MONTH) != calendar.get(Calendar.MONTH)){ //se o mês de segunda e sexta forem diferentes, retorna o mês de segunda
-            return new SimpleDateFormat("MMMM").format(calendar.getTime());
+            return new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(calendar.getTime());
         }
         else
-            return new SimpleDateFormat("MMMM").format(sexta.getTime());
+            return new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(sexta.getTime());
     }
 
     @Exclude
     public String getYearString() throws ParseException {
-        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega());
-        return new SimpleDateFormat("yyyy").format(date);
+        java.util.Date date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(this.getDataEntrega());
+        return new SimpleDateFormat("yyyy", new java.util.Locale("pt","BR")).format(date);
     }
 
     @Exclude
@@ -176,7 +176,7 @@ public class Tarefa {
         Calendar calendar = Calendar.getInstance();
         Calendar sexta = Calendar.getInstance();
         try {
-            calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(this.getDataEntrega()));
+            calendar.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(this.getDataEntrega()));
         } catch (ParseException e) {
             e.printStackTrace();
         }

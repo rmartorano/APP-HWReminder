@@ -119,7 +119,7 @@ public class ReminderFragment extends Fragment {
 
         //date picker
 
-        editDate = (EditText) view.findViewById(R.id.deadlineDate);
+        editDate = view.findViewById(R.id.deadlineDate);
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -153,7 +153,7 @@ public class ReminderFragment extends Fragment {
 
     private void updateLabel() {
         String myFormat = "dd/MM/yyyy"; //Date format
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, new java.util.Locale("pt","BR"));
 
         editDate.setText(sdf.format(myCalendar.getTime()));
     }
