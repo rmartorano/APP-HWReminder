@@ -48,6 +48,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -574,6 +575,7 @@ public final class HomeFragment extends Fragment {
                     Aluno aluno = dados.getValue(Aluno.class);
                     alunos.add(aluno);
                 }
+                alunos.sort(Comparator.comparing(Aluno::getNome));
                 adapterAluno.notifyDataSetChanged();
                 recuperarTarefas();
             }

@@ -68,7 +68,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
     private PieChart pieChart;
     private Map<String, Integer> mapQtdTarefas = new HashMap<>();
     private Spinner spinner, secondSpinner, thirdSpinner;
-    private boolean hasThirdSpinnerIdChanged, hasSecondSpinnerIdChanged = false, hasFirstSpinnerIdChanged = false;
+    private boolean hasSecondSpinnerIdChanged = false, hasFirstSpinnerIdChanged = false;
     private boolean firstTimeLoading = true;
     private int firstSpinnerLastPos = 0, secondSpinnerLastPos, thirdSpinnerLastPos;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
@@ -462,7 +462,6 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 if (thirdSpinnerLastPos != position) {
                     Log.i("Teste", "changed third spinner");
                     thirdSpinnerLastPos = position;
-                    hasThirdSpinnerIdChanged = true;
                     generateChart(spinner.getSelectedItemPosition());
                 }
             }

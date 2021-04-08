@@ -9,7 +9,7 @@
 
 
     <ImageView
-        android:id="@+id/imageView6"
+        android:id="@+id/imageViewAlunosMaisFizeram"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginTop="16dp"
@@ -29,9 +29,9 @@
         android:gravity="center"
         android:text="Alunos que mais\nfizeram lições"
         android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="@+id/imageView6"
-        app:layout_constraintStart_toStartOf="@+id/imageView6"
-        app:layout_constraintTop_toBottomOf="@+id/imageView6" />
+        app:layout_constraintEnd_toEndOf="@+id/imageViewAlunosMaisFizeram"
+        app:layout_constraintStart_toStartOf="@+id/imageViewAlunosMaisFizeram"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewAlunosMaisFizeram" />
 
     <ImageView
         android:id="@+id/imageView8"
@@ -42,7 +42,7 @@
         android:layout_marginRight="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.677"
-        app:layout_constraintStart_toEndOf="@+id/imageView6"
+        app:layout_constraintStart_toEndOf="@+id/imageViewAlunosMaisFizeram"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_mood_bad_48" />
 

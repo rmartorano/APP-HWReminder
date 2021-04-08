@@ -1,11 +1,14 @@
 package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -94,6 +97,13 @@ public class AcompanhamentoGeralFragment extends Fragment {
                 abrirFeedbackAlunos();
             }
         });
+        ImageView imageViewAlunosMaisFizeram = view.findViewById(R.id.imageViewAlunosMaisFizeram);
+        imageViewAlunosMaisFizeram.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirAlunosMaisFizeram();
+            }
+        });
     }
 
     private void abrirFeedbackAlunos(){ // abre uma view com a frequencia dos alunos
@@ -138,6 +148,10 @@ public class AcompanhamentoGeralFragment extends Fragment {
                 return false;
             }
         });
+    }
+
+    private void abrirAlunosMaisFizeram(){
+        getActivity().startActivity(new Intent(getContext(), MaisFizeramActivity.class));
     }
 
     void filtrarAlunos(String query, AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback, List<Aluno> alunosFiltro){
