@@ -256,7 +256,7 @@ public final class HomeFragment extends Fragment {
                             java.util.Date date;
                             try {
                                 date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefaTmp.getDataEntrega());
-                                diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date);
+                                diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
                             } catch (ParseException parseException) {
                                 parseException.printStackTrace();
                             }
@@ -378,7 +378,7 @@ public final class HomeFragment extends Fragment {
                             //get weekDay string from tarefa
                             try {
                                 date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date);
+                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -440,7 +440,7 @@ public final class HomeFragment extends Fragment {
                                             String diaSemana = "";
                                             try {
                                                 date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-                                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date);
+                                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
                                             } catch (ParseException e) {
                                                 e.printStackTrace();
                                             }
@@ -586,7 +586,7 @@ public final class HomeFragment extends Fragment {
 
     private void formatDayColorDaily(View view) {
         Calendar c = Calendar.getInstance();
-        String today = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(c.getTime());
+        String today = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(c.getTime()).replaceAll("\\.", "");
         TextView textView = null;
         switch (today) {
             case "ter":
@@ -617,7 +617,7 @@ public final class HomeFragment extends Fragment {
         //get weekDay string from tarefa
         try {
             date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-            diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date);
+            diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
         } catch (ParseException e) {
             e.printStackTrace();
         }

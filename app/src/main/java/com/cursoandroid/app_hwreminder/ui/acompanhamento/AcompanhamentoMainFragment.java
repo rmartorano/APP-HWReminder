@@ -346,7 +346,7 @@ public class AcompanhamentoMainFragment extends Fragment {
                 //get weekDay string from tarefa
                 try {
                     dateJava = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-                    diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(dateJava);
+                    diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(dateJava).replaceAll("\\.", "");
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

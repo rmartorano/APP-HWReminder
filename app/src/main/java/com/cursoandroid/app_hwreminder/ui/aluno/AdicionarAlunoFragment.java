@@ -143,22 +143,21 @@ public class AdicionarAlunoFragment extends Fragment {
 
         TextView textViewAddAluno = view.findViewById(R.id.textViewAddAluno);
         textViewAddAluno.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onClick(View v) {
+                Log.i("Teste", "clicked");
                 if(listTurmas.isEmpty()){
                     recuperarTurmas();
                 }
                 else
-                    abrirDialog();
+                    abrirDialog(v);
             }
         });
 
         return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public void abrirDialog(){
+    public void abrirDialog(View v){
 
         //Instance alertDialog
         AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
@@ -237,7 +236,7 @@ public class AdicionarAlunoFragment extends Fragment {
                             dialog.dismiss();
                         }
                         else {
-                            if (validarAluno(input.getText().toString(), spinnerTurma.getSelectedItem().toString())) {
+                            if (validarAluno(input.getText().toString(), spinnerTurma.getSelectedItem().toString(), input)) {
                                 Toast.makeText(
                                         getContext().getApplicationContext(),
                                         input.getText().toString() + " adicionad(o) com sucesso!",
@@ -251,13 +250,6 @@ public class AdicionarAlunoFragment extends Fragment {
                                 adapterAluno.notifyDataSetChanged();
                                 lastTurma = spinnerTurma.getSelectedItemPosition();
                                 dialog.dismiss();
-                            }
-                            else{
-                                Toast.makeText(
-                                        getContext().getApplicationContext(),
-                                        input.getText().toString() + " já existe na turma "+spinnerTurma.getSelectedItem().toString(),
-                                        Toast.LENGTH_SHORT
-                                ).show();
                             }
                         }
                     }
@@ -304,7 +296,7 @@ public class AdicionarAlunoFragment extends Fragment {
 
     }
 
-    public boolean validarAluno(String nome, String turma){
+    public boolean validarAluno(String nome, String turma, EditText input){
 
         List<Aluno> alunos = HomeFragment.getListAlunos();
         List<String> alunosNome = new LinkedList<>();
@@ -318,8 +310,14 @@ public class AdicionarAlunoFragment extends Fragment {
             mapTurmas.put(aluno.getNome(), aluno.getTurma());
         }
 
-        if(alunosNome.contains(nome) && mapTurmas.get(nome).equalsIgnoreCase(turma))
+        if(alunosNome.contains(nome) && mapTurmas.get(nome).equalsIgnoreCase(turma)){
+            Toast.makeText(
+                    getContext().getApplicationContext(),
+                    input.getText().toString() + " já existe na turma "+spinnerTurma.getSelectedItem().toString(),
+                    Toast.LENGTH_SHORT
+            ).show();
             return false;
+        }
 
         return true;
 
@@ -350,7 +348,7 @@ public class AdicionarAlunoFragment extends Fragment {
                     String turma = turmaSnapshot.getValue().toString();
                     listTurmas.add(turma);
                 }
-                abrirDialog();
+                abrirDialog(getView());
             }
 
             @Override
