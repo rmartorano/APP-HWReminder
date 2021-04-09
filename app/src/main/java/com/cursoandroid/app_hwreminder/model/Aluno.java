@@ -15,6 +15,7 @@ public class Aluno {
 
     private String nome, diaSemana = "seg", turma;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
+    private int qtdProgressBarTarefasFeitas, qtdProgressBarTarefasNaoFeitas;
 
     public Aluno() {
         checkBoxSegunda = checkBoxTerca = checkBoxQuarta = checkBoxQuinta = checkBoxSexta = true;
@@ -129,4 +130,21 @@ public class Aluno {
                 .setValue(checkBoxes);
     }
 
+    @Exclude
+    public int getQtdProgressBarTarefasFeitas() {
+        return qtdProgressBarTarefasFeitas;
+    }
+
+    public void setQtdProgressBarTarefasFeitas(int qtdProgressBarTarefasFeitas) {
+        this.qtdProgressBarTarefasFeitas = qtdProgressBarTarefasFeitas;
+    }
+
+    @Exclude
+    public int getQtdProgressBarTarefasNaoFeitas() {
+        return qtdProgressBarTarefasNaoFeitas;
+    }
+
+    public void setQtdProgressBarTarefasNaoFeitas(int qtdProgressBarTarefasNaoFeitas) {
+        this.qtdProgressBarTarefasNaoFeitas = qtdProgressBarTarefasNaoFeitas;
+    }
 }

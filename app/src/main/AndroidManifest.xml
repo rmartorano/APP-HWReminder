@@ -12,7 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.APPHWReminder">
-        <activity android:name=".ui.acompanhamento.MaisFizeramActivity"></activity>
+        <activity android:name=".ui.acompanhamento.MaisFizeramActivity"
+            android:windowSoftInputMode="stateHidden">
+        </activity>
         <activity
             android:name=".ui.aluno.InfoAlunoActivity"
             android:screenOrientation="portrait"></activity>

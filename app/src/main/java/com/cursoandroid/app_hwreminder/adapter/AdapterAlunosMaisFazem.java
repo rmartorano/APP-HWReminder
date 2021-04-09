@@ -61,6 +61,8 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
         holder.progressBarFez.setMax(listTarefas.size());
         holder.progressBarNaoFez.setMax(listTarefas.size());
         holder.progressBarNaoFez.setProgressTintList(ColorStateList.valueOf(Color.RED));
+        holder.progressBarFez.setProgress(0);
+        holder.progressBarNaoFez.setProgress(0);
 
         for(Tarefa tarefa : listTarefas){
             if(tarefa.getListAlunosFizeram().contains(aluno.getNome()))
@@ -69,6 +71,9 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
             else if(tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
                 holder.progressBarNaoFez.setProgress(holder.progressBarNaoFez.getProgress()+1);
         }
+
+        aluno.setQtdProgressBarTarefasFeitas(holder.progressBarFez.getProgress());
+        aluno.setQtdProgressBarTarefasNaoFeitas(holder.progressBarNaoFez.getProgress());
 
         holder.qtdFez.setText(""+holder.progressBarFez.getProgress());
         holder.qtdNaoFez.setText(""+holder.progressBarNaoFez.getProgress());

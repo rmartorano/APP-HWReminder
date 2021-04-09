@@ -54,7 +54,12 @@
 
     <string-array name="array_filtro_info_aluno_intervalo_semana">
         <item>XX/XX a XX/XX</item>
+    </string-array>
 
+    <string-array name="array_ordenar_acompanhamento_progress_bar">
+        <item>Nome</item>
+        <item>Tarefas feitas</item>
+        <item>Tarefas não feitas</item>
     </string-array>
 
 </resources>
