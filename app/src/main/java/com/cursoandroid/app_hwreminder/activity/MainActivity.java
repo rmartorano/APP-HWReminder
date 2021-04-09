@@ -2,13 +2,20 @@ package com.cursoandroid.app_hwreminder.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
+import android.view.View;
+
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
@@ -26,41 +33,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        //Drawer
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_acompanhamento, R.id.nav_aluno, R.id.nav_reminder)
-                .setOpenableLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+        setContentView(R.layout.intro_cadastrar_logar);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+    protected void onStart() {
+        super.onStart();
+        verificarUsuarioLogado();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+    public void verificarUsuarioLogado(){
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        //autenticacao.signOut();
+        if(autenticacao.getCurrentUser() != null){
+            startActivity(new Intent(this, PrincipalActivity.class));
+        }
     }
 
-    //Method below was required because I was losing instance of fragment so now when clicking 'Lista de tarefas', it creates a new one again
-    public void startHomeHolder(MenuItem item) {
-        startActivity(new Intent(this, MainActivity.class));
+    public void btCadastrar(View view){
+        startActivity(new Intent(this, CadastroActivity.class));
     }
+
 }

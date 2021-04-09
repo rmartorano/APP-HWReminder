@@ -2,8 +2,6 @@ package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,41 +14,24 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.SearchView;
 import android.widget.TextView;
 
-import com.cursoandroid.app_hwreminder.activity.MainActivity;
-import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
-import com.cursoandroid.app_hwreminder.ui.aluno.AdicionarAlunoFragment;
-import com.cursoandroid.app_hwreminder.ui.aluno.InfoAlunoActivity;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
-import com.cursoandroid.app_hwreminder.ui.home.HomeFragmentMonthly;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.IMarker;
-import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -60,9 +41,6 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.MPPointF;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -253,7 +231,6 @@ public class AcompanhamentoMainFragment extends Fragment {
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
                 getActivity().getSupportFragmentManager(), FragmentPagerItems.with(getContext())
                 .add("Geral", AcompanhamentoGeralFragment.class)
-                .add("Filtrar", HomeFragmentMonthly.class)
                 .create());
 
         ViewPager viewPager = view.findViewById(R.id.viewpager);

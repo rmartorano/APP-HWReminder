@@ -22,7 +22,7 @@
 
         <item
             android:id="@+id/nav_acompanhamento"
-            android:icon="@drawable/ic_menu_send"
+            android:icon="@drawable/ic_baseline_show_chart_24"
             android:title="Acompanhamento"/>
 
     </group>

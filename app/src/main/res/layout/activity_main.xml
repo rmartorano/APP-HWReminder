@@ -8,6 +8,12 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
+    <FrameLayout
+        android:id="@+id/fragment_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"></FrameLayout>
+
     <include
         layout="@layout/app_bar_main"
         android:layout_width="match_parent"
