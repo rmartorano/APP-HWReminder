@@ -60,7 +60,9 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         //atualiza seleção das checkBoxes
         Date date = new Date();
         String year = date.getYearString();
-        ConfiguracaoFirebase.getFirebaseDatabase().child("aluno")
+        ConfiguracaoFirebase.getFirebaseDatabase()
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("aluno")
                 .child(year)
                 .child(aluno.getTurma())
                 .child(aluno.getNome()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -154,9 +156,10 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                             int countDado = 0, countSemana = 0, countMes = 0, countAno = 0;
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                firebaseRef.child("aluno").child(aluno.getNome()).removeValue();
+                                String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-");
+                                firebaseRef.child(user).child("aluno").child(aluno.getNome()).removeValue();
                                 for(int mes = 0 ; mes < 11 ; mes++){
-                                    firebaseRef.child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    firebaseRef.child(user).child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
                                         @RequiresApi(api = Build.VERSION_CODES.N)
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {

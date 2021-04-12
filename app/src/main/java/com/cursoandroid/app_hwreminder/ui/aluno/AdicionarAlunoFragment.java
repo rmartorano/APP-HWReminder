@@ -34,6 +34,7 @@ import com.cursoandroid.app_hwreminder.adapter.AdapterAddAlunoPendente;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAluno;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.config.Date;
+import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
@@ -128,7 +129,9 @@ public class AdicionarAlunoFragment extends Fragment {
 
         Date date = new Date();
 
-        turmaRef = firebaseRef.child("Configurações HomeFragment")
+        turmaRef = firebaseRef
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("Configurações HomeFragment")
                 .child("turmas")
                 .child(date.getYearString());
 
@@ -145,7 +148,6 @@ public class AdicionarAlunoFragment extends Fragment {
         textViewAddAluno.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("Teste", "clicked");
                 if(listTurmas.isEmpty()){
                     recuperarTurmas();
                 }
@@ -331,6 +333,7 @@ public class AdicionarAlunoFragment extends Fragment {
             aluno.salvar();
             HomeFragment.setLastTurmaModified(alunoAdd.getTurma());
         }
+        Log.i("Teste", "last turma: "+HomeFragment.getLastTurmaModified());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -359,5 +362,9 @@ public class AdicionarAlunoFragment extends Fragment {
 
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        HomeFragmentConfigs.salvarConfigs();
+    }
 }

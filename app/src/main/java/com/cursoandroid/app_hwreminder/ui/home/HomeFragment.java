@@ -12,8 +12,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +66,7 @@ public final class HomeFragment extends Fragment {
     private static String monthLastTarefaModified = " ", yearLastTarefaModified = " ", weekIntervalLastTarefaModified = " ", lastTurmaModified = " ";
     private com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
     private ChildEventListener tarefaChildEventListener, alunoEventListener;
+    private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".","-");
 
     private TextView textViewDescricao;
 
@@ -84,6 +87,7 @@ public final class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Log.i("Teste", "onViewCreated");
+        Log.i("Teste", "user: "+ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail());
 
         TextView textDiaSemana = view.findViewById(R.id.textViewDiaSemana);
         TextView textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
@@ -204,11 +208,12 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.i("Teste", "last turma on pause: "+HomeFragment.getLastTurmaModified());
         HomeFragmentConfigs.salvarConfigs();
     }
 
     public void recuperarConfigs() {
-        firebaseRef.child("Configurações HomeFragment").addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseRef.child(user).child("Configurações HomeFragment").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() == null) {
@@ -223,7 +228,7 @@ public final class HomeFragment extends Fragment {
                 HomeFragment.setMonthLastTarefaModified(snapshot.child("geral").child("mes").getValue().toString());
                 HomeFragment.setWeekIntervalLastTarefaModified(snapshot.child("geral").child("intervalo da semana").getValue().toString());
                 HomeFragment.setLastTurmaModified(snapshot.child("geral").child("turma").getValue().toString());
-                recuperarListaAlunos();
+                recuperarTurmas();
             }
 
             @Override
@@ -233,12 +238,38 @@ public final class HomeFragment extends Fragment {
         });
     }
 
+    public void recuperarTurmas(){
+        Spinner spinnerTurmaHome = getView().findViewById(R.id.spinnerTurmaHome);
+        List<String> spinnerArray =  new ArrayList<String>();
+        firebaseRef.child(user).child("Configurações HomeFragment").child("turmas").child(dateFromProject.getYearString()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot turma : snapshot.getChildren()){
+                    Log.i("Teste", "turma: "+turma.getValue());
+                    if(!turma.getValue().equals("Selecionar turma")){
+                        spinnerArray.add(turma.getValue().toString());
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        getContext(), android.R.layout.simple_spinner_item, spinnerArray);
+                spinnerTurmaHome.setAdapter(adapter);
+                recuperarListaAlunos();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void addListeners() {
 
         Calendar calendar = Calendar.getInstance();
         //listener para quando um aluo for alterado
-        alunoEventListener = firebaseRef.child("aluno").child(String.valueOf(calendar.get(Calendar.YEAR))).child(lastTurmaModified).addChildEventListener(new ChildEventListener() {
+        alunoEventListener = firebaseRef.child(user).child("aluno").child(String.valueOf(calendar.get(Calendar.YEAR))).child(lastTurmaModified).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
             }
@@ -291,7 +322,7 @@ public final class HomeFragment extends Fragment {
         });
 
         //listener para quando uma tarefa for adicionada
-        tarefaChildEventListener = firebaseRef.child("tarefa").child(yearLastTarefaModified).child(monthLastTarefaModified).child(weekIntervalLastTarefaModified).addChildEventListener(new ChildEventListener() {
+        tarefaChildEventListener = firebaseRef.child(user).child("tarefa").child(yearLastTarefaModified).child(monthLastTarefaModified).child(weekIntervalLastTarefaModified).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (!alunos.isEmpty()) {
@@ -343,7 +374,7 @@ public final class HomeFragment extends Fragment {
 
     private void recuperarTarefas() {
         Log.i("Teste", "called recuperar tarefas");
-        firebaseRef.child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseRef.child(user).child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -468,7 +499,7 @@ public final class HomeFragment extends Fragment {
                                                     throw new IllegalStateException("Unexpected value: " + diaSemana);
                                             }
                                             try {
-                                                firebaseRef.child("tarefa")
+                                                firebaseRef.child(user).child("tarefa")
                                                         .child(tarefa.getYearString())
                                                         .child(tarefa.getMonthString())
                                                         .child(tarefa.getWeekIntervalAsChildString())
@@ -566,7 +597,7 @@ public final class HomeFragment extends Fragment {
 
     private void recuperarListaAlunos() {
         Calendar calendar = Calendar.getInstance();
-        firebaseRef.child("aluno").child(String.valueOf(calendar.get(Calendar.YEAR))).child(lastTurmaModified).addListenerForSingleValueEvent(new ValueEventListener() {
+        firebaseRef.child(user).child("aluno").child(String.valueOf(calendar.get(Calendar.YEAR))).child(lastTurmaModified).addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -626,7 +657,7 @@ public final class HomeFragment extends Fragment {
         String finalDiaSemana = diaSemana;
         String yearString = tarefa.getYearString();
         String nomeAluno = aluno.getNome();
-        firebaseRef.child("aluno")
+        firebaseRef.child(user).child("aluno")
                 .child(yearString)
                 .child(aluno.getTurma())
                 .child(nomeAluno)

@@ -22,7 +22,9 @@ public class Usuario {
 
     public void salvar(){
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebase.child("usuarios")
+        firebase
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("usuarios")
                 .child(this.idUsuario)
                 .setValue(this);
     }

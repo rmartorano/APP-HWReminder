@@ -102,7 +102,9 @@ public class Aluno {
     public void salvar(){
         Calendar calendar = Calendar.getInstance();
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebase.child("aluno")
+        firebase
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("aluno")
                 .child(String.valueOf(calendar.get(Calendar.YEAR)))
                 .child(this.turma)
                 .child(this.nome)
@@ -122,7 +124,9 @@ public class Aluno {
         checkBoxes.put("checkedBoxSexta", this.checkBoxSexta);
         checkBoxes.put("diaSemana", this.diaSemana);
 
-        firebase.child("aluno")
+        firebase
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("aluno")
                 .child(String.valueOf(calendar.get(Calendar.YEAR)))
                 .child(this.turma)
                 .child(this.nome)

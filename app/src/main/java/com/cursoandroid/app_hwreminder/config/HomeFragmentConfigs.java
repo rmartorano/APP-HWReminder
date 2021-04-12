@@ -22,7 +22,9 @@ public class HomeFragmentConfigs {
         map.put("intervalo da semana", HomeFragment.getWeekIntervalLastTarefaModified());
         map.put("turma", HomeFragment.getLastTurmaModified());
 
-        firebaseRef.child("Configurações HomeFragment")
+        firebaseRef
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("Configurações HomeFragment")
                 .child("geral")
                 .setValue(map);
     }

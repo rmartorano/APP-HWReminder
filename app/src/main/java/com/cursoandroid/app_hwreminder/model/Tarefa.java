@@ -79,7 +79,9 @@ public class Tarefa {
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         this.key = firebase.push().getKey();
-        firebase.child("tarefa")
+        firebase
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
                 .child(this.getWeekIntervalAsChildString())
@@ -91,7 +93,9 @@ public class Tarefa {
     public void deletarTarefa() throws ParseException {
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebase.child("tarefa")
+        firebase
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
                 .child(this.getWeekIntervalAsChildString())
@@ -192,7 +196,9 @@ public class Tarefa {
     @Exclude
     public void salvarListas() throws ParseException {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        firebaseRef.child("tarefa")
+        firebaseRef
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
                 .child(this.getWeekIntervalAsChildString())
@@ -200,7 +206,9 @@ public class Tarefa {
                 .child("Alunos que fizeram")
                 .setValue(this.listAlunosFizeram);
 
-        firebaseRef.child("tarefa")
+        firebaseRef
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
                 .child(this.getWeekIntervalAsChildString())

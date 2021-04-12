@@ -73,23 +73,32 @@
         <LinearLayout
             android:layout_width="130dp"
             android:layout_height="match_parent"
-            android:background="@drawable/textlines_right_divisor"
+            android:background="@drawable/textlines_spaced_bottom_right"
+            android:gravity="center"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textViewListarAlunos"
                 android:layout_width="match_parent"
-                android:layout_height="142dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/textlines_spaced_bottom"
                 android:clickable="true"
-                android:drawableBottom="@drawable/ic_baseline_format_list_bulleted_24"
                 android:gravity="center"
                 android:paddingTop="8dp"
-                android:text="Acessar histórico dos alunos"
+                android:text="Turma"
                 android:textColor="@color/red"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinnerTurmaHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:clipToPadding="false"
+                android:gravity="center"
+                android:spinnerMode="dialog" />
 
         </LinearLayout>
 

@@ -46,12 +46,17 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         //autenticacao.signOut();
         if(autenticacao.getCurrentUser() != null){
+            Log.i("Teste", "user: "+autenticacao.getCurrentUser());
             startActivity(new Intent(this, PrincipalActivity.class));
         }
     }
 
     public void btCadastrar(View view){
         startActivity(new Intent(this, CadastroActivity.class));
+    }
+
+    public void btEntrar(View view){
+        startActivity(new Intent(this, LoginActivity.class));
     }
 
 }
