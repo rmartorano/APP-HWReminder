@@ -103,7 +103,7 @@ public class Aluno {
         Calendar calendar = Calendar.getInstance();
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("aluno")
                 .child(String.valueOf(calendar.get(Calendar.YEAR)))
                 .child(this.turma)
@@ -125,7 +125,7 @@ public class Aluno {
         checkBoxes.put("diaSemana", this.diaSemana);
 
         firebase
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getUid())
                 .child("aluno")
                 .child(String.valueOf(calendar.get(Calendar.YEAR)))
                 .child(this.turma)

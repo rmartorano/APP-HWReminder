@@ -23,7 +23,7 @@ public class HomeFragmentConfigs {
         map.put("turma", HomeFragment.getLastTurmaModified());
 
         firebaseRef
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("Configurações HomeFragment")
                 .child("geral")
                 .setValue(map);

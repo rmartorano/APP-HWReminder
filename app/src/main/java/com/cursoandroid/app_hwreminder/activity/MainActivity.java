@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity {
     public void verificarUsuarioLogado(){
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         //autenticacao.signOut();
+        Log.i("Teste", "teste");
         if(autenticacao.getCurrentUser() != null){
-            Log.i("Teste", "user: "+autenticacao.getCurrentUser());
+            Log.i("Teste", "user: "+autenticacao.getCurrentUser().getUid());
             startActivity(new Intent(this, PrincipalActivity.class));
         }
     }

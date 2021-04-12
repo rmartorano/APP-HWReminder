@@ -80,7 +80,7 @@ public class Tarefa {
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         this.key = firebase.push().getKey();
         firebase
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
@@ -94,7 +94,7 @@ public class Tarefa {
 
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
         firebase
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
@@ -197,7 +197,7 @@ public class Tarefa {
     public void salvarListas() throws ParseException {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         firebaseRef
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())
@@ -207,7 +207,7 @@ public class Tarefa {
                 .setValue(this.listAlunosFizeram);
 
         firebaseRef
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("tarefa")
                 .child(this.getYearString())
                 .child(this.getMonthString())

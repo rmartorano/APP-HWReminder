@@ -130,7 +130,7 @@ public class AdicionarAlunoFragment extends Fragment {
         Date date = new Date();
 
         turmaRef = firebaseRef
-                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                 .child("Configurações HomeFragment")
                 .child("turmas")
                 .child(date.getYearString());

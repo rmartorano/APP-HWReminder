@@ -320,7 +320,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 if(hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged){
 
                     firebaseRef
-                            .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                            .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                             .child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -500,7 +500,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
             Calendar calendar = Calendar.getInstance();
             int finalMes = mes;
             firebaseRef
-                    .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".", "-"))
+                    .child(ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid())
                     .child("tarefa")
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @RequiresApi(api = Build.VERSION_CODES.N)

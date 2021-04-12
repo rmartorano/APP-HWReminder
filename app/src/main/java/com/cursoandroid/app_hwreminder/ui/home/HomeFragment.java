@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -66,7 +67,7 @@ public final class HomeFragment extends Fragment {
     private static String monthLastTarefaModified = " ", yearLastTarefaModified = " ", weekIntervalLastTarefaModified = " ", lastTurmaModified = " ";
     private com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
     private ChildEventListener tarefaChildEventListener, alunoEventListener;
-    private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail().replace(".","-");
+    private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
 
     private TextView textViewDescricao;
 
@@ -137,6 +138,7 @@ public final class HomeFragment extends Fragment {
                         HomeFragmentConfigs.salvarConfigs();
                         week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
                         textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
+                        dateFromProject.setCalendarTime(calendarProject.getTime());
                         onStart();
                         return true;
                     }
@@ -151,6 +153,7 @@ public final class HomeFragment extends Fragment {
                         HomeFragmentConfigs.salvarConfigs();
                         week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
                         textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
+                        dateFromProject.setCalendarTime(calendarProject.getTime());
                         onStart();
                         return true;
                     }
@@ -750,7 +753,6 @@ public final class HomeFragment extends Fragment {
                 anyChange = true;
             }
         }
-        Log.i("Teste", "Any change: " + anyChange);
         if (anyChange)
             tarefa.salvarListas();
     }

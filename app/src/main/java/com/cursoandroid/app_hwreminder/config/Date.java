@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class Date {
 
-    private long sextaMili;
-    private Calendar calendar, sexta;
+    private static long sextaMili;
+    private static Calendar calendar, sexta;
     private static DecimalFormat mFormat = new DecimalFormat("00");
 
     public Date(){
@@ -24,23 +24,23 @@ public class Date {
         this.sexta.setTimeInMillis(sextaMili);
     }
 
-    public String getMonthString(){
-        return new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(this.calendar.getTime());
+    public static String getMonthString(){
+        return new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(calendar.getTime());
     }
 
-    public String getYearString(){
-        return new SimpleDateFormat("yyyy", new java.util.Locale("pt","BR")).format(this.calendar.getTime());
+    public static String getYearString(){
+        return new SimpleDateFormat("yyyy", new java.util.Locale("pt","BR")).format(calendar.getTime());
     }
 
-    public String getWeekIntervalAsChildString(){
-        return "Semana "+mFormat.format(Double.valueOf(this.calendar.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(this.calendar.get(Calendar.MONTH)+1))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1));
+    public static String getWeekIntervalAsChildString(){
+        return "Semana "+mFormat.format(Double.valueOf(calendar.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(calendar.get(Calendar.MONTH)+1))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" | "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1));
     }
 
-    public String getWeekInterval(){
-        return "Semana "+mFormat.format(Double.valueOf(this.calendar.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(this.calendar.get(Calendar.MONTH)+1))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1));
+    public static String getWeekInterval(){
+        return "Semana "+mFormat.format(Double.valueOf(calendar.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(calendar.get(Calendar.MONTH)+1))+" a "+mFormat.format(Double.valueOf(sexta.get(Calendar.DAY_OF_MONTH)))+" / "+mFormat.format(Double.valueOf(sexta.get(Calendar.MONTH)+1));
     }
 
-    public Map<String, String> getAllWeekIntervals(int mes) {
+    public static Map<String, String> getAllWeekIntervals(int mes) {
 
         Map<String, String> map = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
@@ -71,23 +71,27 @@ public class Date {
         return map;
     }
 
-    public Calendar getCalendar() {
+    public static Calendar getCalendar() {
         return calendar;
     }
 
     public void setCalendarTime(java.util.Date time){
-        this.calendar.setTime(time);
+        calendar.setTime(time);
     }
 
-    public Calendar getSexta(){
+    public static Calendar getSexta(){
         return sexta;
     }
 
-    public void setSextaInMili(long mili){
-        this.sexta.setTimeInMillis(mili);
+    public void setSexta(Calendar sexta) {
+        Date.sexta = sexta;
     }
 
-    public long getSextaMili() {
+    public void setSextaInMili(long mili){
+        sexta.setTimeInMillis(mili);
+    }
+
+    public static long getSextaMili() {
         return sextaMili;
     }
 }

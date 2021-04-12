@@ -2,6 +2,7 @@ package com.cursoandroid.app_hwreminder.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -88,10 +89,12 @@ public class CadastroActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
-                    startActivity(new Intent(getApplicationContext(), PrincipalActivity.class));
+                    autenticacao.signInWithEmailAndPassword(usuario.getEmail(), usuario.getSenha());
+                    Log.i("Teste", "is auth: "+autenticacao.getCurrentUser().getUid());
                     String idUsuario = usuario.getEmail();
                     usuario.setIdUsuario(idUsuario);
                     usuario.salvar();
+                    startActivity(new Intent(getApplicationContext(), PrincipalActivity.class));
                 }
                 else{
                     String execao = "";
