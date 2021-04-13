@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -23,13 +24,22 @@ import android.widget.Toast;
 
 import com.cursoandroid.app_hwreminder.activity.MainActivity;
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -43,7 +53,7 @@ public class ReminderFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
     private EditText editDate, editTitulo, editDescricao;
-    private Spinner spinner;
+    private Spinner spinner, spinnerTurma;
     private Button buttonSalvar;
     private final Calendar myCalendar = Calendar.getInstance();
     private Tarefa tarefa;
@@ -103,6 +113,7 @@ public class ReminderFragment extends Fragment {
         buttonSalvar = view.findViewById(R.id.buttonSalvar);
         spinner = view.findViewById(R.id.disciplines_spinner);
         editDate = view.findViewById(R.id.deadlineDate);
+        recuperarTurmas();
 
         //onClick para salvar tarefa
         buttonSalvar.setOnClickListener(new View.OnClickListener() {
@@ -161,7 +172,7 @@ public class ReminderFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void salvarTarefa(View view) throws ParseException {
         if(validarCampos()){
-            tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString());
+            tarefa = new Tarefa(editTitulo.getText().toString(), spinner.getSelectedItem().toString(), editDate.getText().toString(), editDescricao.getText().toString(), spinnerTurma.getSelectedItem().toString());
             HomeFragment.setMonthLastTarefaModified(tarefa.getMonthString());
             HomeFragment.setYearLastTarefaModified(tarefa.getYearString());
             HomeFragment.setWeekIntervalLastTarefaModified(tarefa.getWeekIntervalAsChildString());
@@ -178,7 +189,13 @@ public class ReminderFragment extends Fragment {
             if(!editDescricao.getText().toString().equals("") && editDescricao.getText() != null){
                 if(!spinner.getSelectedItem().toString().equals("Selecione uma disciplina") && spinner.getSelectedItem() != null) {
                     if(!editDate.getText().toString().equals("") && editDate.getText() != null){
-                        return true;
+                        if(!(spinnerTurma.getSelectedItem().toString() == null) && !spinnerTurma.getSelectedItem().toString().equals("")){
+                            return true;
+                        }
+                        else{
+                            Toast.makeText(getContext(), "Selecione ou crie uma turma primeiro", Toast.LENGTH_SHORT).show();
+                            return false;
+                        }
                     }
                     else{
                         Toast.makeText(getContext(), "Escolha uma data", Toast.LENGTH_SHORT).show();
@@ -199,6 +216,57 @@ public class ReminderFragment extends Fragment {
             Toast.makeText(getContext(), "Preencha o campo Título", Toast.LENGTH_SHORT).show();
             return false;
         }
+    }
+
+    public void recuperarTurmas(){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+        String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
+        spinnerTurma = getView().findViewById(R.id.spinnerTurmaCriarTarefa);
+        Date dateFromProject = new Date();
+        final String[] lastTurmaModified = {HomeFragment.getLastTurmaModified()};
+        List<String> spinnerArray =  new ArrayList<String>();
+        firebaseRef.child(user).child("Configurações HomeFragment").child("turmas").child(dateFromProject.getYearString()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot turma : snapshot.getChildren()){
+                    Log.i("Teste", "turma: "+turma.getValue());
+                    if(!turma.getValue().equals("Selecionar turma")){
+                        spinnerArray.add(turma.getValue().toString());
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        getContext(), android.R.layout.simple_spinner_item, spinnerArray);
+                spinnerTurma.setAdapter(adapter);
+                if(!lastTurmaModified[0].equals("")){
+                    for(int i=0; i<spinnerTurma.getCount(); i++){
+                        if(spinnerTurma.getItemAtPosition(i).toString().equals(lastTurmaModified[0])){
+                            spinnerTurma.setSelection(i);
+                            break;
+                        }
+                    }
+                }
+                spinnerTurma.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if(spinnerTurma.getSelectedItem().toString().equalsIgnoreCase(lastTurmaModified[0]))
+                            return;
+                        lastTurmaModified[0] = spinnerTurma.getSelectedItem().toString();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
 }

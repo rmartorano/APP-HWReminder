@@ -12,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +46,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,6 +71,7 @@ public final class HomeFragment extends Fragment {
     private com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
     private ChildEventListener tarefaChildEventListener, alunoEventListener;
     private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
+    private ProgressBar indeterminateBar;
 
     private TextView textViewDescricao;
 
@@ -98,16 +102,14 @@ public final class HomeFragment extends Fragment {
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
 
-        com.cursoandroid.app_hwreminder.config.Date data = new com.cursoandroid.app_hwreminder.config.Date();
+        Calendar calendar = dateFromProject.getCalendar();
 
-        Calendar calendar = data.getCalendar();
-
-        textViewTituloLista.setText("Dever de casa - " + data.getMonthString());
+        textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
         textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE", new java.util.Locale("pt","BR"))
                 .format(Calendar.getInstance().getTime())));
         formatDayColorDaily(view); // change color of today to focus on that
         week = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH); // week of the year
-        textViewSemanaHome.setText(data.getWeekInterval()); // retorna a string formata do intervalo da semana
+        textViewSemanaHome.setText(dateFromProject.getWeekInterval()); // retorna a string formata do intervalo da semana
 
         //Config adapters
         adapterTarefa = new AdapterTarefa(tarefas, getContext());
@@ -132,14 +134,8 @@ public final class HomeFragment extends Fragment {
                     if(textViewSemanaHome.getRight() - event.getRawX() <= 200){ // clicando na direita
                         calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH)+1);
                         dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis()+604800000);
-                        weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
-                        monthLastTarefaModified = dateFromProject.getMonthString();
-                        textViewSemanaHome.setText(dateFromProject.getWeekInterval());
-                        HomeFragmentConfigs.salvarConfigs();
-                        week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
-                        textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
                         dateFromProject.setCalendarTime(calendarProject.getTime());
-                        onStart();
+                        saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
                         return true;
                     }
                     else if(event.getRawX() >= (textViewSemanaHome.getLeft() -
@@ -147,14 +143,8 @@ public final class HomeFragment extends Fragment {
                             (textViewSemanaHome.getRight() - event.getRawX()) > 600){ //clicando na esquerda
                         calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH)-1);
                         dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis()-604800000);
-                        weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
-                        monthLastTarefaModified = dateFromProject.getMonthString();
-                        textViewSemanaHome.setText(dateFromProject.getWeekInterval());
-                        HomeFragmentConfigs.salvarConfigs();
-                        week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
-                        textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
                         dateFromProject.setCalendarTime(calendarProject.getTime());
-                        onStart();
+                        saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
                         return true;
                     }
                     else {//meio
@@ -166,16 +156,11 @@ public final class HomeFragment extends Fragment {
                                 calendarProject.set(Calendar.MONTH, month);
                                 calendarProject.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                                 calendarProject.add(Calendar.DAY_OF_WEEK, -calendarProject.get(Calendar.DAY_OF_WEEK)+Calendar.MONDAY);
-                                Log.i("Teste", "date week: "+calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH));
                                 long sextaMili = calendarProject.getTimeInMillis() + Long.parseLong("345600000");
                                 dateFromProject.setSextaInMili(sextaMili);
-                                weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
-                                monthLastTarefaModified = dateFromProject.getMonthString();
-                                textViewSemanaHome.setText(dateFromProject.getWeekInterval());
-                                HomeFragmentConfigs.salvarConfigs();
-                                week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
                                 textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
-                                onStart();
+                                dateFromProject.setCalendarTime(calendarProject.getTime());
+                                saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
                             }
                         };
 
@@ -185,7 +170,6 @@ public final class HomeFragment extends Fragment {
 
                         return  true;
                     }
-
                 }
                 return false;
             }
@@ -197,9 +181,22 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        indeterminateBar = getView().findViewById(R.id.indeterminateBarFragmentHome);
+        indeterminateBar.setVisibility(View.VISIBLE);
         if(alunoEventListener != null)
             removerListeners();
         recuperarConfigs();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void saveWeekChangeData(TextView textViewSemanaHome, TextView textViewTituloLista, Calendar calendarProject){
+        weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
+        monthLastTarefaModified = dateFromProject.getMonthString();
+        textViewSemanaHome.setText(dateFromProject.getWeekInterval());
+        week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+        textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
+        HomeFragmentConfigs.salvarConfigs();
+        onStart();
     }
 
     public void removerListeners(){
@@ -211,7 +208,6 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.i("Teste", "last turma on pause: "+HomeFragment.getLastTurmaModified());
         HomeFragmentConfigs.salvarConfigs();
     }
 
@@ -256,6 +252,30 @@ public final class HomeFragment extends Fragment {
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                         getContext(), android.R.layout.simple_spinner_item, spinnerArray);
                 spinnerTurmaHome.setAdapter(adapter);
+                if(!lastTurmaModified.equals("")){
+                    for(int i=0; i<spinnerTurmaHome.getCount(); i++){
+                        if(spinnerTurmaHome.getItemAtPosition(i).toString().equals(lastTurmaModified)){
+                            spinnerTurmaHome.setSelection(i);
+                            break;
+                        }
+                    }
+                }
+                spinnerTurmaHome.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if(spinnerTurmaHome.getSelectedItem().toString().equalsIgnoreCase(lastTurmaModified))
+                            return;
+                        lastTurmaModified = spinnerTurmaHome.getSelectedItem().toString();
+                        HomeFragmentConfigs.salvarConfigs();
+                        onStart();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
                 recuperarListaAlunos();
             }
 
@@ -295,8 +315,7 @@ public final class HomeFragment extends Fragment {
                             } catch (ParseException parseException) {
                                 parseException.printStackTrace();
                             }
-                            com.cursoandroid.app_hwreminder.config.Date dateProject = new com.cursoandroid.app_hwreminder.config.Date();
-                            if (diaSemanaTarefa.equals(aluno.getDiaSemana()) && tarefaTmp.getWeekIntervalAsChildString().equals(dateProject.getWeekIntervalAsChildString())) {
+                            if (diaSemanaTarefa.equals(aluno.getDiaSemana()) && tarefaTmp.getWeekIntervalAsChildString().equals(dateFromProject.getWeekIntervalAsChildString())) {
                                 updateFrequenciaTarefa(tarefaTmp, aluno, false);
                                 break;
                             }
@@ -331,8 +350,7 @@ public final class HomeFragment extends Fragment {
                 if (!alunos.isEmpty()) {
                     Tarefa tarefa = snapshot.getValue(Tarefa.class);
                     tarefa.setKey(snapshot.getKey());
-                    com.cursoandroid.app_hwreminder.config.Date date = new com.cursoandroid.app_hwreminder.config.Date();
-                    if (weekIntervalLastTarefaModified.equals(date.getWeekIntervalAsChildString())) {
+                    if (weekIntervalLastTarefaModified.equals(dateFromProject.getWeekIntervalAsChildString())) {
                         try {
                             Log.i("Teste", "tarefa in update added");
                             updateFrequenciaTarefa(tarefa, alunos.get(0), true);
@@ -407,8 +425,8 @@ public final class HomeFragment extends Fragment {
                         }
                         calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
                         calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // configura pro primeiro dia da semana ser segunda
-                        Log.i("Teste", "calendar week: " + calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) + " week: " + week + " tarefa: " + tarefa.getTitulo());
-                        if (calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) == week) { // only shows currently week tarefas
+                        //Log.i("Teste", "calendar week: " + calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) + " week: " + week + " tarefa: " + tarefa.getTitulo());
+                        if (calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) == week && tarefa.getTurma().equals(lastTurmaModified)) { // only shows currently week tarefas
 
                             //get weekDay string from tarefa
                             try {
@@ -588,6 +606,7 @@ public final class HomeFragment extends Fragment {
                 }
                 adapterTarefa.notifyDataSetChanged();
                 addListeners();
+                indeterminateBar.setVisibility(View.GONE);
             }
 
             @Override

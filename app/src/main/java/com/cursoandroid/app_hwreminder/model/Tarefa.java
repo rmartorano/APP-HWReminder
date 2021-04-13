@@ -18,18 +18,19 @@ import java.util.List;
 
 public class Tarefa {
 
-    private String titulo, disciplina, dataEntrega, descricao, key;
+    private String titulo, disciplina, dataEntrega, descricao, key, turma;
     private List<String> listAlunosFizeram = new ArrayList<>();
     private List<String> listAlunosNaoFizeram = new ArrayList<>();
 
     public Tarefa() {
     }
 
-    public Tarefa(String titulo, String disciplina, String dataEntrega, String descricao) {
+    public Tarefa(String titulo, String disciplina, String dataEntrega, String descricao, String turma) {
         this.titulo = titulo;
         this.disciplina = disciplina;
         this.dataEntrega = dataEntrega;
         this.descricao = descricao;
+        this.turma = turma;
     }
 
     public String getTitulo() {
@@ -64,6 +65,13 @@ public class Tarefa {
         this.descricao = descricao;
     }
 
+    public String getTurma() {
+        return turma;
+    }
+
+    public void setTurma(String turma) {
+        this.turma = turma;
+    }
 
     @Exclude
     public String getKey() {

@@ -15,13 +15,13 @@ public class Date {
     private static DecimalFormat mFormat = new DecimalFormat("00");
 
     public Date(){
-        this.calendar = Calendar.getInstance();
-        this.sexta = Calendar.getInstance();
-        this.calendar.set(Calendar.DAY_OF_WEEK, this.calendar.getFirstDayOfWeek());
-        this.calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // configura pro primeiro dia da semana ser segunda
+        calendar = Calendar.getInstance();
+        sexta = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, this.calendar.getFirstDayOfWeek());
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // configura pro primeiro dia da semana ser segunda
         long timeMili = this.calendar.getTimeInMillis();
-        this.sextaMili = timeMili + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
-        this.sexta.setTimeInMillis(sextaMili);
+        sextaMili = timeMili + Long.parseLong("345600000"); // monday in millisecs + 4 days in millisecs
+        sexta.setTimeInMillis(sextaMili);
     }
 
     public static String getMonthString(){
@@ -69,6 +69,10 @@ public class Date {
             calendar.setTimeInMillis(calendar.getTimeInMillis()+604800000); //+7 dias
         }
         return map;
+    }
+
+    public long getTimeInMilis(){
+        return calendar.getTimeInMillis();
     }
 
     public static Calendar getCalendar() {
