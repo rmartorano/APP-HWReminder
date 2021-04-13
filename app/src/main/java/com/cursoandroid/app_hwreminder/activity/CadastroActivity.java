@@ -21,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class CadastroActivity extends AppCompatActivity {
 
@@ -90,7 +92,7 @@ public class CadastroActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     autenticacao.signInWithEmailAndPassword(usuario.getEmail(), usuario.getSenha());
-                    Log.i("Teste", "is auth: "+autenticacao.getCurrentUser().getUid());
+                    FirebaseUser user = autenticacao.getCurrentUser();
                     String idUsuario = usuario.getEmail();
                     usuario.setIdUsuario(idUsuario);
                     usuario.salvar();

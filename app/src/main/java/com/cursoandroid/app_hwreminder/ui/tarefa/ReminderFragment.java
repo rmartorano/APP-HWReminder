@@ -189,7 +189,7 @@ public class ReminderFragment extends Fragment {
             if(!editDescricao.getText().toString().equals("") && editDescricao.getText() != null){
                 if(!spinner.getSelectedItem().toString().equals("Selecione uma disciplina") && spinner.getSelectedItem() != null) {
                     if(!editDate.getText().toString().equals("") && editDate.getText() != null){
-                        if(!(spinnerTurma.getSelectedItem().toString() == null) && !spinnerTurma.getSelectedItem().toString().equals("")){
+                        if(!(spinnerTurma.getSelectedItem().toString() == null) && !spinnerTurma.getSelectedItem().toString().equalsIgnoreCase("Selecionar turma")){
                             return true;
                         }
                         else{

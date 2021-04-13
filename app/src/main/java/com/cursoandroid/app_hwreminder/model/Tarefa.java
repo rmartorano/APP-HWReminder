@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.model;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -114,24 +115,22 @@ public class Tarefa {
 
     @Exclude
     public void setListAlunosFizeram(List<String> listAlunosFizeram){
-        this.listAlunosFizeram.clear();
-        this.listAlunosFizeram.addAll(listAlunosFizeram);
+        this.listAlunosFizeram = listAlunosFizeram;
     }
 
     @Exclude
     public List<String> getListAlunosFizeram() {
-        return listAlunosFizeram;
+        return this.listAlunosFizeram;
     }
 
     @Exclude
     public void setListAlunosNaoFizeram(List<String> listAlunosNaoFizeram) {
-        this.listAlunosNaoFizeram.clear();
-        this.listAlunosNaoFizeram.addAll(listAlunosNaoFizeram);
+        this.listAlunosNaoFizeram = listAlunosNaoFizeram;
     }
 
     @Exclude
     public List<String> getListAlunosNaoFizeram() {
-        return listAlunosNaoFizeram;
+        return this.listAlunosNaoFizeram;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

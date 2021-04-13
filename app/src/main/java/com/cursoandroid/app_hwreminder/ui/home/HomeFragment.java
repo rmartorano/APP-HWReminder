@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -72,6 +75,9 @@ public final class HomeFragment extends Fragment {
     private ChildEventListener tarefaChildEventListener, alunoEventListener;
     private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
     private ProgressBar indeterminateBar;
+    private boolean firstLoading = true;
+    private static Button buttonSalvarAlteracoes, buttonCancelarAlteracoes;
+    private static boolean anyChange = false;
 
     private TextView textViewDescricao;
 
@@ -92,12 +98,13 @@ public final class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Log.i("Teste", "onViewCreated");
-        Log.i("Teste", "user: "+ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getEmail());
 
         TextView textDiaSemana = view.findViewById(R.id.textViewDiaSemana);
         TextView textViewSemanaHome = view.findViewById(R.id.textViewSemanaHome);
         TextView textViewTituloLista = view.findViewById(R.id.textViewTituloLista);
         RecyclerView recyclerViewAluno = view.findViewById(R.id.recyclerViewAluno);
+        buttonSalvarAlteracoes = view.findViewById(R.id.buttonSalvarAlteracoes);
+        buttonCancelarAlteracoes = view.findViewById(R.id.buttonCancelarAlteracoes);
         //FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG); //usar para debug
 
         //Change title from month to month, day every day and set currently week interval from monday to friday
@@ -105,7 +112,7 @@ public final class HomeFragment extends Fragment {
         Calendar calendar = dateFromProject.getCalendar();
 
         textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
-        textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE", new java.util.Locale("pt","BR"))
+        textDiaSemana.setText(StringUtils.capitalize(new SimpleDateFormat("EEEE", new java.util.Locale("pt", "BR"))
                 .format(Calendar.getInstance().getTime())));
         formatDayColorDaily(view); // change color of today to focus on that
         week = calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH); // week of the year
@@ -127,27 +134,26 @@ public final class HomeFragment extends Fragment {
             final int DRAWABLE_TOP = 1;
             final int DRAWABLE_RIGHT = 2;
             final int DRAWABLE_BOTTOM = 3;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     Calendar calendarProject = dateFromProject.getCalendar();
-                    if(textViewSemanaHome.getRight() - event.getRawX() <= 200){ // clicando na direita
-                        calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH)+1);
-                        dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis()+604800000);
+                    if (textViewSemanaHome.getRight() - event.getRawX() <= 200) { // clicando na direita
+                        calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH) + 1);
+                        dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis() + 604800000);
                         dateFromProject.setCalendarTime(calendarProject.getTime());
                         saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
                         return true;
-                    }
-                    else if(event.getRawX() >= (textViewSemanaHome.getLeft() -
+                    } else if (event.getRawX() >= (textViewSemanaHome.getLeft() -
                             textViewSemanaHome.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width()) &&
-                            (textViewSemanaHome.getRight() - event.getRawX()) > 600){ //clicando na esquerda
-                        calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH)-1);
-                        dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis()-604800000);
+                            (textViewSemanaHome.getRight() - event.getRawX()) > 600) { //clicando na esquerda
+                        calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1);
+                        dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis() - 604800000);
                         dateFromProject.setCalendarTime(calendarProject.getTime());
                         saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
                         return true;
-                    }
-                    else {//meio
+                    } else {//meio
                         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -155,7 +161,7 @@ public final class HomeFragment extends Fragment {
                                 calendarProject.set(Calendar.YEAR, year);
                                 calendarProject.set(Calendar.MONTH, month);
                                 calendarProject.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                                calendarProject.add(Calendar.DAY_OF_WEEK, -calendarProject.get(Calendar.DAY_OF_WEEK)+Calendar.MONDAY);
+                                calendarProject.add(Calendar.DAY_OF_WEEK, -calendarProject.get(Calendar.DAY_OF_WEEK) + Calendar.MONDAY);
                                 long sextaMili = calendarProject.getTimeInMillis() + Long.parseLong("345600000");
                                 dateFromProject.setSextaInMili(sextaMili);
                                 textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
@@ -168,10 +174,39 @@ public final class HomeFragment extends Fragment {
                                 .get(Calendar.YEAR), calendarProject.get(Calendar.MONTH),
                                 calendarProject.get(Calendar.DAY_OF_MONTH)).show();
 
-                        return  true;
+                        return true;
                     }
                 }
                 return false;
+            }
+        });
+
+        buttonSalvarAlteracoes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (Tarefa tarefa : tarefas) {
+                    try {
+                        updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (Aluno aluno : alunos) {
+                    aluno.salvarCheckBox();
+                }
+                anyChange = false;
+                buttonSalvarAlteracoes.setVisibility(View.INVISIBLE);
+                buttonCancelarAlteracoes.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        buttonCancelarAlteracoes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                anyChange = false;
+                buttonSalvarAlteracoes.setVisibility(View.INVISIBLE);
+                buttonCancelarAlteracoes.setVisibility(View.INVISIBLE);
+                onStart();
             }
         });
 
@@ -182,14 +217,20 @@ public final class HomeFragment extends Fragment {
     public void onStart() {
         super.onStart();
         indeterminateBar = getView().findViewById(R.id.indeterminateBarFragmentHome);
-        indeterminateBar.setVisibility(View.VISIBLE);
-        if(alunoEventListener != null)
+        indeterminateBar.setIndeterminateTintList(ColorStateList.valueOf(Color.RED));
+        if (alunos.isEmpty() && !firstLoading) {
+            indeterminateBar.setVisibility(View.INVISIBLE);
+        } else {
+            Log.i("Teste", "not firstLoading: " + firstLoading);
+            indeterminateBar.setVisibility(View.VISIBLE);
+        }
+        if (alunoEventListener != null)
             removerListeners();
         recuperarConfigs();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void saveWeekChangeData(TextView textViewSemanaHome, TextView textViewTituloLista, Calendar calendarProject){
+    public void saveWeekChangeData(TextView textViewSemanaHome, TextView textViewTituloLista, Calendar calendarProject) {
         weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
         monthLastTarefaModified = dateFromProject.getMonthString();
         textViewSemanaHome.setText(dateFromProject.getWeekInterval());
@@ -199,8 +240,8 @@ public final class HomeFragment extends Fragment {
         onStart();
     }
 
-    public void removerListeners(){
-        Log.i("Teste"," removemndo listeners");
+    public void removerListeners() {
+        Log.i("Teste", " removemndo listeners");
         firebaseRef.removeEventListener(alunoEventListener);
         firebaseRef.removeEventListener(tarefaChildEventListener);
     }
@@ -237,24 +278,24 @@ public final class HomeFragment extends Fragment {
         });
     }
 
-    public void recuperarTurmas(){
+    public void recuperarTurmas() {
         Spinner spinnerTurmaHome = getView().findViewById(R.id.spinnerTurmaHome);
-        List<String> spinnerArray =  new ArrayList<String>();
+        List<String> spinnerArray = new ArrayList<String>();
         firebaseRef.child(user).child("Configurações HomeFragment").child("turmas").child(dateFromProject.getYearString()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot turma : snapshot.getChildren()){
-                    Log.i("Teste", "turma: "+turma.getValue());
-                    if(!turma.getValue().equals("Selecionar turma")){
+                for (DataSnapshot turma : snapshot.getChildren()) {
+                    Log.i("Teste", "turma: " + turma.getValue());
+                    if (!turma.getValue().equals("Selecionar turma")) {
                         spinnerArray.add(turma.getValue().toString());
                     }
                 }
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                         getContext(), android.R.layout.simple_spinner_item, spinnerArray);
                 spinnerTurmaHome.setAdapter(adapter);
-                if(!lastTurmaModified.equals("")){
-                    for(int i=0; i<spinnerTurmaHome.getCount(); i++){
-                        if(spinnerTurmaHome.getItemAtPosition(i).toString().equals(lastTurmaModified)){
+                if (!lastTurmaModified.equals("")) {
+                    for (int i = 0; i < spinnerTurmaHome.getCount(); i++) {
+                        if (spinnerTurmaHome.getItemAtPosition(i).toString().equals(lastTurmaModified)) {
                             spinnerTurmaHome.setSelection(i);
                             break;
                         }
@@ -264,7 +305,7 @@ public final class HomeFragment extends Fragment {
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if(spinnerTurmaHome.getSelectedItem().toString().equalsIgnoreCase(lastTurmaModified))
+                        if (spinnerTurmaHome.getSelectedItem().toString().equalsIgnoreCase(lastTurmaModified))
                             return;
                         lastTurmaModified = spinnerTurmaHome.getSelectedItem().toString();
                         HomeFragmentConfigs.salvarConfigs();
@@ -290,59 +331,6 @@ public final class HomeFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void addListeners() {
 
-        Calendar calendar = Calendar.getInstance();
-        //listener para quando um aluo for alterado
-        alunoEventListener = firebaseRef.child(user).child("aluno").child(String.valueOf(calendar.get(Calendar.YEAR))).child(lastTurmaModified).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (!tarefas.isEmpty()) {
-                    Log.i("Teste", "onChildChanged");
-                    Aluno aluno = snapshot.getValue(Aluno.class);
-                    String diaSemana = (String) snapshot.child("checkBoxes").child("diaSemana").getValue();
-                    aluno.setDiaSemana(diaSemana);
-
-                    try {
-                        String diaSemanaTarefa = "";
-                        for (Tarefa tarefaTmp : getListTarefas()) {
-                            java.util.Date date;
-                            try {
-                                date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefaTmp.getDataEntrega());
-                                diaSemanaTarefa = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
-                            } catch (ParseException parseException) {
-                                parseException.printStackTrace();
-                            }
-                            if (diaSemanaTarefa.equals(aluno.getDiaSemana()) && tarefaTmp.getWeekIntervalAsChildString().equals(dateFromProject.getWeekIntervalAsChildString())) {
-                                updateFrequenciaTarefa(tarefaTmp, aluno, false);
-                                break;
-                            }
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                recuperarListaAlunos();
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
         //listener para quando uma tarefa for adicionada
         tarefaChildEventListener = firebaseRef.child(user).child("tarefa").child(yearLastTarefaModified).child(monthLastTarefaModified).child(weekIntervalLastTarefaModified).addChildEventListener(new ChildEventListener() {
             @Override
@@ -350,24 +338,24 @@ public final class HomeFragment extends Fragment {
                 if (!alunos.isEmpty()) {
                     Tarefa tarefa = snapshot.getValue(Tarefa.class);
                     tarefa.setKey(snapshot.getKey());
-                    if (weekIntervalLastTarefaModified.equals(dateFromProject.getWeekIntervalAsChildString())) {
-                        try {
-                            Log.i("Teste", "tarefa in update added");
-                            updateFrequenciaTarefa(tarefa, alunos.get(0), true);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                    List<String> listTmpFizeram = (List<String>) snapshot.child("Alunos que fizeram").getValue();
+                    List<String> listTmpNaoFizeram = (List<String>) snapshot.child("Alunos que não fizeram").getValue();
+
+                    if (listTmpFizeram == null && listTmpNaoFizeram == null) {
+                        for (Aluno aluno : alunos) {
+                            tarefa.addToListAlunosFizeram(aluno.getNome());
                         }
-                    } else {
-                        List<String> listTmpFizeram = new ArrayList();
-                        for (Aluno aluno : getListAlunos()) {
-                            listTmpFizeram.add(aluno.getNome());
-                        }
-                        tarefa.setListAlunosFizeram(listTmpFizeram);
                         try {
                             tarefa.salvarListas();
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
+                    } else {
+                        if (listTmpFizeram != null) {
+                            tarefa.setListAlunosFizeram(listTmpFizeram);
+                        }
+                        if (listTmpNaoFizeram != null)
+                            tarefa.setListAlunosNaoFizeram(listTmpNaoFizeram);
                     }
                 }
             }
@@ -394,13 +382,13 @@ public final class HomeFragment extends Fragment {
     }
 
     private void recuperarTarefas() {
-        Log.i("Teste", "called recuperar tarefas");
         firebaseRef.child(user).child("tarefa").addListenerForSingleValueEvent(new ValueEventListener() {
-           @RequiresApi(api = Build.VERSION_CODES.O)
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-               Log.i("Teste", "recuperar tarefas on change");
-               Calendar calendar = Calendar.getInstance();
+                tarefas.clear();
+                Log.i("Teste", "recuperar tarefas on change");
+                Calendar calendar = Calendar.getInstance();
                 Date date;
                 String diaSemana = new String();
                 TextView textViewDiaSemana = getView().findViewById(R.id.textViewSegunda);
@@ -419,7 +407,7 @@ public final class HomeFragment extends Fragment {
                         Tarefa tarefa = dados.getValue(Tarefa.class);
                         tarefa.setKey(dados.getKey());
                         try {
-                            calendar.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega()));
+                            calendar.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega()));
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
@@ -430,8 +418,8 @@ public final class HomeFragment extends Fragment {
 
                             //get weekDay string from tarefa
                             try {
-                                date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
+                                date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega());
+                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt", "BR")).format(date).replaceAll("\\.", "");
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -492,8 +480,8 @@ public final class HomeFragment extends Fragment {
                                             Date date = new Date();
                                             String diaSemana = "";
                                             try {
-                                                date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-                                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
+                                                date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega());
+                                                diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt", "BR")).format(date).replaceAll("\\.", "");
                                             } catch (ParseException e) {
                                                 e.printStackTrace();
                                             }
@@ -585,28 +573,32 @@ public final class HomeFragment extends Fragment {
                             });
 
                         }
-
-                        ArrayList listTmpFizeram = (ArrayList) dados.child("Alunos que fizeram").getValue();
-
-                        ArrayList listTmpNaoFizeram = (ArrayList) dados.child("Alunos que não fizeram").getValue();
-
-                        if (listTmpFizeram == null) {
-                            listTmpFizeram = new ArrayList();
-                            for (Aluno aluno : getListAlunos()) {
-                                listTmpFizeram.add(aluno.getNome());
-                            }
-                            tarefa.setListAlunosFizeram(listTmpFizeram);
-                        } else
-                            tarefa.setListAlunosFizeram(listTmpFizeram);
-
-                        if (listTmpNaoFizeram != null)
-                            tarefa.setListAlunosNaoFizeram(listTmpNaoFizeram);
                         tarefas.add(tarefa);
+                        List<String> listTmpFizeram = (List<String>) dados.child("Alunos que fizeram").getValue();
+                        List<String> listTmpNaoFizeram = (List<String>) dados.child("Alunos que não fizeram").getValue();
+
+                        if (listTmpFizeram == null && listTmpNaoFizeram == null) {
+                            for (Aluno aluno : alunos) {
+                                tarefa.addToListAlunosFizeram(aluno.getNome());
+                            }
+                            try {
+                                tarefa.salvarListas();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            if (listTmpFizeram != null) {
+                                tarefa.setListAlunosFizeram(listTmpFizeram);
+                            }
+                            if (listTmpNaoFizeram != null)
+                                tarefa.setListAlunosNaoFizeram(listTmpNaoFizeram);
+                        }
                     }
                 }
                 adapterTarefa.notifyDataSetChanged();
                 addListeners();
-                indeterminateBar.setVisibility(View.GONE);
+                indeterminateBar.setVisibility(View.INVISIBLE);
+                firstLoading = false;
             }
 
             @Override
@@ -641,7 +633,7 @@ public final class HomeFragment extends Fragment {
 
     private void formatDayColorDaily(View view) {
         Calendar c = Calendar.getInstance();
-        String today = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(c.getTime()).replaceAll("\\.", "");
+        String today = new SimpleDateFormat("EE", new java.util.Locale("pt", "BR")).format(c.getTime()).replaceAll("\\.", "");
         TextView textView = null;
         switch (today) {
             case "ter":
@@ -671,8 +663,8 @@ public final class HomeFragment extends Fragment {
         Date date;
         //get weekDay string from tarefa
         try {
-            date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega());
-            diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt","BR")).format(date).replaceAll("\\.", "");
+            date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega());
+            diaSemana = new SimpleDateFormat("EE", new java.util.Locale("pt", "BR")).format(date).replaceAll("\\.", "");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -745,7 +737,10 @@ public final class HomeFragment extends Fragment {
     public void validarAddFrequencia(Tarefa tarefa, String nomeAluno, boolean fezTarefa) throws ParseException {
         List<String> listFizeram = tarefa.getListAlunosFizeram();
         List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
-        boolean anyChange = false;
+
+        anyChange = false;
+
+        Log.i("Teste", "lists: " + listFizeram + " " + listNaoFizeram);
 
         if (listFizeram.contains(nomeAluno)) {
             if (!fezTarefa) {
@@ -772,8 +767,10 @@ public final class HomeFragment extends Fragment {
                 anyChange = true;
             }
         }
-        if (anyChange)
+        if (anyChange) {
             tarefa.salvarListas();
+            Log.i("Teste", "lists: " + tarefa.getListAlunosFizeram() + " nf:" + tarefa.getListAlunosNaoFizeram());
+        }
     }
 
     public static void setTarefas(List<Tarefa> tarefas) {
@@ -821,6 +818,17 @@ public final class HomeFragment extends Fragment {
     }
 
     public static void setLastTurmaModified(String turma) {
-        HomeFragment.lastTurmaModified = turma;
+        lastTurmaModified = turma;
+    }
+
+    public static void setAnyChange(boolean anyChange) {
+        HomeFragment.anyChange = anyChange;
+        if (anyChange) {
+            for(Tarefa tarefa : tarefas){
+                Log.i("Teste", "parei aqui");
+            }
+            buttonSalvarAlteracoes.setVisibility(View.VISIBLE);
+            buttonCancelarAlteracoes.setVisibility(View.VISIBLE);
+        }
     }
 }

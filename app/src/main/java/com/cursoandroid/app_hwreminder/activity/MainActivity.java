@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.intro_cadastrar_logar);
+
     }
 
     @Override
@@ -45,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
     public void verificarUsuarioLogado(){
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         //autenticacao.signOut();
-        Log.i("Teste", "teste");
         if(autenticacao.getCurrentUser() != null){
-            Log.i("Teste", "user: "+autenticacao.getCurrentUser().getUid());
             startActivity(new Intent(this, PrincipalActivity.class));
         }
     }

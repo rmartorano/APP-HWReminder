@@ -112,7 +112,6 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                         calendar.setTimeInMillis(calendar.getTimeInMillis() + Long.parseLong("86400000")); // configura pro primeiro dia da semana ser segunda
                         if (calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) == Date.getCalendar().get(Calendar.DAY_OF_WEEK_IN_MONTH)) {
                             sameWeek = true;
-                            Log.i("Teste", "Week from tarefa: " + calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) + " week now: " + Date.getCalendar().get(Calendar.DAY_OF_WEEK_IN_MONTH));
                             boolean controle = true;
                             if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
                                 controle = false;
@@ -153,7 +152,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek && dia == SEGUNDA) {
                     aluno.setCheckBoxSegunda(isChecked);
-                    aluno.salvarCheckBox();
+                    HomeFragment.setAnyChange(true);
                 }
             }
         });
@@ -162,7 +161,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek && dia == TERCA) {
                     aluno.setCheckBoxTerca(isChecked);
-                    aluno.salvarCheckBox();
+                    HomeFragment.setAnyChange(true);
                 }
             }
         });
@@ -171,7 +170,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek && dia == QUARTA) {
                     aluno.setCheckBoxQuarta(isChecked);
-                    aluno.salvarCheckBox();
+                    HomeFragment.setAnyChange(true);
                 }
             }
         });
@@ -180,7 +179,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek && dia == QUINTA) {
                     aluno.setCheckBoxQuinta(isChecked);
-                    aluno.salvarCheckBox();
+                    HomeFragment.setAnyChange(true);
                 }
             }
         });
@@ -189,7 +188,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek && dia == SEXTA) {
                     aluno.setCheckBoxSexta(isChecked);
-                    aluno.salvarCheckBox();
+                    HomeFragment.setAnyChange(true);
                 }
             }
         });
@@ -316,7 +315,6 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         });
 
     }
-
 
     @Override
     public int getItemCount() {
