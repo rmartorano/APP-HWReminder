@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -193,8 +194,15 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             }
         });
 
-        if(alunos.indexOf(aluno) == alunos.size()-1)
-            HomeFragment.setFirstLoading(false);
+        if(alunos.indexOf(aluno) == alunos.size()-1) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    HomeFragment.setFirstLoading(false);
+                }
+            }, 1500);
+        }
 
         holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override

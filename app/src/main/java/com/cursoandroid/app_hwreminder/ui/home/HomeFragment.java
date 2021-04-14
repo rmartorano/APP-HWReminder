@@ -8,6 +8,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -140,6 +141,7 @@ public final class HomeFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     Calendar calendarProject = dateFromProject.getCalendar();
                     if (textViewSemanaHome.getRight() - event.getRawX() <= 200) { // clicando na direita
+                        salvarListTarefasEResetBotaoSalvar();
                         calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH) + 1);
                         dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis() + 604800000);
                         dateFromProject.setCalendarTime(calendarProject.getTime());
@@ -148,6 +150,7 @@ public final class HomeFragment extends Fragment {
                     } else if (event.getRawX() >= (textViewSemanaHome.getLeft() -
                             textViewSemanaHome.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width()) &&
                             (textViewSemanaHome.getRight() - event.getRawX()) > 600) { //clicando na esquerda
+                        salvarListTarefasEResetBotaoSalvar();
                         calendarProject.set(Calendar.DAY_OF_WEEK_IN_MONTH, calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH) - 1);
                         dateFromProject.setSextaInMili(dateFromProject.getSexta().getTimeInMillis() - 604800000);
                         dateFromProject.setCalendarTime(calendarProject.getTime());
@@ -157,7 +160,7 @@ public final class HomeFragment extends Fragment {
                         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                // TODO Auto-generated method stub
+                                salvarListTarefasEResetBotaoSalvar();
                                 calendarProject.set(Calendar.YEAR, year);
                                 calendarProject.set(Calendar.MONTH, month);
                                 calendarProject.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -173,7 +176,6 @@ public final class HomeFragment extends Fragment {
                         new DatePickerDialog(getContext(), date, calendarProject
                                 .get(Calendar.YEAR), calendarProject.get(Calendar.MONTH),
                                 calendarProject.get(Calendar.DAY_OF_MONTH)).show();
-
                         return true;
                     }
                 }
@@ -184,19 +186,7 @@ public final class HomeFragment extends Fragment {
         buttonSalvarAlteracoes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (Tarefa tarefa : tarefas) {
-                    try {
-                        updateFrequenciaTarefa(tarefa, alunos.get(0), true);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-                for (Aluno aluno : alunos) {
-                    aluno.salvarCheckBox();
-                }
-                anyChange = false;
-                buttonSalvarAlteracoes.setVisibility(View.INVISIBLE);
-                buttonCancelarAlteracoes.setVisibility(View.INVISIBLE);
+                salvarListTarefasEResetBotaoSalvar();
             }
         });
 
@@ -216,16 +206,21 @@ public final class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        firstLoading = true;
         indeterminateBar = getView().findViewById(R.id.indeterminateBarFragmentHome);
         indeterminateBar.setIndeterminateTintList(ColorStateList.valueOf(Color.RED));
-        if (alunos.isEmpty() && !firstLoading) {
-            indeterminateBar.setVisibility(View.INVISIBLE);
-        } else {
-            indeterminateBar.setVisibility(View.VISIBLE);
-        }
+        indeterminateBar.setVisibility(View.VISIBLE);
         if (alunoEventListener != null)
             removerListeners();
         recuperarConfigs();
+        final Handler handler = new Handler(); //checa depois de 2s se as listas estão vazias, caso positivo remove o progressbar
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(alunos.isEmpty() && tarefas.isEmpty())
+                    indeterminateBar.setVisibility(View.INVISIBLE);
+            }
+        }, 2000);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -597,7 +592,6 @@ public final class HomeFragment extends Fragment {
                 adapterTarefa.notifyDataSetChanged();
                 addListeners();
                 indeterminateBar.setVisibility(View.INVISIBLE);
-                firstLoading = false;
             }
 
             @Override
@@ -659,7 +653,7 @@ public final class HomeFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos) throws ParseException {
         String diaSemana = new String();
-        Date date;
+        Date date = null;
         //get weekDay string from tarefa
         try {
             date = new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega());
@@ -667,6 +661,12 @@ public final class HomeFragment extends Fragment {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.setMinimalDaysInFirstWeek(7);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        if (dateFromProject.getCalendar().get(Calendar.DAY_OF_WEEK_IN_MONTH) != calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH))
+            return;
         String finalDiaSemana = diaSemana;
         String yearString = tarefa.getYearString();
         String nomeAluno = aluno.getNome();
@@ -681,35 +681,35 @@ public final class HomeFragment extends Fragment {
                         switch (finalDiaSemana) {
                             case "seg":
                                 try {
-                                    validarAddFrequencia(tarefa, nomeAluno, (boolean) snapshot.child("checkBoxes").child("checkedBoxSegunda").getValue());
+                                    validarAddFrequencia(tarefa, nomeAluno, aluno.isCheckedBoxSegunda());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
                                 break;
                             case "ter":
                                 try {
-                                    validarAddFrequencia(tarefa, nomeAluno, (boolean) snapshot.child("checkBoxes").child("checkedBoxTerca").getValue());
+                                    validarAddFrequencia(tarefa, nomeAluno, aluno.isCheckedBoxTerca());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
                                 break;
                             case "qua":
                                 try {
-                                    validarAddFrequencia(tarefa, nomeAluno, (boolean) snapshot.child("checkBoxes").child("checkedBoxQuarta").getValue());
+                                    validarAddFrequencia(tarefa, nomeAluno, aluno.isCheckedBoxQuarta());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
                                 break;
                             case "qui":
                                 try {
-                                    validarAddFrequencia(tarefa, nomeAluno, (boolean) snapshot.child("checkBoxes").child("checkedBoxQuinta").getValue());
+                                    validarAddFrequencia(tarefa, nomeAluno, aluno.isCheckedBoxQuinta());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
                                 break;
                             case "sex":
                                 try {
-                                    validarAddFrequencia(tarefa, nomeAluno, (boolean) snapshot.child("checkBoxes").child("checkedBoxSexta").getValue());
+                                    validarAddFrequencia(tarefa, nomeAluno, aluno.isCheckedBoxSexta());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                 }
@@ -737,38 +737,54 @@ public final class HomeFragment extends Fragment {
         List<String> listFizeram = tarefa.getListAlunosFizeram();
         List<String> listNaoFizeram = tarefa.getListAlunosNaoFizeram();
 
-        anyChange = false;
-
-        Log.i("Teste", "lists: " + listFizeram + " " + listNaoFizeram);
+        boolean listChanged = false;
 
         if (listFizeram.contains(nomeAluno)) {
             if (!fezTarefa) {
                 tarefa.removeFromListAlunosFizeram(nomeAluno);
-                anyChange = true;
+                listChanged = true;
             }
         }
         if (!listFizeram.contains(nomeAluno)) {
             if (fezTarefa) {
                 tarefa.addToListAlunosFizeram(nomeAluno);
-                anyChange = true;
+                listChanged = true;
             }
         }
 
         if (listNaoFizeram.contains(nomeAluno)) {
             if (fezTarefa) {
                 tarefa.removeFromListAlunosNaoFizeram(nomeAluno);
-                anyChange = true;
+                listChanged = true;
             }
         }
         if (!listNaoFizeram.contains(nomeAluno)) {
             if (!fezTarefa) {
                 tarefa.addToListAlunosNaoFizeram(nomeAluno);
-                anyChange = true;
+                listChanged = true;
             }
         }
-        if (anyChange) {
+        if (listChanged) {
             tarefa.salvarListas();
-            Log.i("Teste", "lists: " + tarefa.getListAlunosFizeram() + " nf:" + tarefa.getListAlunosNaoFizeram());
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void salvarListTarefasEResetBotaoSalvar() {
+        if (anyChange) {
+            for (Tarefa tarefa : tarefas) {
+                try {
+                    updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            for (Aluno aluno : alunos) {
+                aluno.salvarCheckBox();
+            }
+            buttonSalvarAlteracoes.setVisibility(View.INVISIBLE);
+            buttonCancelarAlteracoes.setVisibility(View.INVISIBLE);
+            anyChange = false;
         }
     }
 
@@ -822,54 +838,52 @@ public final class HomeFragment extends Fragment {
 
     public static void setAnyChange(boolean anyChange) {
         HomeFragment.anyChange = anyChange;
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        FirebaseAuth auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
         if (anyChange && buttonSalvarAlteracoes.getVisibility() != View.VISIBLE && !firstLoading) {
+            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+            FirebaseAuth auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
             final boolean[] hasChanged = {false};
-            for(Tarefa tarefa : tarefas){
-                if(hasChanged[0])
+            for (Aluno aluno : alunos) {
+                if (hasChanged[0])
                     break;
-                for(Aluno aluno : alunos){
-                    if(hasChanged[0])
-                        break;
-                    Log.i("Teste", "Starting loop");
-                    firebaseRef.child(auth.getCurrentUser()
-                            .getUid())
-                            .child("aluno")
-                            .child(com.cursoandroid.app_hwreminder.config.Date.getYearString())
-                            .child(lastTurmaModified)
-                            .child(aluno.getNome())
-                            .child("checkBoxes")
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.i("Teste", "Starting loop");
+                firebaseRef.child(auth.getCurrentUser()
+                        .getUid())
+                        .child("aluno")
+                        .child(com.cursoandroid.app_hwreminder.config.Date.getYearString())
+                        .child(lastTurmaModified)
+                        .child(aluno.getNome())
+                        .child("checkBoxes")
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                    if(
-                                            aluno.isCheckedBoxSegunda() != (Boolean) snapshot.child("checkedBoxSegunda").getValue()
-                                            || aluno.isCheckedBoxTerca() != (Boolean) snapshot.child("checkedBoxTerca").getValue()
-                                            || aluno.isCheckedBoxQuarta() != (Boolean) snapshot.child("checkedBoxQuarta").getValue()
-                                            || aluno.isCheckedBoxQuinta() != (Boolean) snapshot.child("checkedBoxQuinta").getValue()
-                                            || aluno.isCheckedBoxSexta() != (Boolean) snapshot.child("checkedBoxSexta").getValue()
-                                    )
-                                        hasChanged[0] = true;
+                                if (
+                                        aluno.isCheckedBoxSegunda() != (Boolean) snapshot.child("checkedBoxSegunda").getValue()
+                                                || aluno.isCheckedBoxTerca() != (Boolean) snapshot.child("checkedBoxTerca").getValue()
+                                                || aluno.isCheckedBoxQuarta() != (Boolean) snapshot.child("checkedBoxQuarta").getValue()
+                                                || aluno.isCheckedBoxQuinta() != (Boolean) snapshot.child("checkedBoxQuinta").getValue()
+                                                || aluno.isCheckedBoxSexta() != (Boolean) snapshot.child("checkedBoxSexta").getValue()
+                                )
+                                    hasChanged[0] = true;
 
-                                    if(hasChanged[0]){
-                                        Log.i("Teste", "deve parar aqui");
-                                        buttonSalvarAlteracoes.setVisibility(View.VISIBLE);
-                                        buttonCancelarAlteracoes.setVisibility(View.VISIBLE);
-                                    }
+                                if (hasChanged[0]) {
+                                    Log.i("Teste", "deve parar aqui");
+                                    buttonSalvarAlteracoes.setVisibility(View.VISIBLE);
+                                    buttonCancelarAlteracoes.setVisibility(View.VISIBLE);
                                 }
+                            }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
-                }
+                            }
+                        });
             }
         }
     }
 
-
+    public static void setFirstLoading(boolean value) {
+        HomeFragment.firstLoading = value;
+    }
 
 }

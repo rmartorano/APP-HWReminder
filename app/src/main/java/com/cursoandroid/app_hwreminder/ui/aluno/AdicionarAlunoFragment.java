@@ -37,6 +37,7 @@ import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
+import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,6 +45,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.Collator;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -119,9 +122,14 @@ public class AdicionarAlunoFragment extends Fragment {
         Button salvarBtn = view.findViewById(R.id.buttonSalvarAddAlunos);
 
         salvarBtn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                salvarAlunos();
+                try {
+                    salvarAlunos();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 getActivity().finish();
                 startActivity(new Intent(getContext(), MainActivity.class));
             }
@@ -325,13 +333,29 @@ public class AdicionarAlunoFragment extends Fragment {
 
     }
 
-    public void salvarAlunos(){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void salvarAlunos() throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setMinimalDaysInFirstWeek(7);
         for(AlunoAddPendente alunoAdd : listAlunos) {
             Aluno aluno = new Aluno();
             aluno.setNome(alunoAdd.getNome());
             aluno.setTurma(alunoAdd.getTurma());
             aluno.salvar();
             HomeFragment.setLastTurmaModified(alunoAdd.getTurma());
+            for(Tarefa tarefa : HomeFragment.getListTarefas()){
+                Calendar calendarTarefa = Calendar.getInstance();
+                calendarTarefa.setMinimalDaysInFirstWeek(7);
+                try {
+                    calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if(calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) <= calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH)){
+                    tarefa.addToListAlunosFizeram(aluno.getNome());
+                    tarefa.salvarListas();
+                }
+            }
         }
         Log.i("Teste", "last turma: "+HomeFragment.getLastTurmaModified());
     }

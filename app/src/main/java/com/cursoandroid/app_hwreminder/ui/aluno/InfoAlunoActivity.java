@@ -243,6 +243,13 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 Calendar calendar = Calendar.getInstance();
                 Date date = new Date();
                 if (hasSecondSpinnerIdChanged || hasFirstSpinnerIdChanged || firstTimeLoading) {
+                    if (secondSpinner.getCount() < 12) {
+                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                                R.array.array_filtro_info_aluno_meses, android.R.layout.simple_spinner_item);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        secondSpinner.setAdapter(adapter);
+                        secondSpinner.setSelection(calendar.get(Calendar.MONTH));
+                    }
                     listTarefas = HomeFragment.getListTarefas();
                     calendar.set(Calendar.MONTH, secondSpinner.getSelectedItemPosition());
                     Map<String, String> mapIntervals = date.getAllWeekIntervals(secondSpinner.getSelectedItemPosition()); //recupera todos os intervalos da semana do mês

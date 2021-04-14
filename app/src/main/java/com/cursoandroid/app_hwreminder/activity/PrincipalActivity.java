@@ -2,10 +2,12 @@ package com.cursoandroid.app_hwreminder.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +20,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
+import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -104,4 +107,27 @@ public class PrincipalActivity extends AppCompatActivity {
         startActivity(new Intent(this, MainActivity.class));
     }
 
+    int countVoltar = 0;
+    Toast toast = null;
+    @Override
+    public void onBackPressed() {
+        if(countVoltar == 1)
+        {
+            moveTaskToBack(true);
+            toast.cancel();
+            finish();
+        }
+        else {
+            toast.makeText(this, "Pressione voltar novamente para fechar o app", Toast.LENGTH_SHORT).show();
+            countVoltar++;
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    countVoltar = 0;
+                }
+            }, 2000);
+        }
+
+    }
 }
