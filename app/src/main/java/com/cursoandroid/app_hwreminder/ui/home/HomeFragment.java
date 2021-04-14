@@ -42,6 +42,7 @@ import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.config.HomeFragmentConfigs;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -75,9 +76,8 @@ public final class HomeFragment extends Fragment {
     private ChildEventListener tarefaChildEventListener, alunoEventListener;
     private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
     private ProgressBar indeterminateBar;
-    private boolean firstLoading = true;
     private static Button buttonSalvarAlteracoes, buttonCancelarAlteracoes;
-    private static boolean anyChange = false;
+    private static boolean anyChange = false, firstLoading = true;
 
     private TextView textViewDescricao;
 
@@ -221,7 +221,6 @@ public final class HomeFragment extends Fragment {
         if (alunos.isEmpty() && !firstLoading) {
             indeterminateBar.setVisibility(View.INVISIBLE);
         } else {
-            Log.i("Teste", "not firstLoading: " + firstLoading);
             indeterminateBar.setVisibility(View.VISIBLE);
         }
         if (alunoEventListener != null)
@@ -823,12 +822,54 @@ public final class HomeFragment extends Fragment {
 
     public static void setAnyChange(boolean anyChange) {
         HomeFragment.anyChange = anyChange;
-        if (anyChange) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+        FirebaseAuth auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        if (anyChange && buttonSalvarAlteracoes.getVisibility() != View.VISIBLE && !firstLoading) {
+            final boolean[] hasChanged = {false};
             for(Tarefa tarefa : tarefas){
-                Log.i("Teste", "parei aqui");
+                if(hasChanged[0])
+                    break;
+                for(Aluno aluno : alunos){
+                    if(hasChanged[0])
+                        break;
+                    Log.i("Teste", "Starting loop");
+                    firebaseRef.child(auth.getCurrentUser()
+                            .getUid())
+                            .child("aluno")
+                            .child(com.cursoandroid.app_hwreminder.config.Date.getYearString())
+                            .child(lastTurmaModified)
+                            .child(aluno.getNome())
+                            .child("checkBoxes")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                    if(
+                                            aluno.isCheckedBoxSegunda() != (Boolean) snapshot.child("checkedBoxSegunda").getValue()
+                                            || aluno.isCheckedBoxTerca() != (Boolean) snapshot.child("checkedBoxTerca").getValue()
+                                            || aluno.isCheckedBoxQuarta() != (Boolean) snapshot.child("checkedBoxQuarta").getValue()
+                                            || aluno.isCheckedBoxQuinta() != (Boolean) snapshot.child("checkedBoxQuinta").getValue()
+                                            || aluno.isCheckedBoxSexta() != (Boolean) snapshot.child("checkedBoxSexta").getValue()
+                                    )
+                                        hasChanged[0] = true;
+
+                                    if(hasChanged[0]){
+                                        Log.i("Teste", "deve parar aqui");
+                                        buttonSalvarAlteracoes.setVisibility(View.VISIBLE);
+                                        buttonCancelarAlteracoes.setVisibility(View.VISIBLE);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                }
             }
-            buttonSalvarAlteracoes.setVisibility(View.VISIBLE);
-            buttonCancelarAlteracoes.setVisibility(View.VISIBLE);
         }
     }
+
+
+
 }

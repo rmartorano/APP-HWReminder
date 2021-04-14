@@ -193,6 +193,9 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             }
         });
 
+        if(alunos.indexOf(aluno) == alunos.size()-1)
+            HomeFragment.setFirstLoading(false);
+
         holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
