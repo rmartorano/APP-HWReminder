@@ -2,10 +2,13 @@ package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -92,6 +95,7 @@ public class AcompanhamentoGeralFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ImageView imageViewPesquisarAluno = view.findViewById(R.id.imageViewPesquisarAluno);
         imageViewPesquisarAluno.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
                 abrirFeedbackAlunos();
@@ -106,6 +110,7 @@ public class AcompanhamentoGeralFragment extends Fragment {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void abrirFeedbackAlunos(){ // abre uma view com a frequencia dos alunos
         Dialog dialog = new Dialog(getContext(), android.R.style.Theme_Material_Light_Dialog);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -133,7 +138,7 @@ public class AcompanhamentoGeralFragment extends Fragment {
 
         //Search widget
         SearchView searchView = view.findViewById(R.id.searchViewFeedback);
-        searchView.setBackgroundColor(getResources().getColor(R.color.teal_200));
+        searchView.setBackgroundColor(Color.WHITE);
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint("Digite o nome de um aluno");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

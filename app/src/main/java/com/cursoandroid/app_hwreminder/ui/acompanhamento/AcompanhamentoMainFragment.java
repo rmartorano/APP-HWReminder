@@ -32,6 +32,7 @@ import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -169,8 +170,14 @@ public class AcompanhamentoMainFragment extends Fragment {
         xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
         xAxis.setValueFormatter(formatter);
         xAxis.setTextSize(11);
-        xAxis.setTextColor(R.color.teal_200);
+        xAxis.setTextColor(Color.YELLOW);
         xAxis.setAvoidFirstLastClipping(true);
+
+        chart.getAxisRight().setTextColor(Color.parseColor("#88A4F8"));
+        chart.getAxisLeft().setTextColor(Color.parseColor("#88A4F8"));
+        Legend legend = chart.getLegend();
+        legend.setTextColor(Color.WHITE);
+        legend.setForm(Legend.LegendForm.CIRCLE);
 
         ValueFormatter pointFormatter = new ValueFormatter() {
             private DecimalFormat format = new DecimalFormat("0");
@@ -197,17 +204,17 @@ public class AcompanhamentoMainFragment extends Fragment {
         LineDataSet dataSetFizeram = new LineDataSet(entriesFizeram, "Quantidade fizeram");
         dataSetFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetFizeram.setColor(Color.GREEN);
-        dataSetFizeram.setValueTextColor(Color.BLACK);
+        dataSetFizeram.setValueTextColor(Color.WHITE);
         dataSetFizeram.setValueTextSize(10);
         dataSetFizeram.setValueFormatter(pointFormatter);
         dataSetFizeram.setHighlightEnabled(true);
-        dataSetFizeram.setHighLightColor(Color.BLACK);
+        dataSetFizeram.setHighLightColor(Color.BLUE);
         dataSetFizeram.setDrawHighlightIndicators(true);
 
         LineDataSet dataSetNaoFizeram = new LineDataSet(entriesNaoFizeram, "Quantidade não fizeram");
         dataSetNaoFizeram.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetNaoFizeram.setColor(Color.RED);
-        dataSetNaoFizeram.setValueTextColor(Color.BLACK);
+        dataSetNaoFizeram.setValueTextColor(Color.WHITE);
         dataSetNaoFizeram.setValueTextSize(10);
         dataSetNaoFizeram.setValueFormatter(pointFormatter);
 
@@ -218,6 +225,7 @@ public class AcompanhamentoMainFragment extends Fragment {
         Description description = new Description();
         description.setText("Quantidade total de alunos: "+listAlunos.size());
         description.setTextSize(10);
+        description.setTextColor(Color.YELLOW);
 
         LineData lineData = new LineData(dataSets);
         chart.setDescription(description);
@@ -279,7 +287,10 @@ public class AcompanhamentoMainFragment extends Fragment {
                     calendar.setTime(date);
                     calendar.setFirstDayOfWeek(Calendar.MONDAY);
                     Log.i("Teste", "day of week: "+calendar.get(Calendar.DAY_OF_WEEK));
-                    if(calendar.get(Calendar.DAY_OF_WEEK)-2 == (int) e.getX()){
+                    if(
+                            calendar.get(Calendar.DAY_OF_WEEK)-2 == (int) e.getX()
+                            && calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) == Date.getCalendar().get(Calendar.DAY_OF_WEEK_IN_MONTH)
+                    ){
                         List<Aluno> alunosList = new ArrayList<>();
                         for(Aluno aluno : listAlunos){
                             if(h.getDataSetIndex() == 0) {

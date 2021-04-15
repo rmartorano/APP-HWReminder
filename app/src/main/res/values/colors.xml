@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="red">#fc0303</color>
+    <color name="purple_background_acompanhamento">#4C1057</color>
+    <color name="yellow">#FFEB3B</color>
+    <color name="blue_light">#88A4F8</color>
 </resources>

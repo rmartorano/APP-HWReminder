@@ -3,8 +3,8 @@
     <string name="default_notification_channel_id">fcm_default_channel</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Angélica Rubim de Toledo</string>
-    <string name="nav_header_subtitle">angelicartoledo@iecj.com.br</string>
+    <string name="nav_header_title">Nome</string>
+    <string name="nav_header_subtitle">email</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 

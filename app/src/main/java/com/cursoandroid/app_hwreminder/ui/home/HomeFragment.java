@@ -210,6 +210,7 @@ public final class HomeFragment extends Fragment {
         firstLoading = true;
         indeterminateBar = getView().findViewById(R.id.indeterminateBarFragmentHome);
         indeterminateBar.setIndeterminateTintList(ColorStateList.valueOf(Color.RED));
+        indeterminateBar.setBackgroundColor(Color.TRANSPARENT);
         indeterminateBar.setVisibility(View.VISIBLE);
         if (tarefaChildEventListener != null)
             removerListeners();

@@ -106,34 +106,36 @@
 
     <TextView
         android:id="@+id/textViewNomeMaisFazem"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="97dp"
-        android:layout_marginLeft="97dp"
         android:layout_marginBottom="4dp"
+        android:gravity="center"
         android:text="Rafael"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/progressBarMaisFazemFez"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/progressBarMaisFazemFez"
         app:layout_constraintHorizontal_bias="0.13"
-        app:layout_constraintStart_toEndOf="@+id/cardView"
+        app:layout_constraintStart_toStartOf="@+id/progressBarMaisFazemFez"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
-        android:id="@+id/textViewTotal1"
+        android:id="@+id/textViewTotalTarefasAlunosMaisFizeram1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="/"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintStart_toEndOf="@+id/textViewPBarFez"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
-        android:id="@+id/textViewTotal2"
+        android:id="@+id/textViewTotalTarefasAlunosMaisFizeram2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="/"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintStart_toEndOf="@+id/textViewPBarNaoFez"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />

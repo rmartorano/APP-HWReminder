@@ -1,12 +1,9 @@
 package com.cursoandroid.app_hwreminder.adapter;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,17 +15,8 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.app_hwreminder.R;
-import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
-import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
-import com.cursoandroid.app_hwreminder.ui.aluno.InfoAlunoActivity;
-import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
-import com.github.mikephil.charting.charts.PieChart;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -100,8 +88,8 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
             qtdNaoFez = itemView.findViewById(R.id.textViewPBarNaoFez);
             progressBarFez = itemView.findViewById(R.id.progressBarMaisFazemFez);
             progressBarNaoFez = itemView.findViewById(R.id.progressBarMaisFazemNaoFez);
-            total1 = itemView.findViewById(R.id.textViewTotal1);
-            total2 = itemView.findViewById(R.id.textViewTotal2);
+            total1 = itemView.findViewById(R.id.textViewTotalTarefasAlunosMaisFizeram1);
+            total2 = itemView.findViewById(R.id.textViewTotalTarefasAlunosMaisFizeram2);
 
         }
     }

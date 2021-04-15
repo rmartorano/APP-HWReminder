@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#4C1057"
     tools:context=".ui.acompanhamento.AcompanhamentoMainFragment">
 
     <TextView
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Acompanhamento diário - semana: - mes:"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/line_chart"

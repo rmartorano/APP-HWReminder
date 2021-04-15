@@ -1,13 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/textlines_no_spaced_bottom"
-        android:orientation="vertical">
+        android:background="@drawable/textlines_no_spaced_bottom">
+
+        <androidx.cardview.widget.CardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/cardViewAdapterFiltrarAlunoFeedback"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_margin="5dp"
+            android:elevation="0dp"
+            app:cardCornerRadius="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:cardBackgroundColor="@color/black">
+
+            <ImageView
+                android:id="@+id/roundedImageViewFiltrarAlunoFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/boy_face" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/textViewNomeAlunoFiltro"

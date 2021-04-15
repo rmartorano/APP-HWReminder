@@ -2,6 +2,7 @@ package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,7 +10,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -43,8 +46,13 @@ public class MaisFizeramActivity extends AppCompatActivity {
         TextView textMes = findViewById(R.id.textViewMesMaisFizeram);
         textMes.setText("Tarefas de "+date.getMonthString());
         spinnerOrdenar = findViewById(R.id.spinnerOrdenaraAcompanhamentoFizeram);
+        ArrayList<String> spinnerArray = new ArrayList<>();
+        spinnerArray.add("Nome");
+        spinnerArray.add("Tarefas feitas");
+        spinnerArray.add("Tarefas não feitas");
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, spinnerArray);
+        spinnerOrdenar.setAdapter(spinnerArrayAdapter);
         SearchView searchAluno = findViewById(R.id.searchViewAlunoAcompanhamento);
-
         AdapterAlunosMaisFazem adapterAlunosMaisFazem = new AdapterAlunosMaisFazem
                 (listTmp, HomeFragment.getListTarefas(), this);
 
