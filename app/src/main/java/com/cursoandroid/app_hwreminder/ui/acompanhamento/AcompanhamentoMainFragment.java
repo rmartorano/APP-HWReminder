@@ -243,7 +243,8 @@ public class AcompanhamentoMainFragment extends Fragment {
         chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
-                Log.i("Teste", "highlight: "+h);
+                if(e.getY() == 0)
+                    return;
                 Dialog dialog = new Dialog(getContext(), android.R.style.Theme_Material_Light_Dialog);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.acompanhamento_grafico_geral_get_alunos);
@@ -284,14 +285,12 @@ public class AcompanhamentoMainFragment extends Fragment {
                             if(h.getDataSetIndex() == 0) {
                                 textViewTitulo.setText("Alunos que fizeram as tarefas do dia: "+diasSemana[(int) e.getX()]);
                                 if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
-                                    Log.i("Teste", "contains");
                                     alunosList.add(aluno);
                                 }
                             }
                             else{
                                 textViewTitulo.setText("Alunos que não fizeram as tarefas do dia: "+diasSemana[(int) e.getX()]);
                                 if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
-                                    Log.i("Teste", "contains não fizeram");
                                     alunosList.add(aluno);
                                 }
                             }

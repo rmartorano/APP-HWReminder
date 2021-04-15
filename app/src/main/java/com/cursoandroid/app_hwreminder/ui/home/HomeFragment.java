@@ -74,11 +74,12 @@ public final class HomeFragment extends Fragment {
     private int week;
     private static String monthLastTarefaModified = " ", yearLastTarefaModified = " ", weekIntervalLastTarefaModified = " ", lastTurmaModified = " ";
     private com.cursoandroid.app_hwreminder.config.Date dateFromProject = new com.cursoandroid.app_hwreminder.config.Date();
-    private ChildEventListener tarefaChildEventListener, alunoEventListener;
+    private ChildEventListener tarefaChildEventListener;
     private String user = ConfiguracaoFirebase.getFirebaseAutenticacao().getCurrentUser().getUid();
     private ProgressBar indeterminateBar;
     private static Button buttonSalvarAlteracoes, buttonCancelarAlteracoes;
     private static boolean anyChange = false, firstLoading = true;
+    private boolean finishedUpdate = false;
 
     private TextView textViewDescricao;
 
@@ -210,14 +211,14 @@ public final class HomeFragment extends Fragment {
         indeterminateBar = getView().findViewById(R.id.indeterminateBarFragmentHome);
         indeterminateBar.setIndeterminateTintList(ColorStateList.valueOf(Color.RED));
         indeterminateBar.setVisibility(View.VISIBLE);
-        if (alunoEventListener != null)
+        if (tarefaChildEventListener != null)
             removerListeners();
         recuperarConfigs();
         final Handler handler = new Handler(); //checa depois de 2s se as listas estão vazias, caso positivo remove o progressbar
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(alunos.isEmpty() && tarefas.isEmpty())
+                if (alunos.isEmpty() && tarefas.isEmpty())
                     indeterminateBar.setVisibility(View.INVISIBLE);
             }
         }, 2000);
@@ -225,18 +226,31 @@ public final class HomeFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void saveWeekChangeData(TextView textViewSemanaHome, TextView textViewTituloLista, Calendar calendarProject) {
-        weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
-        monthLastTarefaModified = dateFromProject.getMonthString();
-        textViewSemanaHome.setText(dateFromProject.getWeekInterval());
-        week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
-        textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
-        HomeFragmentConfigs.salvarConfigs();
-        onStart();
+        indeterminateBar.setVisibility(View.VISIBLE);
+        if (finishedUpdate || !anyChange) {
+            weekIntervalLastTarefaModified = dateFromProject.getWeekIntervalAsChildString();
+            monthLastTarefaModified = dateFromProject.getMonthString();
+            textViewSemanaHome.setText(dateFromProject.getWeekInterval());
+            week = calendarProject.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+            textViewTituloLista.setText("Dever de casa - " + dateFromProject.getMonthString());
+            HomeFragmentConfigs.salvarConfigs();
+            finishedUpdate = false;
+            Log.i("Teste", "finished saving");
+            onStart();
+        }
+        else { //chama o método novamente pra checar se já terminou de salvar as alterações
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    saveWeekChangeData(textViewSemanaHome, textViewTituloLista, calendarProject);
+                }
+            }, 1000);
+        }
     }
 
     public void removerListeners() {
-        Log.i("Teste", " removemndo listeners");
-        firebaseRef.removeEventListener(alunoEventListener);
+        //firebaseRef.removeEventListener(alunoEventListener);
         firebaseRef.removeEventListener(tarefaChildEventListener);
     }
 
@@ -251,9 +265,8 @@ public final class HomeFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() == null) {
-                    Log.i("Teste", "null");
                     HomeFragment.setYearLastTarefaModified(" ");
-                    HomeFragment.setMonthLastTarefaModified(" "); //mudar pra janeiro dps
+                    HomeFragment.setMonthLastTarefaModified(" ");
                     HomeFragment.setWeekIntervalLastTarefaModified(" ");
                     HomeFragment.setLastTurmaModified(" ");
                     return;
@@ -651,7 +664,7 @@ public final class HomeFragment extends Fragment {
     static int contadorRecursao = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno, boolean updateTodosAlunos) throws ParseException {
+    public void updateFrequenciaTarefa(Tarefa tarefa, Aluno aluno) throws ParseException {
         String diaSemana = new String();
         Date date = null;
         //get weekDay string from tarefa
@@ -723,12 +736,12 @@ public final class HomeFragment extends Fragment {
 
                     }
                 });
-        if (updateTodosAlunos) { //se essa opcao tiver marcada, chama a funcao de novo com o aluno do próximo index
-            contadorRecursao++;
-            if (alunos.size() > contadorRecursao) {
-                updateFrequenciaTarefa(tarefa, alunos.get(contadorRecursao), true);
-            } else
-                contadorRecursao = 0;
+        contadorRecursao++;
+        if (alunos.size() > contadorRecursao) {
+            updateFrequenciaTarefa(tarefa, alunos.get(contadorRecursao));
+        } else{
+            contadorRecursao = 0;
+            finishedUpdate = true;
         }
     }
 
@@ -774,7 +787,7 @@ public final class HomeFragment extends Fragment {
         if (anyChange) {
             for (Tarefa tarefa : tarefas) {
                 try {
-                    updateFrequenciaTarefa(tarefa, alunos.get(0), true);
+                    updateFrequenciaTarefa(tarefa, alunos.get(0));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

@@ -37,6 +37,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder> {
@@ -77,12 +78,14 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
         checkBox.setChecked(true);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         sameWeek = false;
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         Aluno aluno = alunos.get(position);
         holder.nome.setText(aluno.getNome());
+        resetCheckBoxes(holder.itemView.getRootView());
         //atualiza seleção das checkBoxes
         String year = Date.getYearString();
         ConfiguracaoFirebase.getFirebaseDatabase()
@@ -90,13 +93,14 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                 .child("aluno")
                 .child(year)
                 .child(aluno.getTurma())
-                .child(aluno.getNome()).addListenerForSingleValueEvent(new ValueEventListener() {
+                .child(aluno.getNome())
+                .child("checkBoxes")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child("checkBoxes").child("checkedBoxSegunda").getValue() == null) {
+                if (snapshot.child("checkedBoxSegunda").getValue() == null) {
                     aluno.salvarCheckBox();
                 } else {
-                    resetCheckBoxes(holder.itemView.getRootView());
                     List<Tarefa> listTarefas = HomeFragment.getListTarefas();
                     Calendar calendar = Calendar.getInstance();
                     java.util.Date dateJava;
@@ -147,61 +151,72 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
+
+        final boolean[] firstLoading = {true};
         //add um listener pra cada checkBox
         holder.checkBoxSegunda.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(sameWeek && dia == SEGUNDA) {
+                if(sameWeek) {
                     aluno.setCheckBoxSegunda(isChecked);
-                    HomeFragment.setAnyChange(true);
+                    if(!firstLoading[0])
+                        HomeFragment.setAnyChange(true);
                 }
             }
         });
         holder.checkBoxTerca.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(sameWeek && dia == TERCA) {
+                if(sameWeek) {
                     aluno.setCheckBoxTerca(isChecked);
-                    HomeFragment.setAnyChange(true);
+                    if(!firstLoading[0])
+                        HomeFragment.setAnyChange(true);
                 }
             }
         });
         holder.checkBoxQuarta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(sameWeek && dia == QUARTA) {
+                if(sameWeek) {
                     aluno.setCheckBoxQuarta(isChecked);
-                    HomeFragment.setAnyChange(true);
+                    if(!firstLoading[0])
+                        HomeFragment.setAnyChange(true);
                 }
             }
         });
         holder.checkBoxQuinta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(sameWeek && dia == QUINTA) {
+                if(sameWeek) {
                     aluno.setCheckBoxQuinta(isChecked);
-                    HomeFragment.setAnyChange(true);
+                    if(!firstLoading[0])
+                        HomeFragment.setAnyChange(true);
                 }
             }
         });
+        final boolean[] finishedConfig = {false};
         holder.checkBoxSexta.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(sameWeek && dia == SEXTA) {
+                if(sameWeek) {
                     aluno.setCheckBoxSexta(isChecked);
+
                     HomeFragment.setAnyChange(true);
+                    finishedConfig[0] = true;
                 }
             }
         });
 
+        alunos.sort(Comparator.comparing(Aluno::getNome));
         if(alunos.indexOf(aluno) == alunos.size()-1) {
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     HomeFragment.setFirstLoading(false);
+                    firstLoading[0] = false;
                 }
-            }, 1500);
+            }, 1000);
         }
 
         holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
