@@ -2,6 +2,8 @@ package com.cursoandroid.app_hwreminder.ui.aluno;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -24,6 +26,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +43,7 @@ import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.AlunoAddPendente;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -154,6 +159,7 @@ public class AdicionarAlunoFragment extends Fragment {
 
         TextView textViewAddAluno = view.findViewById(R.id.textViewAddAluno);
         textViewAddAluno.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
                 if(listTurmas.isEmpty()){
@@ -167,6 +173,7 @@ public class AdicionarAlunoFragment extends Fragment {
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void abrirDialog(View v){
 
         //Instance alertDialog
@@ -188,7 +195,42 @@ public class AdicionarAlunoFragment extends Fragment {
         EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setHint("Nome do aluno");
+        input.setHintTextColor(Color.GRAY);
+        input.setTextColor(Color.BLACK);
         layoutTurma.addView(input);
+
+        RadioGroup rg = new RadioGroup(getContext());
+        TextView textViewSexo = new TextView(getContext());
+        textViewSexo.setTextSize(16);
+        textViewSexo.setPadding(12, 0, 0, 0);
+        textViewSexo.setText("Sexo: ");
+        textViewSexo.setTextColor(Color.BLACK);
+        rg.setOrientation(RadioGroup.HORIZONTAL);
+        RadioButton rbM = new RadioButton(getContext());
+        ColorStateList colorStateList = new ColorStateList(
+                new int[][]{
+
+                        new int[]{-android.R.attr.state_enabled}, //disabled
+                        new int[]{android.R.attr.state_enabled} //enabled
+                },
+                new int[] {
+
+                        Color.BLUE //disabled
+                        ,Color.BLACK //enabled
+
+                }
+        );
+        rbM.setText("M");
+        rbM.setTextColor(getResources().getColor(R.color.teal_200));
+        rbM.setButtonTintList(colorStateList);
+        RadioButton rbF = new RadioButton(getContext());
+        rbF.setText("F");
+        rbF.setTextColor(getResources().getColor(R.color.teal_200));
+        rbF.setButtonTintList(colorStateList);
+        rg.addView(textViewSexo);
+        rg.addView(rbM);
+        rg.addView(rbF);
+        layoutTurma.addView(rg);
 
         LinearLayout layout2 = new LinearLayout(getContext());
         layout2.setOrientation(LinearLayout.HORIZONTAL);
@@ -281,6 +323,8 @@ public class AdicionarAlunoFragment extends Fragment {
         EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setHint("Turma");
+        input.setHintTextColor(Color.GRAY);
+        input.setTextColor(Color.BLACK);
         dialog.setView(input);
 
         dialog.setPositiveButton("Criar", new DialogInterface.OnClickListener() {
@@ -368,7 +412,7 @@ public class AdicionarAlunoFragment extends Fragment {
     public void recuperarTurmas(){
 
         turmaRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot turmaSnapshot : snapshot.getChildren()){

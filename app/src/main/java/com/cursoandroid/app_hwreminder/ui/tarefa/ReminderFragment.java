@@ -155,7 +155,7 @@ public class ReminderFragment extends Fragment {
         Spinner spinner = view.findViewById(R.id.disciplines_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.array_disciplines, android.R.layout.simple_spinner_item);
+                R.array.array_disciplines, R.layout.spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
@@ -235,7 +235,7 @@ public class ReminderFragment extends Fragment {
                     }
                 }
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        getContext(), android.R.layout.simple_spinner_item, spinnerArray);
+                        getContext(), R.layout.spinner_item, spinnerArray);
                 spinnerTurma.setAdapter(adapter);
                 if(!lastTurmaModified[0].equals("")){
                     for(int i=0; i<spinnerTurma.getCount(); i++){

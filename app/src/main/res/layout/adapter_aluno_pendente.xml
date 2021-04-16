@@ -19,7 +19,7 @@
             android:clickable="true"
             android:drawableRight="@drawable/ic_baseline_remove_24"
             android:text="Nome do aluno"
-            android:textColor="@android:color/black"
+            android:textColor="@color/teal_200"
             android:textSize="14sp" />
 
         <TextView
@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="Turma"
+            android:textColor="@color/yellow"
             android:textSize="12sp" />
     </LinearLayout>
 

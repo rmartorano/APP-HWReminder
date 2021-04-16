@@ -299,7 +299,7 @@ public final class HomeFragment extends Fragment {
                     }
                 }
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        getContext(), android.R.layout.simple_spinner_item, spinnerArray);
+                        getContext(), R.layout.spinner_item, spinnerArray);
                 spinnerTurmaHome.setAdapter(adapter);
                 if (!lastTurmaModified.equals("")) {
                     for (int i = 0; i < spinnerTurmaHome.getCount(); i++) {

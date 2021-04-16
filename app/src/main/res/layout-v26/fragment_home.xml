@@ -16,7 +16,7 @@
         android:background="@drawable/textlines_spaced_bottom"
         android:gravity="center"
         android:text="Dever de casa - mês"
-        android:textColor="@color/black"
+        android:textColor="@color/yellow"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -33,36 +33,33 @@
             android:gravity="center"
             android:paddingTop="8dp"
             android:text="Segunda"
-            android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textColor="@color/teal_200"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textViewSemanaHome"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:autoSizeTextType="uniform"
-            android:autoText="true"
+            android:singleLine="true"
             android:background="@drawable/textlines_spaced_bottom"
-            android:drawableLeft="@drawable/ic_baseline_arrow_back_ios_24"
-            android:drawableRight="@drawable/ic_baseline_arrow_forward_ios_24"
-            android:ellipsize="end"
             android:freezesText="false"
             android:gravity="center"
             android:inputType="none"
-            android:maxLines="1"
             android:paddingLeft="3dp"
             android:paddingTop="8dp"
             android:paddingRight="3dp"
             android:text="Semana  __ /__ a __ /__"
             android:textAllCaps="false"
-            android:textColor="@color/black"
+            android:textColor="@color/teal_200"
             android:textStyle="bold"
             app:autoSizeMaxTextSize="18sp"
             app:autoSizeMinTextSize="12sp"
-            app:autoSizeTextType="uniform" />
+            app:autoSizeTextType="uniform"
+            app:drawableRightCompat="@drawable/ic_baseline_arrow_forward_ios_24"
+            app:drawableLeftCompat="@drawable/ic_baseline_arrow_back_ios_24" />
     </LinearLayout>
 
     <LinearLayout
@@ -86,7 +83,7 @@
                 android:gravity="center"
                 android:paddingTop="8dp"
                 android:text="Turma"
-                android:textColor="@color/red"
+                android:textColor="#FF2626"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -123,6 +120,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Seg"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -134,6 +132,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Ter"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -145,6 +144,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Qua"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -156,6 +156,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Qui"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -167,6 +168,7 @@
                     android:gravity="center"
                     android:padding="2dp"
                     android:text="Sex"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
             </LinearLayout>
@@ -187,6 +189,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Sem tarefa"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -199,6 +202,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Sem tarefa"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -211,6 +215,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Sem tarefa"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -223,6 +228,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Sem tarefa"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
                 <TextView
@@ -237,6 +243,7 @@
                     android:gravity="center"
                     android:padding="1dp"
                     android:text="Sem tarefa"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
 
