@@ -7,11 +7,12 @@
     android:layout_gravity="center">
 
     <TextView
-        android:id="@+id/textView11"
+        android:id="@+id/textViewCrieSuaContaGratis"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="Crie sua conta grátis"
+        android:textColor="@android:color/holo_green_light"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/editNomeCadastro"
@@ -38,7 +39,7 @@
         app:layout_constraintBottom_toTopOf="@+id/editEmailCadastro"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewCrieSuaContaGratis" />
 
     <EditText
         android:id="@+id/editEmailCadastro"

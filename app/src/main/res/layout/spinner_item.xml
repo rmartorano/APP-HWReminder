@@ -7,5 +7,6 @@
     android:textSize="16dp"
     android:gravity="left"
     android:textColor="@color/teal_200"
+    android:singleLine="true"
     android:padding="5dip"
     />

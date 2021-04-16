@@ -1,6 +1,7 @@
 package com.cursoandroid.app_hwreminder.model;
 
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
@@ -13,9 +14,10 @@ import java.util.Map;
 
 public class Aluno {
 
-    private String nome, diaSemana = "seg", turma;
+    private String nome, diaSemana = "seg", turma, sexo;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
     private int qtdProgressBarTarefasFeitas, qtdProgressBarTarefasNaoFeitas;
+    private int fotoPerfil;
 
     public Aluno() {
         checkBoxSegunda = checkBoxTerca = checkBoxQuarta = checkBoxQuinta = checkBoxSexta = true;
@@ -99,6 +101,14 @@ public class Aluno {
 
     }
 
+    public int getFotoPerfil() {
+        return this.fotoPerfil;
+    }
+
+    public void setFotoPerfil(int fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+    }
+
     public void salvar(){
         Calendar calendar = Calendar.getInstance();
         DatabaseReference firebase = ConfiguracaoFirebase.getFirebaseDatabase();
@@ -150,5 +160,13 @@ public class Aluno {
 
     public void setQtdProgressBarTarefasNaoFeitas(int qtdProgressBarTarefasNaoFeitas) {
         this.qtdProgressBarTarefasNaoFeitas = qtdProgressBarTarefasNaoFeitas;
+    }
+
+    public String getSexo() {
+        return sexo;
+    }
+
+    public void setSexo(String sexo) {
+        this.sexo = sexo;
     }
 }

@@ -7,6 +7,7 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -46,6 +47,7 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
 
         Aluno aluno = listAlunos.get(position);
         holder.nome.setText(aluno.getNome());
+        holder.fotoPerfil.setImageResource(aluno.getFotoPerfil());
         holder.progressBarFez.setMax(listTarefas.size());
         holder.progressBarNaoFez.setMax(listTarefas.size());
         holder.progressBarNaoFez.setProgressTintList(ColorStateList.valueOf(Color.RED));
@@ -79,11 +81,13 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
 
         TextView nome, qtdFez, qtdNaoFez, total1, total2;
         ProgressBar progressBarFez, progressBarNaoFez;
+        ImageView fotoPerfil;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             nome = itemView.findViewById(R.id.textViewNomeMaisFazem);
+            fotoPerfil = itemView.findViewById(R.id.roundedImageViewAdapterAlunosMaisFazem);
             qtdFez = itemView.findViewById(R.id.textViewPBarFez);
             qtdNaoFez = itemView.findViewById(R.id.textViewPBarNaoFez);
             progressBarFez = itemView.findViewById(R.id.progressBarMaisFazemFez);

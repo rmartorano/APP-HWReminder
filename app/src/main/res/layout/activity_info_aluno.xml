@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/cardAlunoActivityInfoAluno"
         app:layout_constraintVertical_bias="1.0">
     </com.github.mikephil.charting.charts.PieChart>
 
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="@+id/pieChart" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/cardAlunoActivityInfoAluno"
         android:layout_width="match_parent"
         android:layout_height="170dp"
         android:layout_marginStart="16dp"
@@ -65,7 +65,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/roundedImageView"
+                android:id="@+id/roundedImageViewActivityInfoAluno"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/white"
@@ -86,7 +86,7 @@
             app:layout_constraintTop_toBottomOf="@+id/cardView" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/textViewDataAniversarioInfoAluno"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -98,14 +98,25 @@
             app:layout_constraintVertical_bias="0.894" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/textViewTurmaActivityInfoAluno"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="52dp"
             android:layout_marginRight="52dp"
             android:text="Turma: D"
-            app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textViewDataAniversarioInfoAluno"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewEditInfoAluno"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.872"
+            app:layout_constraintStart_toEndOf="@+id/cardView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_pencil_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -119,7 +130,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+        app:layout_constraintTop_toBottomOf="@+id/cardAlunoActivityInfoAluno">
 
         <Spinner
             android:id="@+id/spinnerFiltroInfoAluno"

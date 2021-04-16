@@ -45,6 +45,7 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
     List<Aluno> alunos;
     Context context;
     private boolean sameWeek = false;
+    final static boolean[] firstLoading = {true};
 
     private int dia = 0;
     private final int SEGUNDA = 0;
@@ -122,23 +123,18 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                                 controle = false;
                             switch (diaSemana) {
                                 case "seg":
-                                    dia = SEGUNDA;
                                     holder.checkBoxSegunda.setChecked(controle);
                                     break;
                                 case "ter":
-                                    dia = TERCA;
                                     holder.checkBoxTerca.setChecked(controle);
                                     break;
                                 case "qua":
-                                    dia = QUARTA;
                                     holder.checkBoxQuarta.setChecked(controle);
                                     break;
                                 case "qui":
-                                    dia = QUINTA;
                                     holder.checkBoxQuinta.setChecked(controle);
                                     break;
                                 case "sex":
-                                    dia = SEXTA;
                                     holder.checkBoxSexta.setChecked(controle);
                                     break;
                             }
@@ -152,12 +148,12 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             }
         });
 
-        final boolean[] firstLoading = {true};
         //add um listener pra cada checkBox
         holder.checkBoxSegunda.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(sameWeek) {
+                    Log.i("Teste", "checked segunda");
                     aluno.setCheckBoxSegunda(isChecked);
                     if(!firstLoading[0])
                         HomeFragment.setAnyChange(true);
@@ -207,7 +203,6 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
             }
         });
 
-        alunos.sort(Comparator.comparing(Aluno::getNome));
         if(alunos.indexOf(aluno) == alunos.size()-1) {
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -218,6 +213,8 @@ public class AdapterAluno extends RecyclerView.Adapter<AdapterAluno.MyViewHolder
                 }
             }, 1000);
         }
+        else
+            Log.i("Teste", "not the last one");
 
         holder.nome.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override

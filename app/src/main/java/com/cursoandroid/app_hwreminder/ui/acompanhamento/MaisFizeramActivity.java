@@ -39,7 +39,7 @@ public class MaisFizeramActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mais_fizeram);
-        setTitle("Alunos que mais fizeram tarefas");
+        setTitle("Acompanhamento mensal da turma");
 
         Date date = new Date();
 

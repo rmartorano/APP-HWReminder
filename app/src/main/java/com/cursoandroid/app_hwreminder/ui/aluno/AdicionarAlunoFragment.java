@@ -76,6 +76,7 @@ public class AdicionarAlunoFragment extends Fragment {
     private DatabaseReference turmaRef;
     private int lastTurma = 0;
     private Spinner spinnerTurma;
+    private RadioButton radioM, radioF;
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -206,7 +207,7 @@ public class AdicionarAlunoFragment extends Fragment {
         textViewSexo.setText("Sexo: ");
         textViewSexo.setTextColor(Color.BLACK);
         rg.setOrientation(RadioGroup.HORIZONTAL);
-        RadioButton rbM = new RadioButton(getContext());
+        radioM = new RadioButton(getContext());
         ColorStateList colorStateList = new ColorStateList(
                 new int[][]{
 
@@ -220,16 +221,16 @@ public class AdicionarAlunoFragment extends Fragment {
 
                 }
         );
-        rbM.setText("M");
-        rbM.setTextColor(getResources().getColor(R.color.teal_200));
-        rbM.setButtonTintList(colorStateList);
-        RadioButton rbF = new RadioButton(getContext());
-        rbF.setText("F");
-        rbF.setTextColor(getResources().getColor(R.color.teal_200));
-        rbF.setButtonTintList(colorStateList);
+        radioM.setText("M");
+        radioM.setTextColor(getResources().getColor(R.color.teal_200));
+        radioM.setButtonTintList(colorStateList);
+        radioF = new RadioButton(getContext());
+        radioF.setText("F");
+        radioF.setTextColor(getResources().getColor(R.color.teal_200));
+        radioF.setButtonTintList(colorStateList);
         rg.addView(textViewSexo);
-        rg.addView(rbM);
-        rg.addView(rbF);
+        rg.addView(radioM);
+        rg.addView(radioF);
         layoutTurma.addView(rg);
 
         LinearLayout layout2 = new LinearLayout(getContext());
@@ -279,7 +280,7 @@ public class AdicionarAlunoFragment extends Fragment {
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void onClick(View v) {
-                        if(input.getText().toString().equals("")){
+                        if(input.getText().toString().equals("") || (!radioM.isChecked() && !radioF.isChecked())){
                             Toast.makeText(
                                     getContext().getApplicationContext(),
                                     "Cancelado",
@@ -297,6 +298,14 @@ public class AdicionarAlunoFragment extends Fragment {
                                 AlunoAddPendente aluno = new AlunoAddPendente();
                                 aluno.setNome(input.getText().toString());
                                 aluno.setTurma(spinnerTurma.getSelectedItem().toString());
+                                if(radioM.isChecked()) {
+                                    aluno.setFotoPerfil(R.drawable.boy_face);
+                                    aluno.setSexo("M");
+                                }
+                                else {
+                                    aluno.setFotoPerfil(R.drawable.girl_default_image);
+                                    aluno.setSexo("F");
+                                }
                                 listAlunos.add(aluno);
                                 sortList(); // sort list alphabetically and notifify the adapter
                                 adapterAluno.notifyDataSetChanged();
@@ -331,6 +340,11 @@ public class AdicionarAlunoFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String inputText = input.getText().toString();
+                if(listTurmas.contains(inputText)){
+                    Toast.makeText(getContext(), "Turma "+inputText+" já existe", Toast.LENGTH_SHORT).show();
+                    spinnerTurma.setSelection(listTurmas.indexOf(inputText));
+                    return;
+                }
                 listTurmas.add(inputText);
                 turmaRef.setValue(listTurmas);
                 Toast.makeText(getContext(), "Turma "+inputText+" adicionada com sucesso", Toast.LENGTH_SHORT).show();
@@ -381,24 +395,28 @@ public class AdicionarAlunoFragment extends Fragment {
     public void salvarAlunos() throws ParseException {
         Calendar calendar = Calendar.getInstance();
         calendar.setMinimalDaysInFirstWeek(7);
+        List<String> listNomes = new ArrayList<>();
         for(AlunoAddPendente alunoAdd : listAlunos) {
             Aluno aluno = new Aluno();
             aluno.setNome(alunoAdd.getNome());
             aluno.setTurma(alunoAdd.getTurma());
+            aluno.setFotoPerfil(alunoAdd.getFotoPerfil());
+            aluno.setSexo(alunoAdd.getSexo());
             aluno.salvar();
+            listNomes.add(aluno.getNome());
             HomeFragment.setLastTurmaModified(alunoAdd.getTurma());
-            for(Tarefa tarefa : HomeFragment.getListTarefas()){
-                Calendar calendarTarefa = Calendar.getInstance();
-                calendarTarefa.setMinimalDaysInFirstWeek(7);
-                try {
-                    calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                if(calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) <= calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH)){
-                    tarefa.addToListAlunosFizeram(aluno.getNome());
-                    tarefa.salvarListas();
-                }
+        }
+        for(Tarefa tarefa : HomeFragment.getListTarefas()){
+            Calendar calendarTarefa = Calendar.getInstance();
+            calendarTarefa.setMinimalDaysInFirstWeek(7);
+            try {
+                calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if(calendar.get(Calendar.DAY_OF_WEEK_IN_MONTH) <= calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH)){
+                tarefa.getListAlunosFizeram().addAll(listNomes);
+                tarefa.salvarListas();
             }
         }
         Log.i("Teste", "last turma: "+HomeFragment.getLastTurmaModified());

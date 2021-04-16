@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,8 @@ public class AdapterFiltrarAlunoFeedback extends RecyclerView.Adapter<AdapterFil
 
         Aluno aluno = listAlunos.get(position);
         holder.nome.setText(aluno.getNome());
+        holder.fotoPerfil.setImageResource(aluno.getFotoPerfil());
+        Log.i("Teste", "foto perfil: "+aluno.getFotoPerfil());
         holder.nome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,11 +64,13 @@ public class AdapterFiltrarAlunoFeedback extends RecyclerView.Adapter<AdapterFil
     public class MyViewHolder extends RecyclerView.ViewHolder{
 
         TextView nome;
+        ImageView fotoPerfil;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             nome = itemView.findViewById(R.id.textViewNomeAlunoFiltro);
+            fotoPerfil = itemView.findViewById(R.id.roundedImageViewFiltrarAlunoFeedback);
 
         }
     }

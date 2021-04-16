@@ -3,6 +3,7 @@ package com.cursoandroid.app_hwreminder.ui.aluno;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -106,6 +108,9 @@ public class InfoAlunoActivity extends AppCompatActivity {
         secondSpinner = findViewById(R.id.secondSpinner);
         thirdSpinner = findViewById(R.id.thirdSpinner);
         indeterminateBar = findViewById(R.id.indeterminateBar);
+        ImageView fotoPerfil = findViewById(R.id.roundedImageViewActivityInfoAluno);
+        TextView textViewTurma = findViewById(R.id.textViewTurmaActivityInfoAluno);
+        ConstraintLayout cardAluno = findViewById(R.id.cardAlunoActivityInfoAluno);
 
         mapMeses.put(0, "janeiro");
         mapMeses.put(1, "fevereiro");
@@ -137,10 +142,24 @@ public class InfoAlunoActivity extends AppCompatActivity {
         }
 
         textViewNome.setText(nomeFromExtra);
+        fotoPerfil.setImageResource(aluno.getFotoPerfil());
+        textViewTurma.setText("Turma: "+aluno.getTurma());
+        if(aluno.getSexo().equalsIgnoreCase("F")){
+            cardAluno.setBackground(getResources().getDrawable(R.drawable.shape_card_aluno_girl));
+        }
 
         //prenche o gráfico com valores iniciais, na config de semanalmente
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        //configura spinners
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.array_filtro_info_aluno, R.layout.spinner_item);
+        spinner.setAdapter(adapter);
+
+        adapter = ArrayAdapter.createFromResource(this,
+                R.array.array_filtro_info_aluno_meses, R.layout.spinner_item);
+        secondSpinner.setAdapter(adapter);
 
         switch (new SimpleDateFormat("MMMM", new java.util.Locale("pt","BR")).format(calendar.getTime()).toLowerCase()) {
             case "janeiro":
@@ -201,6 +220,11 @@ public class InfoAlunoActivity extends AppCompatActivity {
     private void generateChartData() {
 
         List<PieEntry> entries = new ArrayList<>();
+
+        Legend pieChartLegend = pieChart.getLegend();
+        pieChartLegend.setTextColor(Color.WHITE);
+        pieChartLegend.setForm(Legend.LegendForm.CIRCLE);
+
         entries.add(new PieEntry(mapQtdTarefas.get("qtdFizeram"), "Tarefas feitas"));
         entries.add(new PieEntry(mapQtdTarefas.get("qtdNaoFizeram"), "Tarefas não feitas"));
 
@@ -219,6 +243,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
         Description description = new Description();
         description.setText("Descrição: Frequência do aluno");
+        description.setTextColor(Color.YELLOW);
         description.setTextSize(10);
         pieChart.setDescription(description);
 
@@ -245,8 +270,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 if (hasSecondSpinnerIdChanged || hasFirstSpinnerIdChanged || firstTimeLoading) {
                     if (secondSpinner.getCount() < 12) {
                         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                                R.array.array_filtro_info_aluno_meses, android.R.layout.simple_spinner_item);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                R.array.array_filtro_info_aluno_meses, R.layout.spinner_item);
                         secondSpinner.setAdapter(adapter);
                         secondSpinner.setSelection(calendar.get(Calendar.MONTH));
                     }
@@ -257,9 +281,8 @@ public class InfoAlunoActivity extends AppCompatActivity {
                         spinnerArray.add(mapIntervals.get("Semana " + (i + 1)));
                     }
                     ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                            this, android.R.layout.simple_spinner_item,
+                            this, R.layout.spinner_item,
                             spinnerArray);
-                    spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     thirdSpinner.setAdapter(spinnerArrayAdapter);
                     if (firstTimeLoading) {
                         Calendar calendarTeste = Calendar.getInstance();
@@ -285,8 +308,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
                 if (hasFirstSpinnerIdChanged || hasSecondSpinnerIdChanged) {
                     if (secondSpinner.getCount() < 12) {
                         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                                R.array.array_filtro_info_aluno_meses, android.R.layout.simple_spinner_item);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                R.array.array_filtro_info_aluno_meses, R.layout.spinner_item);
                         secondSpinner.setAdapter(adapter);
                         Calendar calendar = Calendar.getInstance();
                         secondSpinner.setSelection(calendar.get(Calendar.MONTH));
@@ -308,9 +330,8 @@ public class InfoAlunoActivity extends AppCompatActivity {
                         spinnerArray.add("1º semestre");
                         spinnerArray.add("2º semestre");
                         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                                this, android.R.layout.simple_spinner_item,
+                                this, R.layout.spinner_item,
                                 spinnerArray);
-                        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         secondSpinner.setAdapter(spinnerArrayAdapter);
                         secondSpinnerLastPos = 0;
                     }
@@ -345,9 +366,8 @@ public class InfoAlunoActivity extends AppCompatActivity {
                                     spinnerArray.add(ano.getKey());
                                 }
                                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                                        getApplicationContext(), android.R.layout.simple_spinner_item,
+                                        getApplicationContext(), R.layout.spinner_item,
                                         spinnerArray);
-                                spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                 secondSpinner.setAdapter(spinnerArrayAdapter);
                                 secondSpinnerLastPos = 0;
                             }

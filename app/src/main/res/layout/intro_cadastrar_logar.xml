@@ -7,13 +7,13 @@
     android:layout_gravity="center">
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textViewCriarConta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
         android:text="Crie sua conta grátis"
-        android:textColor="@color/black"
+        android:textColor="@android:color/holo_green_light"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
@@ -34,7 +34,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonCadastro"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewCriarConta" />
 
     <Button
         android:id="@+id/buttonCadastro"
@@ -60,7 +60,7 @@
         android:clickable="true"
         android:onClick="btEntrar"
         android:text="Já tenho conta"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/teal_200"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
