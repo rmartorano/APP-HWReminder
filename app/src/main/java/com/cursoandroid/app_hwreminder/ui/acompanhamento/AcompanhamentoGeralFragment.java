@@ -28,6 +28,7 @@ import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
+import com.cursoandroid.app_hwreminder.ui.aluno.InfoAlunoActivity;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
 import java.util.ArrayList;
@@ -93,19 +94,11 @@ public class AcompanhamentoGeralFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ImageView imageViewPesquisarAluno = view.findViewById(R.id.imageViewPesquisarAluno);
-        imageViewPesquisarAluno.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void onClick(View v) {
-                abrirFeedbackAlunos();
-            }
-        });
         ImageView imageViewAlunosMaisFizeram = view.findViewById(R.id.imageViewAlunosMaisFizeram);
         imageViewAlunosMaisFizeram.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                abrirAlunosMaisFizeram();
+                getActivity().startActivity(new Intent(getContext(), InfoAlunoActivity.class));
             }
         });
     }
@@ -153,10 +146,6 @@ public class AcompanhamentoGeralFragment extends Fragment {
                 return false;
             }
         });
-    }
-
-    private void abrirAlunosMaisFizeram(){
-        getActivity().startActivity(new Intent(getContext(), MaisFizeramActivity.class));
     }
 
     void filtrarAlunos(String query, AdapterFiltrarAlunoFeedback adapterFiltrarAlunoFeedback, List<Aluno> alunosFiltro){

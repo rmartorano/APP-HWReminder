@@ -3,78 +3,58 @@ package com.cursoandroid.app_hwreminder.ui.aluno;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.cursoandroid.app_hwreminder.R;
+import com.cursoandroid.app_hwreminder.adapter.AdapterAlunosMaisFazem;
 import com.cursoandroid.app_hwreminder.config.ConfiguracaoFirebase;
 import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.model.Tarefa;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import static com.cursoandroid.app_hwreminder.ui.home.HomeFragment.getListAlunos;
 
 public class InfoAlunoActivity extends AppCompatActivity {
 
-    private TextView textViewNome;
     private Aluno aluno;
-    private final List<Aluno> listAlunos = getListAlunos();
+    private final List<Aluno> listAlunos = HomeFragment.getListAlunos(), alunosFiltro = new ArrayList<>();
     private List<Tarefa> listTarefas = HomeFragment.getListTarefas();
-    private PieChart pieChart;
-    private Map<String, Integer> mapQtdTarefas = new HashMap<>();
-    private Spinner spinner, secondSpinner, thirdSpinner;
+    private Spinner spinner, secondSpinner, thirdSpinner, spinnerOrdenar;
     private boolean hasSecondSpinnerIdChanged = false, hasFirstSpinnerIdChanged = false;
     private boolean firstTimeLoading = true;
     private int firstSpinnerLastPos = 0, secondSpinnerLastPos, thirdSpinnerLastPos;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
     private ProgressBar indeterminateBar;
+    private AdapterAlunosMaisFazem adapterAlunosMaisFazem;
 
     //Enums
     private final int SEMANAL = 0;
@@ -97,20 +77,19 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
     private Map<Integer, String> mapMeses = new HashMap<>();
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_aluno);
+        setTitle("Acompanhamento mensal da turma");
 
-        textViewNome = findViewById(R.id.textViewInfoNomeAluno);
         spinner = findViewById(R.id.spinnerFiltroInfoAluno);
-        secondSpinner = findViewById(R.id.secondSpinner);
-        thirdSpinner = findViewById(R.id.thirdSpinner);
-        indeterminateBar = findViewById(R.id.indeterminateBar);
-        ImageView fotoPerfil = findViewById(R.id.roundedImageViewActivityInfoAluno);
-        TextView textViewTurma = findViewById(R.id.textViewTurmaActivityInfoAluno);
-        ConstraintLayout cardAluno = findViewById(R.id.cardAlunoActivityInfoAluno);
+        secondSpinner = findViewById(R.id.secondSpinnerInfoAluno);
+        thirdSpinner = findViewById(R.id.thirdSpinnerInfoAluno);
+        indeterminateBar = findViewById(R.id.indeterminateBarInfoAluno);
+        indeterminateBar.setIndeterminateTintList(ColorStateList.valueOf(getResources().getColor(R.color.red_light)));
+        //TextView textViewTurma = findViewById(R.id.textViewTurmaActivityInfoAluno);
 
         mapMeses.put(0, "janeiro");
         mapMeses.put(1, "fevereiro");
@@ -125,30 +104,57 @@ public class InfoAlunoActivity extends AppCompatActivity {
         mapMeses.put(10, "novembro");
         mapMeses.put(11, "dezembro");
 
-        pieChart = findViewById(R.id.pieChart);
-        String nomeFromExtra = getIntent().getStringExtra("nomeAluno");
-        getSupportActionBar().setTitle("Frequência do aluno");
+        //textViewTurma.setText("Turma: "+aluno.getTurma());
 
-        for (Aluno a : listAlunos) {
-            if (a.getNome().equals(nomeFromExtra)) {
-                aluno = a;
-                break;
+        spinnerOrdenar = findViewById(R.id.spinnerOrdenaraAcompanhamentoFizeram);
+        ArrayList<String> spinnerArray = new ArrayList<>();
+        spinnerArray.add("Nome");
+        spinnerArray.add("Tarefas feitas");
+        spinnerArray.add("Tarefas não feitas");
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, spinnerArray);
+        spinnerOrdenar.setAdapter(spinnerArrayAdapter);
+        SearchView searchAluno = findViewById(R.id.searchViewAlunoAcompanhamento);
+        adapterAlunosMaisFazem = new AdapterAlunosMaisFazem
+                (alunosFiltro, HomeFragment.getListTarefas(), this);
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerViewMaisFizeram);
+        RecyclerView.LayoutManager layoutManagerAluno = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManagerAluno);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapterAlunosMaisFazem);
+
+        final String[] lastText = {""};
+        filtrarAlunos("", adapterAlunosMaisFazem);
+        searchAluno.setIconified(false);
+        searchAluno.clearFocus();
+        searchAluno.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
-        }
 
-        if (aluno.getNome() == null) {
-            textViewNome.setText(nomeFromExtra + " não encontrado!");
-            return;
-        }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filtrarAlunos(newText, adapterAlunosMaisFazem);
+                lastText[0] = newText;
+                return true;
+            }
+        });
 
-        textViewNome.setText(nomeFromExtra);
-        fotoPerfil.setImageResource(aluno.getFotoPerfil());
-        textViewTurma.setText("Turma: "+aluno.getTurma());
-        if(aluno.getSexo().equalsIgnoreCase("F")){
-            cardAluno.setBackground(getResources().getDrawable(R.drawable.shape_card_aluno_girl));
-        }
+        spinnerOrdenar.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                filtrarAlunos(lastText[0], adapterAlunosMaisFazem);
+            }
 
-        //prenche o gráfico com valores iniciais, na config de semanalmente
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        //prenche os spinners com valores iniciais, na config de semanalmente
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 
@@ -208,54 +214,51 @@ public class InfoAlunoActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    void filtrarAlunos(String query, AdapterAlunosMaisFazem adapterAlunosMaisFazem){
+
+        alunosFiltro.clear();
+        if(query.equals("")) {
+            alunosFiltro.addAll(listAlunos); //mostra todos os alunos
+        }
+        else{
+            for(Aluno aluno : listAlunos){
+                if(aluno.getNome().toLowerCase().contains(query.toLowerCase()))
+                    alunosFiltro.add(aluno); //mostra só os que contém os caracteres digitados
+            }
+        }
+
+        switch (spinnerOrdenar.getSelectedItem().toString().toLowerCase()){
+
+            case "nome":{
+                alunosFiltro.sort(Comparator.comparing(Aluno::getNome));
+                break;
+            }
+
+            case "tarefas feitas":{
+                alunosFiltro.sort(Comparator.comparing(Aluno::getQtdProgressBarTarefasFeitas).reversed());
+                break;
+            }
+
+            case "tarefas não feitas":{
+                alunosFiltro.sort(Comparator.comparing(Aluno::getQtdProgressBarTarefasNaoFeitas).reversed());
+                break;
+            }
+
+        }
+        adapterAlunosMaisFazem.notifyDataSetChanged();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void generateChart(int periodo) {
 
         indeterminateBar.setVisibility(View.VISIBLE);
-        pieChart.setCenterText(" ");
         fillSpinners(periodo);
-
-    }
-
-    private void generateChartData() {
-
-        List<PieEntry> entries = new ArrayList<>();
-
-        Legend pieChartLegend = pieChart.getLegend();
-        pieChartLegend.setTextColor(Color.WHITE);
-        pieChartLegend.setForm(Legend.LegendForm.CIRCLE);
-
-        entries.add(new PieEntry(mapQtdTarefas.get("qtdFizeram"), "Tarefas feitas"));
-        entries.add(new PieEntry(mapQtdTarefas.get("qtdNaoFizeram"), "Tarefas não feitas"));
-
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(Color.GREEN, Color.RED);
-        dataSet.setValueTextSize(14);
-        dataSet.setSliceSpace(3);
-        dataSet.setValueLineColor(Color.BLACK);
-
-        int qtdTotal = mapQtdTarefas.get("qtdFizeram") + mapQtdTarefas.get("qtdNaoFizeram");
-
-        pieChart.setCenterText("Quantidade total de tarefas\n\n" + qtdTotal);
-        pieChart.setCenterTextSize(14);
-        Legend legend = pieChart.getLegend();
-        legend.setTextSize(14);
-
-        Description description = new Description();
-        description.setText("Descrição: Frequência do aluno");
-        description.setTextColor(Color.YELLOW);
-        description.setTextSize(10);
-        pieChart.setDescription(description);
-
-        PieData pieData = new PieData(dataSet);
-        pieChart.setData(pieData);
-        pieChart.invalidate();
-
         if (firstTimeLoading) {
             setListeners();
             firstTimeLoading = false;
         }
-        indeterminateBar.setVisibility(View.INVISIBLE);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -264,6 +267,7 @@ public class InfoAlunoActivity extends AppCompatActivity {
         switch (periodo) {
 
             case SEMANAL: { //preenche terceiro spinner com os intervalos da semana
+                Log.i("Teste", "semanal");
                 ArrayList<String> spinnerArray = new ArrayList<>();
                 Calendar calendar = Calendar.getInstance();
                 Date date = new Date();
@@ -402,46 +406,49 @@ public class InfoAlunoActivity extends AppCompatActivity {
         int ano = periodo == ANUAL ? Integer.parseInt(secondSpinner.getSelectedItem().toString()) : date.getCalendar().get(Calendar.YEAR);
         Calendar calendarTarefa = Calendar.getInstance();
 
-        mapQtdTarefas.put("qtdFizeram", 0);
-        mapQtdTarefas.put("qtdNaoFizeram", 0);
-
         Log.i("Teste", "tarefas size: " + listTarefas.size());
 
-        for (Tarefa tarefa : listTarefas) {
-            try {
-                calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt","BR")).parse(tarefa.getDataEntrega()));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            calendarTarefa.setMinimalDaysInFirstWeek(7);
-            calendarTarefa.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            Log.i("Teste", "semana: " + semana + " semana tarefa: " + calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH));
-            if (calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH) == semana && periodo == SEMANAL && calendarTarefa.get(Calendar.MONTH) + 1 == mes) {
-                if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
-                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
+        for(Aluno aluno : alunosFiltro) {
+            int qtdTarefasFeitas = 0, qtdTarefasNaoFeitas = 0;
+            for (Tarefa tarefa : listTarefas) {
+                try {
+                    calendarTarefa.setTime(new SimpleDateFormat("dd/MM/yyyy", new java.util.Locale("pt", "BR")).parse(tarefa.getDataEntrega()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
-                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
+                calendarTarefa.setMinimalDaysInFirstWeek(7);
+                calendarTarefa.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                Log.i("Teste", "semana: " + semana + " semana tarefa: " + calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH));
+                if (calendarTarefa.get(Calendar.DAY_OF_WEEK_IN_MONTH) == semana && periodo == SEMANAL && calendarTarefa.get(Calendar.MONTH) + 1 == mes) {
+                    if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
+                        qtdTarefasFeitas++;
+                    }
+                    if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
+                        qtdTarefasNaoFeitas++;
+                    }
+                } else if (calendarTarefa.get(Calendar.MONTH) + 1 == mes && periodo >= MENSAL && calendarTarefa.get(Calendar.YEAR) == ano) {
+                    if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                        qtdTarefasFeitas++;
+                    if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                        qtdTarefasNaoFeitas++;
+                } else if (calendarTarefa.get(Calendar.MONTH) + 1 >= mes - 5 && calendarTarefa.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && periodo >= SEMESTRAL) {
+                    if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                        qtdTarefasFeitas++;
+                    if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                        qtdTarefasNaoFeitas++;
+                } else if (calendarTarefa.get(Calendar.YEAR) == ano && periodo >= ANUAL) {
+                    if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
+                        qtdTarefasFeitas++;
+                    if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
+                        qtdTarefasNaoFeitas++;
                 }
-            } else if (calendarTarefa.get(Calendar.MONTH) + 1 == mes && periodo >= MENSAL && calendarTarefa.get(Calendar.YEAR) == ano) {
-                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
-                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
-            } else if (calendarTarefa.get(Calendar.MONTH) + 1 >= mes - 5 && calendarTarefa.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && periodo >= SEMESTRAL) {
-                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
-                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
-            } else if (calendarTarefa.get(Calendar.YEAR) == ano && periodo >= ANUAL) {
-                if (tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdFizeram", mapQtdTarefas.get("qtdFizeram") + 1);
-                if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                    mapQtdTarefas.put("qtdNaoFizeram", mapQtdTarefas.get("qtdNaoFizeram") + 1);
             }
+            aluno.setQtdProgressBarTarefasFeitas(qtdTarefasFeitas);
+            aluno.setQtdProgressBarTarefasNaoFeitas(qtdTarefasNaoFeitas);
+            adapterAlunosMaisFazem.notifyDataSetChanged();
+            Log.i("Teste","qtd fez> "+qtdTarefasFeitas+" n: "+qtdTarefasNaoFeitas);
+            indeterminateBar.setVisibility(View.GONE);
         }
-
-        generateChartData();
 
     }
 

@@ -2,135 +2,32 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.aluno.InfoAlunoActivity"
-    >
-
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/pieChart"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="50dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardAlunoActivityInfoAluno"
-        app:layout_constraintVertical_bias="1.0">
-    </com.github.mikephil.charting.charts.PieChart>
+    tools:context=".ui.acompanhamento.MaisFizeramActivity"
+    android:focusableInTouchMode="true">
 
     <ProgressBar
-        android:id="@+id/indeterminateBar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+        android:id="@+id/indeterminateBarInfoAluno"
+        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@+id/pieChart"
-        app:layout_constraintEnd_toEndOf="@+id/pieChart"
-        app:layout_constraintStart_toStartOf="@+id/pieChart"
-        app:layout_constraintTop_toTopOf="@+id/pieChart" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/cardAlunoActivityInfoAluno"
-        android:layout_width="match_parent"
-        android:layout_height="170dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:addStatesFromChildren="false"
-        android:background="@drawable/shape_card_aluno"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_margin="5dp"
-            android:elevation="10dp"
-            app:cardCornerRadius="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/roundedImageViewActivityInfoAluno"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/white"
-                android:scaleType="centerCrop"
-                android:src="@drawable/boy_face" />
-        </androidx.cardview.widget.CardView>
-
-        <TextView
-            android:id="@+id/textViewInfoNomeAluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Nome do aluno"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="@+id/cardView"
-            app:layout_constraintStart_toStartOf="@+id/cardView"
-            app:layout_constraintTop_toBottomOf="@+id/cardView" />
-
-        <TextView
-            android:id="@+id/textViewDataAniversarioInfoAluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginLeft="12dp"
-            android:text="Data de aniversário: 04/08/1997"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.894" />
-
-        <TextView
-            android:id="@+id/textViewTurmaActivityInfoAluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="52dp"
-            android:layout_marginRight="52dp"
-            android:text="Turma: D"
-            app:layout_constraintBaseline_toBaselineOf="@+id/textViewDataAniversarioInfoAluno"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <ImageView
-            android:id="@+id/imageViewEditInfoAluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.872"
-            app:layout_constraintStart_toEndOf="@+id/cardView"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_pencil_24" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
     <LinearLayout
+        android:id="@+id/linearLayout4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/pieChart"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardAlunoActivityInfoAluno">
+        app:layout_constraintTop_toBottomOf="@+id/imageView2">
 
         <Spinner
             android:id="@+id/spinnerFiltroInfoAluno"
@@ -141,20 +38,104 @@
             android:theme="@style/MatchSpinnerTheme" />
 
         <Spinner
-            android:id="@+id/secondSpinner"
+            android:id="@+id/secondSpinnerInfoAluno"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:entries="@array/array_filtro_info_aluno_meses"
             android:spinnerMode="dropdown"
-            android:theme="@style/MatchSpinnerTheme"/>
+            android:theme="@style/MatchSpinnerTheme" />
 
         <Spinner
-            android:id="@+id/thirdSpinner"
+            android:id="@+id/thirdSpinnerInfoAluno"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:entries="@array/array_filtro_info_aluno_intervalo_semana"
-            android:theme="@style/MatchSpinnerTheme"/>
+            android:theme="@style/MatchSpinnerTheme" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/star_celebrating"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMaisFizeram"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:focusableInTouchMode="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/indeterminateBarInfoAluno" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:focusableInTouchMode="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+
+        <SearchView
+            android:id="@+id/searchViewAlunoAcompanhamento"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="nome"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/spinnerOrdenaraAcompanhamentoFizeram"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+        </SearchView>
+
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_background_acompanhamento"
+            app:layout_constraintBottom_toBottomOf="@+id/searchViewAlunoAcompanhamento"
+            app:layout_constraintEnd_toEndOf="@+id/searchViewAlunoAcompanhamento"
+            app:layout_constraintHorizontal_bias="0.15"
+            app:layout_constraintStart_toStartOf="@+id/searchViewAlunoAcompanhamento"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.48000002"
+            app:srcCompat="@drawable/ic_baseline_person_search_white_24" />
+
+        <Spinner
+            android:id="@+id/spinnerOrdenaraAcompanhamentoFizeram"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:entries="@array/array_ordenar_acompanhamento_progress_bar"
+            android:theme="@style/MatchSpinnerTheme"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView3"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/spinnerOrdenaraAcompanhamentoFizeram"
+            app:layout_constraintStart_toEndOf="@+id/searchViewAlunoAcompanhamento"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_sort_24"
+            app:tint="@color/white" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

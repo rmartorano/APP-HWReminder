@@ -2,7 +2,6 @@ package com.cursoandroid.app_hwreminder.ui.acompanhamento;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,16 +10,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.cursoandroid.app_hwreminder.R;
 import com.cursoandroid.app_hwreminder.adapter.AdapterAlunosMaisFazem;
-import com.cursoandroid.app_hwreminder.adapter.AdapterFiltrarAlunoFeedback;
-import com.cursoandroid.app_hwreminder.config.Date;
 import com.cursoandroid.app_hwreminder.model.Aluno;
 import com.cursoandroid.app_hwreminder.ui.home.HomeFragment;
 
@@ -38,13 +32,9 @@ public class MaisFizeramActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mais_fizeram);
+        setContentView(R.layout.activity_info_aluno);
         setTitle("Acompanhamento mensal da turma");
 
-        Date date = new Date();
-
-        TextView textMes = findViewById(R.id.textViewMesMaisFizeram);
-        textMes.setText("Tarefas de "+date.getMonthString());
         spinnerOrdenar = findViewById(R.id.spinnerOrdenaraAcompanhamentoFizeram);
         ArrayList<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Nome");

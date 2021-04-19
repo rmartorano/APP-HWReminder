@@ -16,7 +16,7 @@ public class Aluno {
 
     private String nome, diaSemana = "seg", turma, sexo;
     private boolean checkBoxSegunda, checkBoxTerca, checkBoxQuarta, checkBoxQuinta, checkBoxSexta;
-    private int qtdProgressBarTarefasFeitas, qtdProgressBarTarefasNaoFeitas;
+    private int qtdProgressBarTarefasFeitas = -1, qtdProgressBarTarefasNaoFeitas = -1;
     private int fotoPerfil;
 
     public Aluno() {

@@ -48,27 +48,36 @@ public class AdapterAlunosMaisFazem extends RecyclerView.Adapter<AdapterAlunosMa
         Aluno aluno = listAlunos.get(position);
         holder.nome.setText(aluno.getNome());
         holder.fotoPerfil.setImageResource(aluno.getFotoPerfil());
-        holder.progressBarFez.setMax(listTarefas.size());
-        holder.progressBarNaoFez.setMax(listTarefas.size());
         holder.progressBarNaoFez.setProgressTintList(ColorStateList.valueOf(Color.RED));
         holder.progressBarFez.setProgress(0);
         holder.progressBarNaoFez.setProgress(0);
 
-        for(Tarefa tarefa : listTarefas){
-            if(tarefa.getListAlunosFizeram().contains(aluno.getNome()))
-                holder.progressBarFez.setProgress(holder.progressBarFez.getProgress()+1);
-            //deixar esse else if pois pode ter aluno que entrou dps e não queremos contar tarefas de quando ele não estava presente ainda
-            else if(tarefa.getListAlunosNaoFizeram().contains(aluno.getNome()))
-                holder.progressBarNaoFez.setProgress(holder.progressBarNaoFez.getProgress()+1);
-        }
+        int listSize = listTarefas.size();
+        if(aluno.getQtdProgressBarTarefasFeitas() == -1) {
+            for (Tarefa tarefa : listTarefas) {
+                if (tarefa.getListAlunosFizeram().contains(aluno.getNome())) {
+                    aluno.setQtdProgressBarTarefasFeitas(aluno.getQtdProgressBarTarefasFeitas() + 1);
+                }
+                    //deixar esse else if pois pode ter aluno que entrou dps e não queremos contar tarefas de quando ele não estava presente ainda
+                else if (tarefa.getListAlunosNaoFizeram().contains(aluno.getNome())) {
+                    aluno.setQtdProgressBarTarefasNaoFeitas(aluno.getQtdProgressBarTarefasNaoFeitas() + 1);
+                }
+            }
 
-        aluno.setQtdProgressBarTarefasFeitas(holder.progressBarFez.getProgress());
-        aluno.setQtdProgressBarTarefasNaoFeitas(holder.progressBarNaoFez.getProgress());
+        }
+        else
+            listSize = aluno.getQtdProgressBarTarefasFeitas()+aluno.getQtdProgressBarTarefasNaoFeitas();
+
+        holder.progressBarFez.setMax(listSize);
+        holder.progressBarNaoFez.setMax(listSize);
+
+        holder.progressBarFez.setProgress(aluno.getQtdProgressBarTarefasFeitas());
+        holder.progressBarNaoFez.setProgress(aluno.getQtdProgressBarTarefasNaoFeitas());
 
         holder.qtdFez.setText(""+holder.progressBarFez.getProgress());
         holder.qtdNaoFez.setText(""+holder.progressBarNaoFez.getProgress());
-        holder.total1.setText("/"+listTarefas.size());
-        holder.total2.setText("/"+listTarefas.size());
+        holder.total1.setText("/"+listSize);
+        holder.total2.setText("/"+listSize);
 
     }
 

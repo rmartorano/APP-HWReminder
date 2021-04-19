@@ -20,7 +20,6 @@
         android:cropToPadding="false"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.107"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_star_48" />
@@ -29,38 +28,12 @@
         android:id="@+id/textViewAcompanhamentoPorAluno"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="9dp"
         android:gravity="center"
         android:text="Acompanhamento\npor aluno"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="@+id/imageViewAlunosMaisFizeram"
         app:layout_constraintStart_toStartOf="@+id/imageViewAlunosMaisFizeram"
         app:layout_constraintTop_toBottomOf="@+id/imageViewAlunosMaisFizeram" />
-
-    <ImageView
-        android:id="@+id/imageViewPesquisarAluno"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="128dp"
-        android:layout_marginLeft="128dp"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.677"
-        app:layout_constraintStart_toEndOf="@+id/imageViewAlunosMaisFizeram"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_person_search_100"
-        app:tint="@color/white" />
-
-    <TextView
-        android:id="@+id/textViewPesquisarAlunoAcompanhamento"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Pesquisar aluno"
-        android:textColor="@color/white"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textViewAcompanhamentoPorAluno"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewPesquisarAluno"
-        app:layout_constraintStart_toStartOf="@+id/imageViewPesquisarAluno" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
